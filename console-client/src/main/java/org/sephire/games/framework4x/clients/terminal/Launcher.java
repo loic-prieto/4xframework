@@ -56,10 +56,8 @@ public class Launcher {
     public static void drawMenuBar(Screen screen, TerminalSize size) {
         TextGraphics text = screen.newTextGraphics();
         text.setBackgroundColor(TextColor.Indexed.fromRGB(100, 100, 255));
-        text.fillRectangle(
-                TerminalPosition.TOP_LEFT_CORNER,
-                new TerminalSize(size.getColumns(), 1),
-                ' ');
+        text.setForegroundColor(TextColor.Indexed.fromRGB(50, 50, 155));
+        text.drawRectangle(TerminalPosition.TOP_LEFT_CORNER, size, ' ');
     }
 
     public static void drawBackground(Screen screen, TerminalSize size) {

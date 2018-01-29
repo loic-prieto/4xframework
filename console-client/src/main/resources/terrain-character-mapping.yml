@@ -1,0 +1,12 @@
+mountain:
+  character: ▲
+  color:
+hill:
+  character: ▴
+  color:
+forest:
+  character: ⍋
+  color:
+plain:
+  character: ♒
+  color:

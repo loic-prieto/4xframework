@@ -26,7 +26,7 @@ public class MapLayer {
         this(name, 0, HashMap.empty());
     }
 
-    private Map<Location, Item> getItemsInRange(Range range) {
+    public Map<Location, Item> getItemsInRange(Range range) {
         return items.filterKeys(range::containsLocation);
     }
 
