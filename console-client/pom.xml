@@ -9,10 +9,7 @@
         <artifactId>parent</artifactId>
         <version>0.1.0</version>
     </parent>
-
-    <groupId>org.sephire.games.strategy-framework</groupId>
     <artifactId>console-client</artifactId>
-    <version>${project.version}</version>
     <description>A terminal-based client for the framework</description>
     <packaging>jar</packaging>
 
@@ -80,6 +77,20 @@
             <groupId>com.googlecode.lanterna</groupId>
             <artifactId>lanterna</artifactId>
             <version>${lanterna.version}</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!-- The core api of the game -->

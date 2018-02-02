@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.clients.terminal.config;
+package org.sephire.games.framework4x.clients.terminal.config.tilemapping;
 
 import com.googlecode.lanterna.TextColor;
 import lombok.Getter;

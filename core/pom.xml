@@ -9,10 +9,8 @@
         <artifactId>parent</artifactId>
         <version>0.1.0</version>
     </parent>
-
-    <groupId>org.sephire.games.strategy-framework</groupId>
     <artifactId>core</artifactId>
-    <version>${project.version}</version>
+
     <description>The core library on which to base the game</description>
     <packaging>jar</packaging>
 

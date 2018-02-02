@@ -1,14 +1,11 @@
 package org.sephire.games.framework4x.clients.terminal.scenes;
 
-import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
-import io.vavr.collection.Map;
-import org.sephire.games.framework4x.clients.terminal.Drawable;
+import org.sephire.games.framework4x.clients.terminal.ui.Painter;
 import org.sephire.games.framework4x.clients.terminal.ui.TopMenu;
 import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Item;
-import org.sephire.games.framework4x.core.model.map.Range;
 
 /**
  * This is the main scene of the game.
@@ -18,26 +15,27 @@ import org.sephire.games.framework4x.core.model.map.Range;
  * - A menu on top to bring up submenus to handle the game
  * -
  */
-public class MapScene implements Scene, Drawable {
-    private Screen screen;
-    private GameMap map;
-    private TopMenu topMenu;
-    private Viewport viewport;
-    private Range range;
-    private Map<>
+public class MapScene implements Scene {
+	private GameMap map;
+	private TopMenu topMenu;
+	private Painter painter;
 
-    public MapScene(Screen screen, GameMap gameMap) {
-        this.screen = screen;
-        this.map = gameMap;
-    }
+	public MapScene(Screen screen, GameMap gameMap) {
+		map = gameMap;
+		painter = new Painter(
+				screen,
+				new Viewport(
+						0,
+						0,
+						screen.getTerminalSize().getColumns(),
+						screen.getTerminalSize().getRows())
+		);
+	}
 
-    @Override
-    public void draw(Screen screen) {
-        TextGraphics g = screen.newTextGraphics();
+	public void draw() {
+		for (Item item : map.getVisibleActiveItems(viewport.toRange()).values()) {
 
-        for (Item item : map.getVisibleActiveItems(viewport.toRange()).values()) {
-
-        }
-    }
+		}
+	}
 
 }

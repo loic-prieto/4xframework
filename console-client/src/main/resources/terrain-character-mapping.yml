@@ -8,5 +8,8 @@ forest:
   character: ⍋
   color:
 plain:
+  character: ⚏
+  color:
+ocean:
   character: ♒
   color:

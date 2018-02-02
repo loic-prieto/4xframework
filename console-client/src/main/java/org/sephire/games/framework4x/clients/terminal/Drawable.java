@@ -1,7 +1,7 @@
 package org.sephire.games.framework4x.clients.terminal;
 
-import com.googlecode.lanterna.screen.Screen;
+import org.sephire.games.framework4x.clients.terminal.ui.Painter;
 
 public interface Drawable {
-    void draw(Screen screen);
+	void draw(Painter painter);
 }
