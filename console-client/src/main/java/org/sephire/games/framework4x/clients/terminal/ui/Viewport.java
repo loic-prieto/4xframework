@@ -1,58 +1,86 @@
 package org.sephire.games.framework4x.clients.terminal.ui;
 
 import io.vavr.control.Option;
-import lombok.Value;
 import org.sephire.games.framework4x.core.model.map.Location;
-import org.sephire.games.framework4x.core.model.map.Range;
 
 /**
- * Represents the viewport of a map.
- * Will be influenced by screen size and overlapping ui elements like
- * a top menu.
+ * Represents the viewport of an ui widget that contains other elements inside.
+ * The viewport is what is visible on the screen.
+ * For example, for a terminal size of 80x24, a menu panel may be of size 10x15, located
+ * at position 5,5 on the screen. An element inside that panel will have a position inside the
+ * panel that may exceed the size of the container and would not be shown but still has to be tracked
+ * to check whether it should be shown.
+ * A viewport also acts as a "camera" in the sense that it has a current position which modifies what
+ * is visible on the screen.
+ *
+ * This class helps in translating children coordinates to screen coordinates and to check what is
+ * visible in the screen.
  */
-@Value
 public class Viewport {
-    private int xOffset;
-    private int yOffset;
+	// The location of the viewport in the screen
+    private Location screenLocation;
+    // The width of the viewport inside the screen
     private int width;
+    // The height of the viewport inside the screen
     private int height;
+	// The offset on the x axis. How many columns the viewport is displaced.
+	// Can be thought as the displacement of the camera on the x axis.
+	private int xOffset;
+	// The offset on the x axis. How many columns the viewport is displaced.
+	// Can be thought as the displacement of the camera on the y axis.
+    private int yOffset;
 
-    public Range toRange() {
-        return new Range(xOffset, yOffset, width, height);
+    public Viewport(Location screenLocation,int width,int height) {
+        this.screenLocation = screenLocation;
+        this.width = width;
+        this.height = height;
     }
 
 	/**
-	 * Given an absolute location on a scene, returns a new location
-	 * on the viewport.
-	 * For example, given a city on the world map location (145,120),
-	 * if the viewport is located at (100,105) and has a size of (80,40),
-	 * then the city location inside the viewport is: (45,15)
-	 * If the given location is outside the bounds of the viewport it will
-	 * return a None value.
-	 *
-	 * @param location
-	 * @return
+	 * <p>Given the position of an element inside the viewport, return the absolute
+	 * position of the element in the screen.</p>
+	 * <p>If the element is outside the viewport viewing range, no position is returned.</p>
+	 * Example:
+	 * <ul>
+	 *     <li>Given a city element, on position 132,34 on a viewport of size 80x22, where
+	 * 	       no camera displacement has been produced, and where the ui widget this viewport is
+	 * 	       representing is located at location 0,1 in the screen, this method will return a None
+	 * 	       result since it is outside the visible range of the viewport.
+	 * 	   </li>
+	 *     <li>Given a city element, on position 10,5 on a viewport of size 80x22, where
+	 * 	       no camera displacement has been produced, and where the ui widget this viewport is
+	 * 	       representing is located at location 0,1 in the screen, this method will return a 10,6
+	 * 	       screen location.
+	 * 	   </li>
+	 *     <li>Given a city element, on position 120,60 on a viewport of size 80x22, where
+	 * 	       the camera has been moved 50 positions in the x axis and 50 positions in the y axis, and where
+	 * 	       the ui widget this viewport is representing is located at location 0,1 in the screen,
+	 * 	       this method will return a 10,11 screen location.
+	 * 	   </li>
+	 * </ul>
 	 */
-	public Option<Location> getRelativePositionFor(Location location) {
+	public Option<Location> getScreenPositionFor(Location viewportLocation) {
+		Option<Location> screenPosition = Option.none();
+		if(isLocationVisible(viewportLocation)) {
+            screenPosition = Option.of(
+                    viewportLocation
+                            .substract(xOffset,yOffset)
+                            .add(screenLocation));
+        }
 
-		if (!contains(location)) {
-			return Option.none();
-		}
-
-		return Option.of(new Location(location.getX() - xOffset, location.getY() - yOffset));
+		return screenPosition;
 	}
 
 	/**
-	 * Check whether a given location is contained inside the viewport screen.
+	 * Check whether a given location is contained inside the visible part of the
+     * viewport screen.
 	 *
 	 * @param location
 	 * @return
 	 */
-	public boolean contains(Location location) {
-		return location.getX() < (xOffset + width) &&
-				location.getX() >= xOffset &&
-				location.getY() < (yOffset + height) &&
-				location.getY() >= yOffset;
-
+	public boolean isLocationVisible(Location location) {
+        return !location.substract(xOffset,yOffset)
+                .substract(width,height)
+                .hasPositiveValue();
 	}
 }

@@ -13,7 +13,7 @@ import org.sephire.games.framework4x.core.model.map.Item;
  * The map has:
  * - The main map view, filling almost every tile of the screen.
  * - A menu on top to bring up submenus to handle the game
- * -
+ * - a status bar with quick information for the player
  */
 public class MapScene implements Scene {
 	private GameMap map;
