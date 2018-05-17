@@ -19,10 +19,7 @@ import org.sephire.games.framework4x.core.model.map.Location;
 public class Viewport {
 	// The location of the viewport in the screen
     private Location screenLocation;
-    // The width of the viewport inside the screen
-    private int width;
-    // The height of the viewport inside the screen
-    private int height;
+	private Size size;
 	// The offset on the x axis. How many columns the viewport is displaced.
 	// Can be thought as the displacement of the camera on the x axis.
 	private int xOffset;
@@ -30,10 +27,9 @@ public class Viewport {
 	// Can be thought as the displacement of the camera on the y axis.
     private int yOffset;
 
-    public Viewport(Location screenLocation,int width,int height) {
+	public Viewport(Location screenLocation, Size size) {
         this.screenLocation = screenLocation;
-        this.width = width;
-        this.height = height;
+		this.size = size;
     }
 
 	/**
@@ -80,7 +76,7 @@ public class Viewport {
 	 */
 	public boolean isLocationVisible(Location location) {
         return !location.substract(xOffset,yOffset)
-                .substract(width,height)
+		        .substract(size.getWidth(), size.getHeight())
                 .hasPositiveValue();
 	}
 }
