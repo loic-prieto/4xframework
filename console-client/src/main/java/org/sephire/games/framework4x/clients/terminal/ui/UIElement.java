@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.sephire.games.framework4x.clients.terminal.Drawable;
-import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
  * Represents a basic UI Element that can be drawn to the screen.
@@ -14,8 +13,7 @@ import org.sephire.games.framework4x.core.model.map.Location;
 @Setter
 public abstract class UIElement implements Drawable {
 	@NonNull
-	private Location location;
+	private Coordinates coordinates;
 	@NonNull
-	private Size size;
 	private Option<Container> containerParent;
 }

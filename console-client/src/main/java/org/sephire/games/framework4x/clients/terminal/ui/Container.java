@@ -24,8 +24,7 @@ public abstract class Container extends UIElement {
 	/**
 	 * The list of element contained in this container.
 	 */
-	@NonNull
-	private List<UIElement> children;
+	private List<UIElement> children = List.empty();
 
 	/**
 	 * The coordinates of a child inside a container are relative
@@ -35,20 +34,30 @@ public abstract class Container extends UIElement {
 	 * The container itself may be contained by another container. This means
 	 * that for a child to know its true screen location, the chain of
 	 * containers will have to resolve the coordinates recursively.
+	 * If a child coordinate is outside the viewport of the container, then no
+	 * location can be returned.
 	 *
 	 * @param childLocation
 	 * @return
 	 */
-	public Location unpackLocation(Location childLocation) {
-		// First calculate the location of the child relative to this container
-		Location unpackedLocation = childLocation.add(this.getLocation());
+	public Option<Location> getScreenLocationFor(Location childLocation) {
+		Option<Location> screenLocation;
+		// First check if the child location is inside the view port
+		if (viewport.isLocationVisible(childLocation)) {
+			// First calculate the location of the child relative to this container
+			Location unpackedLocation = childLocation.add(this.getCoordinates().getLocation());
 
-		// Return the unpacking of the new location relative to the parent of
-		// this container
-		return this.getContainerParent()
-				.map((container) -> container.unpackLocation(unpackedLocation))
-				.orElse(() -> Option.of(unpackedLocation))
-				.get();
+			// assign the unpacking of the new location relative to the parent of
+			// this container
+			screenLocation = this.getContainerParent()
+					.map(container -> container.getScreenLocationFor(unpackedLocation))
+					.getOrElse(() -> Option.of(unpackedLocation));
+
+		} else {
+			screenLocation = Option.none();
+		}
+
+		return screenLocation;
 	}
 
 }

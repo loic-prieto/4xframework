@@ -1,6 +1,6 @@
 package org.sephire.games.framework4x.clients.terminal.ui;
 
-import io.vavr.control.Option;
+import org.sephire.games.framework4x.clients.terminal.ui.viewport.ViewportVisibility;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
@@ -17,54 +17,22 @@ import org.sephire.games.framework4x.core.model.map.Location;
  * visible in the screen.
  */
 public class Viewport {
-	// The location of the viewport in the screen
-    private Location screenLocation;
-	private Size size;
+	// The location and size of the viewport in the container element
+	private Coordinates coordinates;
 	// The offset on the x axis. How many columns the viewport is displaced.
 	// Can be thought as the displacement of the camera on the x axis.
 	private int xOffset;
 	// The offset on the x axis. How many columns the viewport is displaced.
 	// Can be thought as the displacement of the camera on the y axis.
     private int yOffset;
+	// The container UI element the viewport is attached to
+	private Container containerElement;
 
-	public Viewport(Location screenLocation, Size size) {
-        this.screenLocation = screenLocation;
-		this.size = size;
-    }
-
-	/**
-	 * <p>Given the position of an element inside the viewport, return the absolute
-	 * position of the element in the screen.</p>
-	 * <p>If the element is outside the viewport viewing range, no position is returned.</p>
-	 * Example:
-	 * <ul>
-	 *     <li>Given a city element, on position 132,34 on a viewport of size 80x22, where
-	 * 	       no camera displacement has been produced, and where the ui widget this viewport is
-	 * 	       representing is located at location 0,1 in the screen, this method will return a None
-	 * 	       result since it is outside the visible range of the viewport.
-	 * 	   </li>
-	 *     <li>Given a city element, on position 10,5 on a viewport of size 80x22, where
-	 * 	       no camera displacement has been produced, and where the ui widget this viewport is
-	 * 	       representing is located at location 0,1 in the screen, this method will return a 10,6
-	 * 	       screen location.
-	 * 	   </li>
-	 *     <li>Given a city element, on position 120,60 on a viewport of size 80x22, where
-	 * 	       the camera has been moved 50 positions in the x axis and 50 positions in the y axis, and where
-	 * 	       the ui widget this viewport is representing is located at location 0,1 in the screen,
-	 * 	       this method will return a 10,11 screen location.
-	 * 	   </li>
-	 * </ul>
-	 */
-	public Option<Location> getScreenPositionFor(Location viewportLocation) {
-		Option<Location> screenPosition = Option.none();
-		if(isLocationVisible(viewportLocation)) {
-            screenPosition = Option.of(
-                    viewportLocation
-                            .substract(xOffset,yOffset)
-                            .add(screenLocation));
-        }
-
-		return screenPosition;
+	public Viewport(Coordinates coordinates, Container container) {
+		this.coordinates = coordinates;
+		this.containerElement = container;
+		xOffset = 0;
+		yOffset = 0;
 	}
 
 	/**
@@ -76,7 +44,40 @@ public class Viewport {
 	 */
 	public boolean isLocationVisible(Location location) {
         return !location.substract(xOffset,yOffset)
-		        .substract(size.getWidth(), size.getHeight())
+		        .substract(coordinates.getSize().getWidth(), coordinates.getSize().getHeight())
                 .hasPositiveValue();
 	}
+
+	/**
+	 * For the given coordinates (location+size), check what kind of visibility they
+	 * have inside the viewport.
+	 *
+	 * @param elementCoordinates
+	 * @return
+	 */
+	public ViewportVisibility coordinatesVisibility(Coordinates elementCoordinates) {
+		int x = elementCoordinates.getLocation().getX();
+		int y = elementCoordinates.getLocation().getY();
+		int width = elementCoordinates.getSize().getWidth();
+		int height = elementCoordinates.getSize().getHeight();
+
+		boolean hasVisibility = false;
+		boolean hasInvisibility = false;
+
+		for (int i = y; i < (y + height); i++) {
+			for (int j = x; i < (x + width); j++) {
+				if (isLocationVisible(new Location(j, i))) {
+					hasVisibility = true;
+				} else {
+					hasInvisibility = true;
+				}
+			}
+		}
+
+		boolean isPartial = hasVisibility && hasInvisibility;
+		return isPartial ? ViewportVisibility.PARTIALLY_VISIBLE :
+				hasVisibility ? ViewportVisibility.VISIBLE :
+						ViewportVisibility.NON_VISIBLE;
+	}
+
 }
