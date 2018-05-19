@@ -1,6 +1,9 @@
 package org.sephire.games.framework4x.clients.terminal.ui;
 
-import org.sephire.games.framework4x.clients.terminal.ui.viewport.ViewportVisibility;
+import lombok.Getter;
+import lombok.Setter;
+import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
+import org.sephire.games.framework4x.clients.terminal.ui.components.viewport.ViewportVisibility;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
@@ -16,6 +19,7 @@ import org.sephire.games.framework4x.core.model.map.Location;
  * This class helps in translating children coordinates to screen coordinates and to check what is
  * visible in the screen.
  */
+@Getter @Setter
 public class Viewport {
 	// The location and size of the viewport in the container element
 	private Coordinates coordinates;

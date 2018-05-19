@@ -1,13 +1,17 @@
-package org.sephire.games.framework4x.clients.terminal.ui;
+package org.sephire.games.framework4x.clients.terminal.ui.components;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;
+import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
+import org.sephire.games.framework4x.clients.terminal.ui.Painter;
+import org.sephire.games.framework4x.clients.terminal.ui.Size;
+import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
 import org.sephire.games.framework4x.core.model.map.Location;
 
-import static org.sephire.games.framework4x.clients.terminal.ui.viewport.ViewportVisibility.NON_VISIBLE;
+import static org.sephire.games.framework4x.clients.terminal.ui.components.viewport.ViewportVisibility.NON_VISIBLE;
 
 /**
- * Represents a panel wich contains child elements.
+ * Represents a panel which contains child elements.
  * Can contain a border, in which case the viewport will have a reduced
  * size to make place for the border.
  */

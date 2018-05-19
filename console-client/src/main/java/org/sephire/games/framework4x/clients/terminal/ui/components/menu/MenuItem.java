@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.clients.terminal.ui.menu;
+package org.sephire.games.framework4x.clients.terminal.ui.components.menu;
 
 import io.vavr.Function0;
 import lombok.Getter;

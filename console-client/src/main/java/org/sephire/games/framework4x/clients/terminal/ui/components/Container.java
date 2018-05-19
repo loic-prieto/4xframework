@@ -1,10 +1,11 @@
-package org.sephire.games.framework4x.clients.terminal.ui;
+package org.sephire.games.framework4x.clients.terminal.ui.components;
 
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
@@ -21,6 +22,12 @@ public abstract class Container extends UIElement {
      */
     @NonNull
     private Viewport viewport;
+
+	public Container() {
+		super();
+		this.viewport = new Viewport(this.getCoordinates(),this);
+	}
+
 	/**
 	 * The list of element contained in this container.
 	 */

@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.clients.terminal.ui.viewport;
+package org.sephire.games.framework4x.clients.terminal.ui.components.viewport;
 
 /**
  * Represents the visibility of an UI element inside the viewport.

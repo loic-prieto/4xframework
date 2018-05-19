@@ -1,9 +1,9 @@
 package org.sephire.games.framework4x.clients.terminal.scenes;
 
 import com.googlecode.lanterna.screen.Screen;
-import org.sephire.games.framework4x.clients.terminal.ui.Menu;
 import org.sephire.games.framework4x.clients.terminal.ui.Painter;
 import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
+import org.sephire.games.framework4x.clients.terminal.ui.components.Menu;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Item;
 

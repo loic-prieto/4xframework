@@ -30,6 +30,9 @@ public class Painter {
 
 	/**
 	 * Draws a character in a location, if it is visible inside a viewport.
+	 * Automatically draws in the correct screen location, based on the viewport's
+	 * parent container.
+	 * <p>
 	 * Just a convenience method to avoid writing boilerplate for each
 	 * drawn character.
 	 *
@@ -38,8 +41,10 @@ public class Painter {
 	 * @param viewport
 	 */
 	public void drawChar(Location location, char character, Viewport viewport) {
-		if (viewport.isLocationVisible(location))
-			screen.setCharacter(location.getX(), location.getY(), new TextCharacter(character));
+		viewport.getContainerElement().getScreenLocationFor(location)
+				.peek(screenLocation -> {
+					screen.setCharacter(screenLocation.getX(), screenLocation.getY(), new TextCharacter(character));
+				});
 	}
 
 	/**
