@@ -4,13 +4,13 @@ package org.sephire.games.framework4x.clients.terminal.utils;
  * When you need a mutable value just to increment a value over time,
  * it is easier to just use a mutable counter.
  */
-public class IntCounter extends MutableValue<Integer> {
+public class MutableIntCounter extends MutableValue<Integer> {
 
-	public IntCounter(int value) {
+	public MutableIntCounter(int value) {
 		super(value);
 	}
 
-	public IntCounter() {
+	public MutableIntCounter() {
 		this(0);
 	}
 
