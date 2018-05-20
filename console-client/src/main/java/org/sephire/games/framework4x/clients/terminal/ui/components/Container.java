@@ -67,4 +67,12 @@ public abstract class Container extends UIElement {
 		return screenLocation;
 	}
 
+	public void addChild(UIElement child) {
+		children = children.append(child);
+	}
+
+	public void addChildren(List<UIElement> children) {
+		this.children = this.children.appendAll(children);
+	}
+
 }

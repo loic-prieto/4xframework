@@ -4,7 +4,7 @@ import io.vavr.collection.List;
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.components.menu.MenuDirection;
 import org.sephire.games.framework4x.clients.terminal.ui.components.menu.MenuItem;
-import org.sephire.games.framework4x.clients.terminal.utils.IntCounter;
+import org.sephire.games.framework4x.clients.terminal.utils.MutableIntCounter;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 import static org.sephire.games.framework4x.clients.terminal.ui.components.menu.MenuDirection.HORIZONTAL;
@@ -30,7 +30,7 @@ public class Menu extends Panel {
 		if(direction == HORIZONTAL) {
 			// If the direction is horizontal, we need to build the locations based
 			// on string length of the previous items.
-			IntCounter rightmostPosition = new IntCounter();
+			MutableIntCounter rightmostPosition = new MutableIntCounter();
 			this.setChildren(
 				this.items.zip(
 					this.items.map((item)->{
