@@ -54,4 +54,43 @@ being assigned half the screen by the layout.
 Another example is when adding a child to a border layout, we may want it to be in the top region and another one in
 the center region.
 
-## Growth and alignment
+## Parameterized resizing and positioning
+
+### Growth 
+
+Resizing is the raison d'être of layouts. They should provide a way to automatically resize the contained components.
+A layout can resize both its regions and the child components they contain.
+For example: 
+For a terminal size of 80x24, and a top level container wich has Border layout with a north, center and east regions 
+filled with components, let's define how they are initially defined: The north region is 80x3, a menu bar. The east 
+region is a side panel of size 10x21. The center region is a container of size 70x21.
+If the terminal is resized by the user to have a 120x40 size, how would we like the regions to grow and its components?
+For a typical application, the top menu should grow horizontally but not vertically. For this case, both the north
+region and its menu container should grow to 120x3 from 80x3. The components inside the menu container, though, should
+not change their position or size. So we can say that both the north region and the top menu container have a flexible
+width growth, and a fixed vertical size.
+For the side panel, we may want it to grow and shrink with resizes, but just to a point. Perhaps we need the side panel
+to have _at least_ 10 characters width and _at most_ 20% of the width size. And vertically to grow to the new vertical
+size. The side panel container inside the east region should always adjust to 100% of its region size both horizontally 
+and vertically. So, for a new 120x40 terminal size, the side panel will grow to size 24x37.
+The center region will automatically adjust to the remaining screen size, so that will be 96x37.
+
+In fact, for the border layout, some things should be restricted. For example: north and south regions must have a 
+limited height, be it relative with percentages, or fixed with character size, and they always occupy 100% width size.
+The west, center and east regions always occupy 100% height of the terminal minus the north and south vertical size. And
+they share the 100% width space between each other. The border layout should enforce that this sharing does not conflict.
+
+To configure all this, the layout should provide region parameters.
+
+#### Region parameters
+
+Following the border layout example, we have for each region:
+- size boundaries:
+	- min size
+	- max size
+	- fixed size
+- size unit:
+	- characters
+	- percentage
+The size boundaries can be combined to say: min size of at least 10% and max size of at most 20%
+

@@ -2,6 +2,7 @@ package org.sephire.games.framework4x.clients.terminal.ui;
 
 import lombok.NonNull;
 import lombok.Value;
+import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 @Value

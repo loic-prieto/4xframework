@@ -6,7 +6,7 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.sephire.games.framework4x.clients.terminal.Drawable;
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
-import org.sephire.games.framework4x.clients.terminal.ui.Size;
+import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**

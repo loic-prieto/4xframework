@@ -2,7 +2,11 @@ package org.sephire.games.framework4x.clients.terminal.ui.components;
 
 import lombok.Getter;
 import lombok.NonNull;
-import org.sephire.games.framework4x.clients.terminal.ui.*;
+import org.sephire.games.framework4x.clients.terminal.ui.ComponentMustBeInsideContainerException;
+import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
+import org.sephire.games.framework4x.clients.terminal.ui.Painter;
+import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
+import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
