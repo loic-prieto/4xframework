@@ -6,8 +6,11 @@ import org.sephire.games.framework4x.clients.terminal.ui.ComponentMustBeInsideCo
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.Painter;
 import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
+import org.sephire.games.framework4x.clients.terminal.ui.size.QualifiedSizeValue;
 import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.core.model.map.Location;
+
+import static org.sephire.games.framework4x.clients.terminal.ui.size.SizeUnit.CHARACTER;
 
 /**
  * Represents a text label inside the screen.
@@ -21,7 +24,7 @@ public class Label extends UIElement {
 	private String text;
 
 	public Label(String text, Location location, Container containerParent) {
-		super(new Coordinates(location,new Size(1,text.length())),containerParent);
+		super(new Coordinates(location, buildSizeFromText(text)), containerParent);
 		this.text = text;
 	}
 
@@ -42,19 +45,21 @@ public class Label extends UIElement {
 	}
 
 	/**
-	 * Each time the text is updated, we should update the size of this component.
-	 */
-	private void updateSizeFromText(){
-		this.setCoordinates(this.getCoordinates().withSize(buildSizeFromText()));
-	}
-
-	/**
 	 * Constructs a Size object from the length of the text of this label.
 	 *
 	 * This will assume that each character will occupy 1 terminal block. Perhaps
 	 * it is not so in non-latin alphabets.
 	 */
-	private Size buildSizeFromText() {
-		return new Size(1,this.text.length());
+	private static Size buildSizeFromText(String text) {
+		return new Size(
+				QualifiedSizeValue.FIXED_SIZE_ONE,
+				new QualifiedSizeValue(text.length(), CHARACTER));
+	}
+
+	/**
+	 * Each time the text is updated, we should update the size of this component.
+	 */
+	private void updateSizeFromText() {
+		this.setCoordinates(this.getCoordinates().withSize(buildSizeFromText(text)));
 	}
 }

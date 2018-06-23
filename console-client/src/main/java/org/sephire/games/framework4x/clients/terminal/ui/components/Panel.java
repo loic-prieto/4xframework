@@ -69,8 +69,8 @@ public class Panel extends Container {
 			Viewport vp = getViewport();
 			x1 = getCoordinates().getLocation().getX();
 			y1 = getCoordinates().getLocation().getY();
-			x2 = x1 + getCoordinates().getSize().getWidth();
-			y2 = y1 + getCoordinates().getSize().getHeight();
+			x2 = x1 + getCoordinates().getSize().getWidth().getValue();
+			y2 = y1 + getCoordinates().getSize().getHeight().getValue();
 			painter.drawChar(x1, y1, '┌', vp);
 			painter.drawChar(x2, y1, '┐', vp);
 			painter.drawChar(x1, y2, '└', vp);

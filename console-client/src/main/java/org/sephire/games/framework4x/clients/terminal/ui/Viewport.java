@@ -48,7 +48,7 @@ public class Viewport {
 	 */
 	public boolean isLocationVisible(Location location) {
         return !location.substract(xOffset,yOffset)
-		        .substract(coordinates.getSize().getWidth(), coordinates.getSize().getHeight())
+		        .substract(coordinates.getSize().getWidth().getValue(), coordinates.getSize().getHeight().getValue())
                 .hasPositiveValue();
 	}
 
@@ -62,8 +62,8 @@ public class Viewport {
 	public ViewportVisibility coordinatesVisibility(Coordinates elementCoordinates) {
 		int x = elementCoordinates.getLocation().getX();
 		int y = elementCoordinates.getLocation().getY();
-		int width = elementCoordinates.getSize().getWidth();
-		int height = elementCoordinates.getSize().getHeight();
+		int width = elementCoordinates.getSize().getWidth().getValue();
+		int height = elementCoordinates.getSize().getHeight().getValue();
 
 		boolean hasVisibility = false;
 		boolean hasInvisibility = false;

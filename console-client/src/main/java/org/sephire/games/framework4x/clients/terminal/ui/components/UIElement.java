@@ -9,6 +9,8 @@ import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.core.model.map.Location;
 
+import static org.sephire.games.framework4x.clients.terminal.ui.size.QualifiedSizeValue.FIXED_SIZE_ONE;
+
 /**
  * Represents a basic UI Element that can be drawn to the screen.
  */
@@ -21,7 +23,7 @@ public abstract class UIElement implements Drawable {
 	private Option<Container> containerParent;
 
 	public UIElement() {
-		this(new Coordinates(new Location(0,0),new Size(1,1)),null);
+		this(new Coordinates(new Location(0, 0), new Size(FIXED_SIZE_ONE, FIXED_SIZE_ONE)), null);
 	}
 
 	public UIElement(Coordinates coordinates,Container containerParent) {
