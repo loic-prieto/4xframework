@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
+import org.sephire.games.framework4x.clients.terminal.ui.layouts.Layout;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
@@ -17,11 +18,11 @@ import org.sephire.games.framework4x.core.model.map.Location;
 @Getter
 @Setter
 public abstract class Container extends UIElement {
-    /**
-     * The viewport of the container.
-     */
+
     @NonNull
     private Viewport viewport;
+	@NonNull
+	private Layout layout;
 
 	public Container() {
 		super();
@@ -69,10 +70,12 @@ public abstract class Container extends UIElement {
 
 	public void addChild(UIElement child) {
 		children = children.append(child);
+		child.setContainerParent(Option.of(this));
 	}
 
 	public void addChildren(List<UIElement> children) {
 		this.children = this.children.appendAll(children);
+		children.forEach((child) -> child.setContainerParent(Option.of(this)));
 	}
 
 }

@@ -1,16 +1,13 @@
 package org.sephire.games.framework4x.clients.terminal.ui.layouts;
 
 import io.vavr.collection.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayout.Direction;
 import org.sephire.games.framework4x.clients.terminal.utils.MutableIntCounter;
 import org.sephire.games.framework4x.clients.terminal.utils.MutableValue;
+import org.sephire.games.framework4x.core.model.map.Location;
 
 import static org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayout.Direction.HORIZONTAL;
 
@@ -21,39 +18,43 @@ import static org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayo
  * <p>
  * A padding may be specified to put between each element.
  */
-@RequiredArgsConstructor
-@AllArgsConstructor
-public class FlowLayout {
-	@NonNull
-	@Getter
-	private Container container;
-	@NonNull
-	@Getter
-	private Direction direction;
-	@Getter
+public class FlowLayout extends BaseLayout {
+	private Direction direction = HORIZONTAL;
 	private int padding = 0;
 
-	/**
-	 * Will update the coordinates of the children inside the container.
-	 * This modifies the children coordinates.
-	 * The flow layout will only adjust location, not size.
-	 */
+	public FlowLayout(Container container) {
+		this(container, HORIZONTAL, 0);
+	}
+
+	public FlowLayout(Container container, Direction direction) {
+		this(container, direction, 0);
+		this.direction = direction;
+	}
+
+	public FlowLayout(Container container, Direction direction, int padding) {
+		super(container);
+		this.direction = direction;
+		this.padding = padding;
+	}
+
+	@Override
 	public void updateChildrenCoordinates() {
-		List<UIElement> children = container.getChildren();
+		List<UIElement> children = getContainer().getChildren();
 
 		if (direction == HORIZONTAL) {
-			MutableIntCounter rightmostPosition = new MutableIntCounter();
+			MutableIntCounter rightmostPosition = new MutableIntCounter(1);
 			MutableValue<Integer> modifiedPadding = new MutableValue<>(0);
 
 			children.forEach((child) -> {
 				Coordinates updatedCoordinates = child.getCoordinates().withLocation(
-						child.getCoordinates().getLocation()
-								.add(rightmostPosition.getValue() + modifiedPadding.getValue(), 0)
+						new Location(rightmostPosition.getValue() + modifiedPadding.getValue(), 1)
 				);
 				child.setCoordinates(updatedCoordinates);
+
 				// The first element does not have padding
 				modifiedPadding.updateValue(padding);
-				rightmostPosition.incrementValue(child.getCoordinates().getSize().getWidth().getValue() + padding);
+
+				rightmostPosition.incrementValue(child.getCoordinates().getSize().getWidth().getValue() + padding + 1);
 			});
 
 		} else {
