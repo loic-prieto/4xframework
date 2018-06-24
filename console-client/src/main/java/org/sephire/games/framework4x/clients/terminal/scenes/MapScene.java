@@ -2,10 +2,8 @@ package org.sephire.games.framework4x.clients.terminal.scenes;
 
 import com.googlecode.lanterna.screen.Screen;
 import org.sephire.games.framework4x.clients.terminal.ui.Painter;
-import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Menu;
 import org.sephire.games.framework4x.core.model.map.GameMap;
-import org.sephire.games.framework4x.core.model.map.Item;
 
 /**
  * This is the main scene of the game.
@@ -22,20 +20,20 @@ public class MapScene implements Scene {
 
 	public MapScene(Screen screen, GameMap gameMap) {
 		map = gameMap;
-		painter = new Painter(
+		/*painter = new Painter(
 				screen,
 				new Viewport(
 						0,
 						0,
 						screen.getTerminalSize().getColumns(),
 						screen.getTerminalSize().getRows())
-		);
+		);*/
 	}
 
 	public void draw() {
-		for (Item item : map.getVisibleActiveItems(viewport.toRange()).values()) {
+		/*for (Item item : map.getVisibleActiveItems(viewport.toRange()).values()) {
 
-		}
+		}*/
 	}
 
 }

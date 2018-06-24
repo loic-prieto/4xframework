@@ -1,9 +1,7 @@
 package org.sephire.games.framework4x.clients.terminal.drawables;
 
-import com.googlecode.lanterna.graphics.TextGraphics;
 import lombok.Getter;
 import org.sephire.games.framework4x.clients.terminal.Drawable;
-import org.sephire.games.framework4x.clients.terminal.config.ConfigException;
 import org.sephire.games.framework4x.clients.terminal.config.tilemapping.TerrainTileMapper;
 import org.sephire.games.framework4x.clients.terminal.config.tilemapping.TileMapping;
 import org.sephire.games.framework4x.clients.terminal.ui.Painter;
@@ -17,12 +15,13 @@ public class TerrainTile implements Drawable {
 
 	public TerrainTile(TerrainTileMapper mappingConfig, Terrain terrain) {
 		this.terrain = terrain;
-		this.tileMapping = mappingConfig.getMappingFor(terrain.getType())
-				.getOrElseThrow(ConfigException::new);
+		/*this.tileMapping = mappingConfig.getMappingFor(terrain.getType())
+				.getOrElseThrow(ConfigException::new);*/
 	}
 
 	@Override
 	public void draw(Painter painter) {
+		/*
 		painter.getViewport().getRelativePositionFor(terrain.getLocation())
 				.peek((relativeLocation) -> {
 					TextGraphics g = painter.getScreen().newTextGraphics();
@@ -31,6 +30,6 @@ public class TerrainTile implements Drawable {
 							relativeLocation.getX(),
 							relativeLocation.getY(),
 							tileMapping.getCharacter().charValue());
-				});
+				});*/
 	}
 }

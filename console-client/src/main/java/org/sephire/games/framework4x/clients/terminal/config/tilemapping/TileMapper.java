@@ -20,8 +20,8 @@ public class TileMapper {
 	}
 
 	public Option<TileMapping> getMappingFor(Item item) {
-		getMapperFor(item.getClass())
-				.map(mapper -> mapper.getMappingFor(item));
+		/*getMapperFor(item.getClass())
+				.map(mapper -> mapper.getMappingFor(item));*/
 
 
 		return null;
