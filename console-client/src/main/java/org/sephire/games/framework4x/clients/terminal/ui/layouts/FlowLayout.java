@@ -43,18 +43,16 @@ public class FlowLayout extends BaseLayout {
 
 		if (direction == HORIZONTAL) {
 			MutableIntCounter rightmostPosition = new MutableIntCounter(1);
+			// The first element does not have padding
 			MutableValue<Integer> modifiedPadding = new MutableValue<>(0);
 
 			children.forEach((child) -> {
 				Coordinates updatedCoordinates = child.getCoordinates().withLocation(
-						new Location(rightmostPosition.getValue() + modifiedPadding.getValue(), 1)
+						new Location(rightmostPosition.getValue(), 1)
 				);
 				child.setCoordinates(updatedCoordinates);
-
-				// The first element does not have padding
 				modifiedPadding.updateValue(padding);
-
-				rightmostPosition.incrementValue(child.getCoordinates().getSize().getWidth().getValue() + padding + 1);
+				rightmostPosition.incrementValue(child.getCoordinates().getSize().getWidth().getValue() + padding);
 			});
 
 		} else {
@@ -64,7 +62,9 @@ public class FlowLayout extends BaseLayout {
 
 			children.zipWithIndex().forEach((childWithIndex) -> {
 				Coordinates updatedCoordinates = childWithIndex._1.getCoordinates().withLocation(
-						childWithIndex._1.getCoordinates().getLocation().add(0, childWithIndex._2 * modifiedPadding.getValue())
+						childWithIndex._1.getCoordinates().getLocation().add(
+								1,
+								childWithIndex._2 + modifiedPadding.getValue() + 1)
 				);
 				childWithIndex._1.setCoordinates(updatedCoordinates);
 				modifiedPadding.updateValue(padding);
