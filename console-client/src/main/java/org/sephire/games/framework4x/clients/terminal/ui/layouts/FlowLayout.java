@@ -64,7 +64,7 @@ public class FlowLayout extends BaseLayout {
 				Coordinates updatedCoordinates = childWithIndex._1.getCoordinates().withLocation(
 						childWithIndex._1.getCoordinates().getLocation().add(
 								1,
-								childWithIndex._2 + modifiedPadding.getValue() + 1)
+								childWithIndex._2 + modifiedPadding.getValue() * childWithIndex._2 + 1)
 				);
 				childWithIndex._1.setCoordinates(updatedCoordinates);
 				modifiedPadding.updateValue(padding);

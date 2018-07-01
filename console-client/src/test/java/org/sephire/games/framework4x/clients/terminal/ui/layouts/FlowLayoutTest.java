@@ -19,10 +19,21 @@ public class FlowLayoutTest {
 	/**
 	 * The characters below are just to have a visual of the results we're expecting
 	 * They only make sense for monospaced fonts
-	 * <p>
+	 *
 	 * xxxxxxxxxx  xxxxxxxxxx  xxxxxxxxxx  xxxxxxxxxx
 	 * 1234567890123456789012345678901234567890
 	 * xxxxxxxxxxyyyyyyyyyyccccccccccvvvvvvvvvv
+	 *
+	 * 1 xxxxxxxxxx
+	 * 2
+	 * 3
+	 * 4 xxxxxxxxxx
+	 * 5
+	 * 6
+	 * 7 xxxxxxxxxx
+	 * 8
+	 * 9
+	 * 0 xxxxxxxxxx
 	 */
 
 
@@ -62,6 +73,18 @@ public class FlowLayoutTest {
 		assertEquals(1, e3.getCoordinates().getLocation().getY());
 	}
 
+	@Test
+	public void testVertticalLayoutWithPadding() {
+		Container container = new TestContainer();
+		container.addChildren(range(0, 4).map((index) -> buildUIElement(10, 1)));
+		Layout layout = new FlowLayout(container, Direction.VERTICAL, 2);
+		layout.updateChildrenCoordinates();
+
+		UIElement e3 = container.getChildren().get(2);
+		assertEquals(1, e3.getCoordinates().getLocation().getX());
+		assertEquals(7, e3.getCoordinates().getLocation().getY());
+	}
+
 	/**
 	 * Convenience method to build ui elements for flow layout testing.
 	 * Location is set to 0,0
@@ -88,7 +111,6 @@ public class FlowLayoutTest {
 	private class TestContainer extends Container {
 		@Override
 		public void draw(Painter painter) {
-			// do nothing
 		}
 	}
 
@@ -98,7 +120,6 @@ public class FlowLayoutTest {
 	private class TestUIElement extends UIElement {
 		@Override
 		public void draw(Painter painter) {
-			//do nothing
 		}
 	}
 }
