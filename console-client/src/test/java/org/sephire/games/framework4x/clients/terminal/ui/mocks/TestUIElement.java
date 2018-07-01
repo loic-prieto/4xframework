@@ -22,9 +22,20 @@ public class TestUIElement extends UIElement {
 	 * @return
 	 */
 	public static UIElement buildUIElement(int width, int height) {
+		return buildUIElement(1, 1, width, height);
+	}
+
+	/**
+	 * Convenience method to build ui elements for layout testing.
+	 *
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static UIElement buildUIElement(int x, int y, int width, int height) {
 		UIElement element = new TestUIElement();
 		element.setCoordinates(new Coordinates(
-				new Location(0, 0),
+				new Location(x, y),
 				new Size(
 						new QualifiedSizeValue(height, CHARACTER),
 						new QualifiedSizeValue(width, CHARACTER))

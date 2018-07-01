@@ -17,7 +17,7 @@ public class FlowLayoutTest {
 	 * They only make sense for monospaced fonts
 	 *
 	 * xxxxxxxxxx  xxxxxxxxxx  xxxxxxxxxx  xxxxxxxxxx
-	 * 1234567890123456789012345678901234567890
+	 * 12345678901234567890123456789012345678901234567890
 	 * xxxxxxxxxxyyyyyyyyyyccccccccccvvvvvvvvvv
 	 *
 	 * 1 xxxxxxxxxx

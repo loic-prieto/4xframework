@@ -61,12 +61,13 @@ public class FlowLayout extends BaseLayout {
 			MutableValue<Integer> modifiedPadding = new MutableValue<>(0);
 
 			children.zipWithIndex().forEach((childWithIndex) -> {
-				Coordinates updatedCoordinates = childWithIndex._1.getCoordinates().withLocation(
-						childWithIndex._1.getCoordinates().getLocation().add(
-								1,
-								childWithIndex._2 + modifiedPadding.getValue() * childWithIndex._2 + 1)
+				UIElement child = childWithIndex._1;
+				int index = childWithIndex._2;
+
+				Coordinates updatedCoordinates = child.getCoordinates().withLocation(
+						new Location(1, index + modifiedPadding.getValue() * index + 1)
 				);
-				childWithIndex._1.setCoordinates(updatedCoordinates);
+				child.setCoordinates(updatedCoordinates);
 				modifiedPadding.updateValue(padding);
 			});
 		}
