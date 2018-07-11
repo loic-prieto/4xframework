@@ -23,7 +23,7 @@ public class GridLayoutTest {
 	 * 5  *    CC        *     DDD      *
 	 * 6  *    CC        *              *
 	 * *******************************
-	 * <p>
+	 *
 	 * The separations do not exist, it is just to visualize them in the test
 	 */
 	@Test
