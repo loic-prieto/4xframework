@@ -48,4 +48,15 @@ public class Location {
 	public boolean hasPositiveValue() {
 		return (x >= 0 || y >= 0);
 	}
+
+	/**
+	 * Very simple convenience fluent factory method for locations.
+	 *
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static Location of(int x, int y) {
+		return new Location(x,y);
+	}
 }

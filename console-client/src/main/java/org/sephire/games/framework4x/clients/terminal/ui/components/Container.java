@@ -1,12 +1,16 @@
 package org.sephire.games.framework4x.clients.terminal.ui.components;
 
+import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.Viewport;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.Layout;
+import org.sephire.games.framework4x.clients.terminal.ui.layouts.LayoutParameterKey;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 /**
@@ -23,6 +27,13 @@ public abstract class Container extends UIElement {
     private Viewport viewport;
 	@NonNull
 	private Layout layout;
+
+	public Container(Coordinates coordinates,Container parentContainer) {
+		super(coordinates,parentContainer);
+	}
+	public Container(Coordinates coordinates) {
+		super(coordinates);
+	}
 
 	public Container() {
 		super();
@@ -69,13 +80,35 @@ public abstract class Container extends UIElement {
 	}
 
 	public void addChild(UIElement child) {
-		children = children.append(child);
-		child.setContainerParent(Option.of(this));
+		addChild(child,HashMap.empty());
 	}
 
+	public void addChild(UIElement child, Map<LayoutParameterKey,Object> layoutParameters) {
+		children = children.append(child);
+		child.setContainerParent(Option.of(this));
+		getLayout().addChild(child,layoutParameters);
+	}
+
+	/**
+	 * Add children with no layout parameters. Only valid for very simple use cases.
+	 * It is a minor performance improvement for a high number of children if they do not have layout parameters.
+	 * @param children
+	 */
 	public void addChildren(List<UIElement> children) {
 		this.children = this.children.appendAll(children);
-		children.forEach((child) -> child.setContainerParent(Option.of(this)));
+		children.forEach((child) -> {
+			child.setContainerParent(Option.of(this));
+			getLayout().addChild(child,HashMap.empty());
+		});
+	}
+
+	/**
+	 * The container acts as the aggregate root regarding the layout
+	 * @param layout
+	 */
+	public void setLayout(Layout layout) {
+		this.layout = layout;
+		layout.setContainer(this);
 	}
 
 }

@@ -1,6 +1,7 @@
 package org.sephire.games.framework4x.clients.terminal.ui.layouts;
 
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
@@ -22,24 +23,25 @@ public class FlowLayout extends BaseLayout {
 	private Direction direction = HORIZONTAL;
 	private int padding = 0;
 
-	public FlowLayout(Container container) {
-		this(container, HORIZONTAL, 0);
+	public FlowLayout() {
+		this(HORIZONTAL, 0);
 	}
 
-	public FlowLayout(Container container, Direction direction) {
-		this(container, direction, 0);
-		this.direction = direction;
+	public FlowLayout(Direction direction) {
+		this(direction, 0);
 	}
 
-	public FlowLayout(Container container, Direction direction, int padding) {
-		super(container);
+	public FlowLayout(Direction direction, int padding) {
+		super(Option.none());
 		this.direction = direction;
 		this.padding = padding;
 	}
 
 	@Override
 	public void updateChildrenCoordinates() {
-		List<UIElement> children = getContainer().getChildren();
+		List<UIElement> children = getContainer()
+				.getOrElseThrow(LayoutMustHaveContainerException::new)
+				.getChildren();
 
 		if (direction == HORIZONTAL) {
 			MutableIntCounter rightmostPosition = new MutableIntCounter(1);

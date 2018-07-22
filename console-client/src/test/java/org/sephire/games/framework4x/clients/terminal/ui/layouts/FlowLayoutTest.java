@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayout.Direction;
-import org.sephire.games.framework4x.clients.terminal.ui.mocks.TestContainer;
 
 import static io.vavr.collection.List.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.sephire.games.framework4x.clients.terminal.ui.mocks.TestContainer.Builder.container;
 import static org.sephire.games.framework4x.clients.terminal.ui.mocks.TestUIElement.buildUIElement;
 
 public class FlowLayoutTest {
@@ -35,10 +35,8 @@ public class FlowLayoutTest {
 
 	@Test
 	public void testHorizontalLayoutWithoutPadding() {
-		Container container = new TestContainer();
+		Container container = container().withLayout(new FlowLayout()).build();
 		container.addChildren(range(0, 4).map((index) -> buildUIElement(10, 1)));
-		Layout layout = new FlowLayout(container);
-		layout.updateChildrenCoordinates();
 
 		UIElement e3 = container.getChildren().get(2);
 		assertEquals(21, e3.getCoordinates().getLocation().getX());
@@ -47,10 +45,8 @@ public class FlowLayoutTest {
 
 	@Test
 	public void testVerticalLayoutWithoutPadding() {
-		Container container = new TestContainer();
+		Container container = container().withLayout(new FlowLayout(Direction.VERTICAL)).build();
 		container.addChildren(range(0, 4).map((index) -> buildUIElement(10, 1)));
-		Layout layout = new FlowLayout(container, Direction.VERTICAL);
-		layout.updateChildrenCoordinates();
 
 		UIElement e3 = container.getChildren().get(2);
 		assertEquals(1, e3.getCoordinates().getLocation().getX());
@@ -59,10 +55,8 @@ public class FlowLayoutTest {
 
 	@Test
 	public void testHorizontalLayoutWithPadding() {
-		Container container = new TestContainer();
+		Container container = container().withLayout(new FlowLayout(Direction.HORIZONTAL,2)).build();
 		container.addChildren(range(0, 4).map((index) -> buildUIElement(10, 1)));
-		Layout layout = new FlowLayout(container, Direction.HORIZONTAL, 2);
-		layout.updateChildrenCoordinates();
 
 		UIElement e3 = container.getChildren().get(2);
 		assertEquals(25, e3.getCoordinates().getLocation().getX());
@@ -71,10 +65,8 @@ public class FlowLayoutTest {
 
 	@Test
 	public void testVertticalLayoutWithPadding() {
-		Container container = new TestContainer();
+		Container container = container().withLayout(new FlowLayout(Direction.VERTICAL,2)).build();
 		container.addChildren(range(0, 4).map((index) -> buildUIElement(10, 1)));
-		Layout layout = new FlowLayout(container, Direction.VERTICAL, 2);
-		layout.updateChildrenCoordinates();
 
 		UIElement e3 = container.getChildren().get(2);
 		assertEquals(1, e3.getCoordinates().getLocation().getX());
