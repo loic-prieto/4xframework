@@ -26,6 +26,10 @@ public abstract class UIElement implements Drawable {
 		this(new Coordinates(new Location(0, 0), new Size(FIXED_SIZE_ONE, FIXED_SIZE_ONE)), null);
 	}
 
+	public UIElement(Coordinates coordinates) {
+		this(coordinates,null);
+	}
+
 	public UIElement(Coordinates coordinates,Container containerParent) {
 		this.coordinates = coordinates;
 		this.containerParent = Option.of(containerParent);
