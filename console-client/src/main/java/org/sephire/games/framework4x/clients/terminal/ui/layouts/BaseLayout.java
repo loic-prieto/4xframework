@@ -5,7 +5,9 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
-import lombok.*;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
 
@@ -14,7 +16,7 @@ public abstract class BaseLayout implements Layout {
 	@NonNull @Getter
 	private Option<Container> container;
 
-	private List<Tuple2<UIElement,Map<LayoutParameterKey,Object>>> childParameters;
+	private List<Tuple2<UIElement,Map<LayoutParameterKey,Object>>> childParameters = List.empty();
 
 	@Override
 	public void addChild(UIElement child, Map<LayoutParameterKey, Object> parameters) {
