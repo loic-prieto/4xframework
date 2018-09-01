@@ -13,16 +13,16 @@ public class GridLayoutTest {
 
 	/**
 	 * We will test the following layout
-	 * 12345678901234 56789012345678
-	 * *******************************
+	 *     12345678901234 56789012345678
+	 *    *******************************
 	 * 1  *   AAAA       *BBBBBBBBB     *
 	 * 2  *   AAAA       *BBBBBBBBB     *
 	 * 3  *              *              *
-	 * *******************************
+	 *    *******************************
 	 * 4  *              *              *
 	 * 5  *    CC        *     DDD      *
 	 * 6  *    CC        *              *
-	 * *******************************
+	 *    *******************************
 	 *
 	 * The separations do not exist, it is just to visualize them in the test
 	 */
