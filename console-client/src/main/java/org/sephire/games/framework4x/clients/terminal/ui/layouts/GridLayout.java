@@ -1,20 +1,17 @@
 package org.sephire.games.framework4x.clients.terminal.ui.layouts;
 
 import io.vavr.collection.HashMap;
-import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Option;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
+import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.gridlayout.GridCell;
 import org.sephire.games.framework4x.clients.terminal.ui.size.FixedSize;
-import org.sephire.games.framework4x.clients.terminal.ui.size.Size;
 import org.sephire.games.framework4x.clients.terminal.utils.MutableValue;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 import static io.vavr.collection.List.range;
-import static java.util.function.Function.identity;
 
 /**
  * This is the layout to distribute components along a conceptual 2D grid.
@@ -35,7 +32,6 @@ public class GridLayout extends BaseLayout {
 
 	private int columns;
 	private int rows;
-
 	private Map<Location,GridCell> cells;
 
 	public GridLayout(int columns, int rows) {
@@ -54,8 +50,8 @@ public class GridLayout extends BaseLayout {
 	}
 
 	@Override
-	public void updateChildrenCoordinates() {
-		Container container = getContainer().getOrElseThrow(LayoutMustHaveContainerException::new);
+	public Coordinates getChildCoordinates(UIElement childElement) {
+		return null;
 	}
 
 	/**

@@ -1,22 +1,27 @@
 package org.sephire.games.framework4x.clients.terminal.ui.layouts;
 
-import io.vavr.Tuple2;
-import io.vavr.collection.List;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public abstract class BaseLayout implements Layout {
 	@NonNull @Getter
 	private Option<Container> container;
-
-	private List<Tuple2<UIElement,Map<LayoutParameterKey,Object>>> childParameters = List.empty();
+	@Getter
+	private Map<UUID,Map<LayoutParameterKey,Object>> childrenParameters = HashMap.empty();
+	@Getter @Setter
+	private Map<UUID, Coordinates> childrenCoordinates = HashMap.empty();
 
 	@Override
 	public void addChild(UIElement child, Map<LayoutParameterKey, Object> parameters) {
@@ -27,8 +32,13 @@ public abstract class BaseLayout implements Layout {
 			throw new InvalidParameterValueClass(invalidKeys);
 		}
 
-		childParameters = childParameters.append(new Tuple2<>(child,parameters));
-		updateChildrenCoordinates();
+		childrenParameters = childrenParameters.put(child.getIdentifier(),parameters);
+		this.updateChildrenCoordinates();
+	}
+
+	@Override
+	public Option<Coordinates> getChildCoordinates(UIElement childElement) {
+		return childrenCoordinates.get(childElement.getIdentifier());
 	}
 
 	public void setContainer(Container container) {

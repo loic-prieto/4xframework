@@ -27,6 +27,7 @@ public abstract class Container extends UIElement {
     private Viewport viewport;
 	@NonNull
 	private Layout layout;
+	private List<UIElement> children = List.empty();
 
 	public Container(Coordinates coordinates,Container parentContainer) {
 		super(coordinates,parentContainer);
@@ -39,11 +40,6 @@ public abstract class Container extends UIElement {
 		super();
 		this.viewport = new Viewport(this.getCoordinates(),this);
 	}
-
-	/**
-	 * The list of element contained in this container.
-	 */
-	private List<UIElement> children = List.empty();
 
 	/**
 	 * The coordinates of a child inside a container are relative

@@ -1,14 +1,16 @@
 package org.sephire.games.framework4x.clients.terminal.ui.layouts;
 
-import io.vavr.collection.List;
+import io.vavr.collection.HashMap;
+import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import org.sephire.games.framework4x.clients.terminal.ui.Coordinates;
-import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.components.UIElement;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayout.Direction;
 import org.sephire.games.framework4x.clients.terminal.utils.MutableIntCounter;
 import org.sephire.games.framework4x.clients.terminal.utils.MutableValue;
 import org.sephire.games.framework4x.core.model.map.Location;
+
+import java.util.UUID;
 
 import static org.sephire.games.framework4x.clients.terminal.ui.layouts.flowlayout.Direction.HORIZONTAL;
 
@@ -39,9 +41,17 @@ public class FlowLayout extends BaseLayout {
 
 	@Override
 	public void updateChildrenCoordinates() {
-		List<UIElement> children = getContainer()
-				.getOrElseThrow(LayoutMustHaveContainerException::new)
-				.getChildren();
+		Map<UUID,Coordinates> updatedChildrenCoordinates = direction == HORIZONTAL ?
+			getContainer().getOrElseThrow(LayoutMustHaveContainerException::new).getChildren()
+				.map((child) -> {
+					return HashMap.empty();
+				}) :
+			getContainer().getOrElseThrow(LayoutMustHaveContainerException::new).getChildren()
+				.map((child) -> {
+
+				});
+
+
 
 		if (direction == HORIZONTAL) {
 			MutableIntCounter rightmostPosition = new MutableIntCounter(1);

@@ -4,7 +4,6 @@ import io.vavr.collection.HashMap;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.clients.terminal.ui.components.Container;
 import org.sephire.games.framework4x.clients.terminal.ui.layouts.gridlayout.Builder;
-import org.sephire.games.framework4x.clients.terminal.ui.mocks.TestContainer;
 import org.sephire.games.framework4x.core.model.map.Location;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,10 +39,10 @@ public class GridLayoutTest {
 		container.addChild(buildUIElement(5, 2, 2, 2),HashMap.of(CELL,new Location(1,2)));
 		container.addChild(buildUIElement(5, 2, 3, 1),HashMap.of(CELL,new Location(2,2)));
 
-		assertEquals(new Location(4, 1), container.getChildren().get(0).getCoordinates().getLocation());
-		assertEquals(new Location(15, 1), container.getChildren().get(1).getCoordinates().getLocation());
-		assertEquals(new Location(5, 5), container.getChildren().get(2).getCoordinates().getLocation());
-		assertEquals(new Location(20, 5), container.getChildren().get(3).getCoordinates().getLocation());
+		assertEquals(new Location(4, 1), container.getChildren().get(0).getCoordinates().getLocation());  // A
+		assertEquals(new Location(15, 1), container.getChildren().get(1).getCoordinates().getLocation()); // B
+		assertEquals(new Location(5, 5), container.getChildren().get(2).getCoordinates().getLocation());  // C
+		assertEquals(new Location(20, 5), container.getChildren().get(3).getCoordinates().getLocation()); // D
 	}
 
 }

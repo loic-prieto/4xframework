@@ -13,5 +13,5 @@ import org.sephire.games.framework4x.core.model.map.Location;
 public class GridCell {
 	private Location location;
 	private FixedSize size;
-
+	private Location childElementLocation;
 }
