@@ -24,6 +24,7 @@ public class Launcher {
 			Window menuWindow = new MenuWindow();
 			menuWindow.setHints(List.of(Window.Hint.FULL_SCREEN));
 			gui.addWindowAndWait(menuWindow);
+			screen.stopScreen();
 
 		} catch(IOException ioe ) {
 			System.out.print(ioe);
