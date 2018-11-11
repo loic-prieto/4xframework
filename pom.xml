@@ -20,7 +20,6 @@
     <modules>
         <module>console-client</module>
         <module>core</module>
-        <module>console-ui</module>
     </modules>
 
     <properties>
