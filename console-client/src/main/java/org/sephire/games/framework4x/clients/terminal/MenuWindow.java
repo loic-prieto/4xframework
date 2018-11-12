@@ -1,11 +1,11 @@
 package org.sephire.games.framework4x.clients.terminal;
 
 import com.googlecode.lanterna.gui2.*;
+import io.vavr.Function1;
 import io.vavr.control.Option;
 
-import java.util.function.Consumer;
-
 import static java.lang.System.out;
+import static org.sephire.games.framework4x.clients.terminal.utils.Functions.wrap;
 
 public class MenuWindow extends BasicWindow {
 	public MenuWindow() {
@@ -18,22 +18,22 @@ public class MenuWindow extends BasicWindow {
 		Panel menuPanel = new Panel();
 		menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 		io.vavr.CheckedConsumer
-		menuPanel.addComponent(buttonFor("Start Game", (b)-> out.println("Start game activated")));
-		menuPanel.addComponent(buttonFor("Load Game",(b)-> out.println("Load game activated")));
-		menuPanel.addComponent(buttonFor("Manage Plugins",(b)-> out.println("Manage Plugins activated")));
-		menuPanel.addComponent(buttonFor("Configuration",(b)-> out.println("Configuration activated")));
-		menuPanel.addComponent(buttonFor("Exit",(b)->{
+		menuPanel.addComponent(buttonFor("Start Game", wrap((b)-> out.println("Start game activated"))));
+		menuPanel.addComponent(buttonFor("Load Game",wrap((b)-> out.println("Load game activated"))));
+		menuPanel.addComponent(buttonFor("Manage Plugins",wrap((b)-> out.println("Manage Plugins activated"))));
+		menuPanel.addComponent(buttonFor("Configuration",wrap((b)-> out.println("Configuration activated"))));
+		menuPanel.addComponent(buttonFor("Exit",wrap((b)->{
 			out.println("Exit activated");
 			close();
-		}));
+		})));
 		backgroundPanel.addComponent(wrapInBorder(menuPanel));
 
 		setComponent(wrapInBorder(backgroundPanel));
 	}
 
-	private static Button buttonFor(String label, Consumer<Button> buttonAction) {
+	private static Button buttonFor(String label, Function1<Button,Void> buttonAction) {
 		Button menuItem = new Button(label);
-		menuItem.addListener(buttonAction::accept);
+		menuItem.addListener(buttonAction::apply);
 
 		return menuItem;
 	}
@@ -48,4 +48,5 @@ public class MenuWindow extends BasicWindow {
 
 		return border;
 	}
+
 }
