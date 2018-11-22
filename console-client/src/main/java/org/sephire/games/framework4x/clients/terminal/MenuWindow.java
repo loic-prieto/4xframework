@@ -17,7 +17,6 @@ public class MenuWindow extends BasicWindow {
 
 		Panel menuPanel = new Panel();
 		menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
-		io.vavr.CheckedConsumer
 		menuPanel.addComponent(buttonFor("Start Game", wrap((b)-> out.println("Start game activated"))));
 		menuPanel.addComponent(buttonFor("Load Game",wrap((b)-> out.println("Load game activated"))));
 		menuPanel.addComponent(buttonFor("Manage Plugins",wrap((b)-> out.println("Manage Plugins activated"))));
