@@ -2,8 +2,8 @@ package org.sephire.games.framework4x.clients.terminal;
 
 import com.googlecode.lanterna.gui2.*;
 import io.vavr.Function1;
-import io.vavr.control.Option;
 
+import static com.googlecode.lanterna.gui2.Borders.doubleLine;
 import static java.lang.System.out;
 import static org.sephire.games.framework4x.clients.terminal.utils.Functions.wrap;
 
@@ -25,9 +25,9 @@ public class MenuWindow extends BasicWindow {
 			out.println("Exit activated");
 			close();
 		})));
-		backgroundPanel.addComponent(wrapInBorder(menuPanel));
+		backgroundPanel.addComponent(menuPanel.withBorder(doubleLine()));
 
-		setComponent(wrapInBorder(backgroundPanel));
+		setComponent(backgroundPanel.withBorder(doubleLine()));
 	}
 
 	private static Button buttonFor(String label, Function1<Button,Void> buttonAction) {
@@ -35,17 +35,6 @@ public class MenuWindow extends BasicWindow {
 		menuItem.addListener(buttonAction::apply);
 
 		return menuItem;
-	}
-
-	private static Border wrapInBorder(Component component) {
-		return wrapInBorder(component,Option.none());
-	}
-	private static Border wrapInBorder(Component component, Option<String> optionalTitle) {
-		Border border = optionalTitle.map(Borders::doubleLine)
-			.getOrElse(Borders::doubleLine);
-		border.setComponent(component);
-
-		return border;
 	}
 
 }
