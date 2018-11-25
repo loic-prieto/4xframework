@@ -99,6 +99,13 @@
             <artifactId>core</artifactId>
             <version>0.1.0</version>
         </dependency>
+
+        <!-- The terminal client will always include the standard 4x plugin -->
+        <dependency>
+            <groupId>org.sephire.games.strategy-framework</groupId>
+            <artifactId>4x-plugin-standard</artifactId>
+            <version>0.1.0</version>
+        </dependency>
     </dependencies>
 
 </project>

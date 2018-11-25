@@ -20,6 +20,7 @@
     <modules>
         <module>console-client</module>
         <module>core</module>
+        <module>4x-plugin-standard</module>
     </modules>
 
     <properties>
