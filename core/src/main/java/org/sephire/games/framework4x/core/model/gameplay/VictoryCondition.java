@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.core.model.map;
+package org.sephire.games.framework4x.core.model.gameplay;
 
 public enum VictoryCondition {
 	CONQUEST,

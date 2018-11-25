@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.core.model.map.ai;
+package org.sephire.games.framework4x.core.model.ai;
 
 public enum AIDifficultyLevel {
 	EASIEST,

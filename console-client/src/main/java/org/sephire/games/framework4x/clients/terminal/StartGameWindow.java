@@ -2,9 +2,9 @@ package org.sephire.games.framework4x.clients.terminal;
 
 import com.googlecode.lanterna.gui2.*;
 import io.vavr.collection.List;
-import org.sephire.games.framework4x.core.model.map.ResearchCostMultiplier;
-import org.sephire.games.framework4x.core.model.map.VictoryCondition;
-import org.sephire.games.framework4x.core.model.map.ai.AIDifficultyLevel;
+import org.sephire.games.framework4x.core.model.ai.AIDifficultyLevel;
+import org.sephire.games.framework4x.core.model.gameplay.VictoryCondition;
+import org.sephire.games.framework4x.core.model.research.ResearchCostMultiplier;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
 
