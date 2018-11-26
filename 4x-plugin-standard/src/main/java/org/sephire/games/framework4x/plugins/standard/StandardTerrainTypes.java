@@ -1,4 +1,4 @@
-package org.serphire.games.framework4x.plugins.standard;
+package org.sephire.games.framework4x.plugins.standard;
 
 import org.sephire.games.framework4x.core.model.map.TerrainTypeEnum;
 
