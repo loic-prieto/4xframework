@@ -21,6 +21,7 @@
         <module>console-client</module>
         <module>core</module>
         <module>4x-plugin-standard</module>
+        <module>4x-plugin-standard-terminal-client</module>
     </modules>
 
     <properties>
@@ -29,6 +30,7 @@
         <junit.jupiter.version>5.3.1</junit.jupiter.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
+        <yaml.version>1.0</yaml.version>
     </properties>
 
     <build>
@@ -135,6 +137,13 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+
+            <!-- YAML Parsing -->
+            <dependency>
+                <groupId>org.snakeyaml</groupId>
+                <artifactId>snakeyaml-engine</artifactId>
+                <version>${yaml.version}</version>
             </dependency>
 
         </dependencies>

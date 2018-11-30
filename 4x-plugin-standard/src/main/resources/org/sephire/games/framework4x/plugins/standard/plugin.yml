@@ -1,0 +1,3 @@
+name: org.sephire.games.framework4x.plugins.standard
+mainClass: org.sephire.games.framework4x.plugins.standard.Main
+isBasePlugin: true

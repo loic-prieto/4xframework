@@ -121,3 +121,7 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
+
+# Fucking stupid mac folders
+.DS_Store
+**/.DS_Store
