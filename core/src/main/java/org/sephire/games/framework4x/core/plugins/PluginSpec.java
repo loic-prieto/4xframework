@@ -28,16 +28,16 @@ public class PluginSpec {
 	 */
 	public static Try<PluginSpec> fromYAML(String pluginPackage, Map rawYaml) {
 		// noinspection unchecked
-		return Try.of(()->{
-			var yaml = HashMap.<String,Object>ofAll(rawYaml);
+		return Try.of(() -> {
+			var yaml = HashMap.<String, Object>ofAll(rawYaml);
 
-			var name = (String)yaml.get("name").getOrElseThrow(()->new InvalidPluginSpecFileException("The name field is mandatory",pluginPackage));
-			var clazz = (String)yaml.get("mainClass").getOrElse(name+".Main");
-			var isBase = (boolean)yaml.get("isBasePlugin").getOrElse(false);
+			var name = (String) yaml.get("name").getOrElseThrow(() -> new InvalidPluginSpecFileException("The name field is mandatory", pluginPackage));
+			var clazz = (String) yaml.get("mainClass").getOrElse(name + ".Main");
+			var isBase = (boolean) yaml.get("isBasePlugin").getOrElse(false);
 
-			return new PluginSpec(name,isBase,clazz);
+			return new PluginSpec(name, isBase, clazz);
 		}).mapFailure(
-			Case($(instanceOf(ClassCastException.class)), e -> new InvalidPluginSpecFileException(pluginPackage,e))
+			Case($(instanceOf(ClassCastException.class)), e -> new InvalidPluginSpecFileException(pluginPackage, e))
 		);
 	}
 
@@ -46,6 +46,6 @@ public class PluginSpec {
 	}
 
 	public PluginSpec withMainClass(String mainClass) {
-		return new PluginSpec(pluginName,isBasePlugin,mainClass);
+		return new PluginSpec(pluginName, isBasePlugin, mainClass);
 	}
 }

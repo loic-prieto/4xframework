@@ -16,8 +16,8 @@ public class Functions {
 	 * @param <T>
 	 * @return
 	 */
-	public static <T> Function1<T,Void> wrap(Consumer<T> consumer) {
-		Function1<T,Void> wrappedConsumer = (T item)-> {
+	public static <T> Function1<T, Void> wrap(Consumer<T> consumer) {
+		Function1<T, Void> wrappedConsumer = (T item) -> {
 			consumer.accept(item);
 			return null;
 		};

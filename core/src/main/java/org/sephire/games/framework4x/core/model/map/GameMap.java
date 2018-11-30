@@ -9,14 +9,14 @@ import lombok.Getter;
  */
 @Getter
 public class GameMap {
-    private Map<String, MapZone> zones;
-    private MapZone currentZone;
+	private Map<String, MapZone> zones;
+	private MapZone currentZone;
 
-    public Try<Void> setCurrentZone(String zoneName) {
-    	return Try.of(()->{
-		    this.currentZone = zones.get(zoneName)
-			    .getOrElseThrow(()-> new ZoneNotFoundException(zoneName));
-		    return null;
-	    });
-    }
+	public Try<Void> setCurrentZone(String zoneName) {
+		return Try.of(() -> {
+			this.currentZone = zones.get(zoneName)
+				.getOrElseThrow(() -> new ZoneNotFoundException(zoneName));
+			return null;
+		});
+	}
 }

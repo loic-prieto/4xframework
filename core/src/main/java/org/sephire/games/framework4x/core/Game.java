@@ -18,65 +18,65 @@ import org.sephire.games.framework4x.core.plugins.PluginLoadingException;
 public class Game {
 
 	@Getter
-    private Configuration configuration;
+	private Configuration configuration;
 
-    private Map<String, Plugin> plugins;
+	private Map<String, Plugin> plugins;
 
-    private Game(List<Plugin> plugins,Configuration configuration) {
-    	this.plugins = HashMap.ofEntries(plugins.map((plugin)->Map.entry(plugin.getSpecification().getPluginName(),plugin)));
-    	this.configuration = configuration;
-    }
+	private Game(List<Plugin> plugins, Configuration configuration) {
+		this.plugins = HashMap.ofEntries(plugins.map((plugin) -> Map.entry(plugin.getSpecification().getPluginName(), plugin)));
+		this.configuration = configuration;
+	}
 
-    /**
-     * Returns whether the specified plugin has been loaded into the framework.
-     *
-     * @param pluginName
-     * @return
-     */
-    public boolean hasPlugin(String pluginName) {
-        return plugins
-                .get(pluginName)
-                .isDefined();
-    }
+	/**
+	 * Returns whether the specified plugin has been loaded into the framework.
+	 *
+	 * @param pluginName
+	 * @return
+	 */
+	public boolean hasPlugin(String pluginName) {
+		return plugins
+			.get(pluginName)
+			.isDefined();
+	}
 
-    public Option<Plugin> getPlugin(String pluginName) {
-    	return plugins.get(pluginName);
-    }
+	public Option<Plugin> getPlugin(String pluginName) {
+		return plugins.get(pluginName);
+	}
 
-    public static class Builder {
+	public static class Builder {
 
-    	private Option<List<String>> pluginNames = Option.none();
+		private Option<List<String>> pluginNames = Option.none();
 
-    	public Builder withPlugins(String... pluginsNames) {
-    		this.pluginNames = Option.of(List.of(pluginsNames));
-    		return this;
-	    }
+		public Builder withPlugins(String... pluginsNames) {
+			this.pluginNames = Option.of(List.of(pluginsNames));
+			return this;
+		}
 
-    	public Try<Game> build() {
-    		return Try.of(()->{
-			    var configuration = new Configuration.Builder();
+		public Try<Game> build() {
+			return Try.of(() -> {
+				var configuration = new Configuration.Builder();
 
-			    var loadedPlugins = pluginNames
-				    .getOrElseThrow(()->new PluginLoadingException("At least one plugin must be loaded",new IllegalArgumentException()))
-				    .map(Plugin::of);
-				if(loadedPlugins.length() == 0) {
+				var loadedPlugins = pluginNames
+					.getOrElseThrow(() -> new PluginLoadingException("At least one plugin must be loaded", new IllegalArgumentException()))
+					.map(Plugin::of);
+				if (loadedPlugins.length() == 0) {
 					throw new PluginLoadingException("At least one plugin must be loaded", new IllegalArgumentException());
 				}
-			    if(loadedPlugins.find(Try::isFailure).isDefined()) {
-				    throw new PluginLoadingException(loadedPlugins.map(Try::getCause));
-			    }
+				if (loadedPlugins.find(Try::isFailure).isDefined()) {
+					throw new PluginLoadingException(loadedPlugins.map(Try::getCause));
+				}
 
-			    var configLoadingResult = loadedPlugins
-				    .map(Try::get)
-				    .map((plugin -> plugin.load(configuration)));
-			    if(configLoadingResult.find(Try::isFailure).isDefined()) {
-			    	throw new PluginLoadingException(configLoadingResult.map(Try::getCause));
-			    }
+				var configLoadingResult = loadedPlugins
+					.map(Try::get)
+					.map((plugin -> plugin.load(configuration)));
+				if (configLoadingResult.find(Try::isFailure).isDefined()) {
+					throw new PluginLoadingException(configLoadingResult.map(Try::getCause));
+				}
 
-			    return new Game(
-			    	loadedPlugins.map(Try::get),
-				    configuration.build());
-		    });
+				return new Game(
+					loadedPlugins.map(Try::get),
+					configuration.build());
+			});
 		}
 	}
 }

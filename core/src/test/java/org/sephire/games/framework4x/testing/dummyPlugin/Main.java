@@ -14,7 +14,7 @@ public class Main implements PluginInitializer {
 
 	@Override
 	public Try<Void> pluginLoad(Configuration.Builder configuration) {
-		configuration.addConfig(KEY1,"test");
+		configuration.addConfig(KEY1, "test");
 		return success(null);
 	}
 }

@@ -14,8 +14,8 @@ public class InvalidPluginMainClassException extends Framework4XException {
 	@Getter
 	private Class pluginMainClass;
 
-	public InvalidPluginMainClassException(String pluginName,Class pluginMainClass,Exception cause) {
-		super("The class "+pluginMainClass+" is not a valid main class for plugin "+pluginName,cause);
+	public InvalidPluginMainClassException(String pluginName, Class pluginMainClass, Exception cause) {
+		super("The class " + pluginMainClass + " is not a valid main class for plugin " + pluginName, cause);
 		this.pluginName = pluginName;
 		this.pluginMainClass = pluginMainClass;
 	}

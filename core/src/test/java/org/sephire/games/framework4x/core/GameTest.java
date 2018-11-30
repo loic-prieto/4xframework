@@ -11,69 +11,69 @@ import static org.sephire.games.framework4x.testing.dummyPlugin.DummyPluginConfi
 
 public class GameTest {
 
-    private static final String DUMMY_PLUGIN_NAME         = "org.sephire.games.framework4x.testing.dummyPlugin";
+	private static final String DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.dummyPlugin";
 	private static final String INVALID_DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.invalidDummyPlugin";
 
-    @Test
-    @DisplayName("Should complain if a requested plugin doesn't exist in classpath when loading framework")
-    public void should_complain_if_plugin_doesnt_exist_in_classpath() {
-        var gameBuildingTry = new Game.Builder()
-            .withPlugins("not_existent_plugin")
-            .build();
+	@Test
+	@DisplayName("Should complain if a requested plugin doesn't exist in classpath when loading framework")
+	public void should_complain_if_plugin_doesnt_exist_in_classpath() {
+		var gameBuildingTry = new Game.Builder()
+			.withPlugins("not_existent_plugin")
+			.build();
 
-        assertTrue(gameBuildingTry.isFailure());
-        assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
+		assertTrue(gameBuildingTry.isFailure());
+		assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
 
-	    var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
-	    assertTrue(exceptions.exists((e)-> PluginSpecFileNotFound.class.isAssignableFrom(e.getClass())));
-    }
+		var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
+		assertTrue(exceptions.exists((e) -> PluginSpecFileNotFound.class.isAssignableFrom(e.getClass())));
+	}
 
-    @Test
-    @DisplayName("Should complain if no plugin is specified while building the framework")
-    public void should_complain_if_no_plugin_is_specified() {
-        var gameBuildingTry = new Game.Builder()
-            .withPlugins()
-            .build();
+	@Test
+	@DisplayName("Should complain if no plugin is specified while building the framework")
+	public void should_complain_if_no_plugin_is_specified() {
+		var gameBuildingTry = new Game.Builder()
+			.withPlugins()
+			.build();
 
-        assertTrue(gameBuildingTry.isFailure());
-        assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
+		assertTrue(gameBuildingTry.isFailure());
+		assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
 
-	    var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
-        assertTrue(exceptions.exists((e)->IllegalArgumentException.class.isAssignableFrom(e.getClass())));
-    }
+		var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
+		assertTrue(exceptions.exists((e) -> IllegalArgumentException.class.isAssignableFrom(e.getClass())));
+	}
 
-    @Test
-    @DisplayName("Should complain when main class of a plugin does not exist")
-    public void should_complain_when_main_class_does_not_exist() {
-	    var gameBuildingTry = new Game.Builder()
-		    .withPlugins(INVALID_DUMMY_PLUGIN_NAME)
-		    .build();
+	@Test
+	@DisplayName("Should complain when main class of a plugin does not exist")
+	public void should_complain_when_main_class_does_not_exist() {
+		var gameBuildingTry = new Game.Builder()
+			.withPlugins(INVALID_DUMMY_PLUGIN_NAME)
+			.build();
 
-	    assertTrue(gameBuildingTry.isFailure());
-	    assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
+		assertTrue(gameBuildingTry.isFailure());
+		assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
 
-	    var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
-	    assertTrue(exceptions.exists((e)-> PluginMainClassNotFoundException.class.isAssignableFrom(e.getClass())));
-    }
+		var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
+		assertTrue(exceptions.exists((e) -> PluginMainClassNotFoundException.class.isAssignableFrom(e.getClass())));
+	}
 
-    @Test
-    @DisplayName("Should load successfully a plugin if it is present in the classpath")
-    public void should_load_successfully_plugin_present_on_classpath() {
-	    var gameBuildingTry = new Game.Builder()
-		    .withPlugins(DUMMY_PLUGIN_NAME)
-		    .build();
+	@Test
+	@DisplayName("Should load successfully a plugin if it is present in the classpath")
+	public void should_load_successfully_plugin_present_on_classpath() {
+		var gameBuildingTry = new Game.Builder()
+			.withPlugins(DUMMY_PLUGIN_NAME)
+			.build();
 
-        assertTrue(gameBuildingTry.isSuccess());
-        assertTrue(gameBuildingTry.get().hasPlugin(DUMMY_PLUGIN_NAME));
-    }
+		assertTrue(gameBuildingTry.isSuccess());
+		assertTrue(gameBuildingTry.get().hasPlugin(DUMMY_PLUGIN_NAME));
+	}
 
-    @Test
-    @DisplayName("Should have filled the configuration when the plugin was loaded")
-    public void should_load_configuration_of_plugin_when_loaded() {
-	    var gameBuildingTry = new Game.Builder()
-		    .withPlugins(DUMMY_PLUGIN_NAME)
-		    .build();
+	@Test
+	@DisplayName("Should have filled the configuration when the plugin was loaded")
+	public void should_load_configuration_of_plugin_when_loaded() {
+		var gameBuildingTry = new Game.Builder()
+			.withPlugins(DUMMY_PLUGIN_NAME)
+			.build();
 
-	    assertTrue(gameBuildingTry.get().getConfiguration().getConfiguration(KEY1).isDefined());
-    }
+		assertTrue(gameBuildingTry.get().getConfiguration().getConfiguration(KEY1).isDefined());
+	}
 }

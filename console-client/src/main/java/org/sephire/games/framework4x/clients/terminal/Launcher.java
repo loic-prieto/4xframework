@@ -26,7 +26,7 @@ public class Launcher {
 			gui.addWindowAndWait(menuWindow);
 			screen.stopScreen();
 
-		} catch(IOException ioe ) {
+		} catch (IOException ioe) {
 			System.out.print(ioe);
 		}
 

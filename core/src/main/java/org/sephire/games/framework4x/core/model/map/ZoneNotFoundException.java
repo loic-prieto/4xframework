@@ -8,7 +8,7 @@ public class ZoneNotFoundException extends Framework4XException {
 	private String zoneName;
 
 	public ZoneNotFoundException(String zoneName) {
-		super("Zone "+zoneName+" not found");
+		super("Zone " + zoneName + " not found");
 		this.zoneName = zoneName;
 	}
 }

@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 public class MapZone {
 	private String name;
-	private Map<Location,MapCell> cells;
+	private Map<Location, MapCell> cells;
 	private Size size;
 
 	public MapZone(Map<Location, MapCell> cells) {
@@ -25,14 +25,14 @@ public class MapZone {
 	 * Updates the size of the zone based on the current map cells.
 	 * @return
 	 */
-	private void buildSize(){
+	private void buildSize() {
 		int maxXPosition = cells.keySet()
 			.map(Location::getX)
-			.reduce((previousX,currentX)-> currentX < previousX ? previousX : currentX);
+			.reduce((previousX, currentX) -> currentX < previousX ? previousX : currentX);
 		int maxYPosition = cells.keySet()
 			.map(Location::getY)
-			.reduce((previousY,currentY)-> currentY < previousY ? previousY : currentY);
+			.reduce((previousY, currentY) -> currentY < previousY ? previousY : currentY);
 
-		this.size = new Size(maxXPosition,maxYPosition);
+		this.size = new Size(maxXPosition, maxYPosition);
 	}
 }

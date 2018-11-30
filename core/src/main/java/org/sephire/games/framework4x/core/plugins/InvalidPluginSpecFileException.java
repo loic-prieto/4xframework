@@ -17,7 +17,7 @@ public class InvalidPluginSpecFileException extends Framework4XException {
 	}
 
 	public InvalidPluginSpecFileException(String pluginName, Throwable cause) {
-		super("The given spec file for the plugin " + pluginName + " is invalid",cause);
+		super("The given spec file for the plugin " + pluginName + " is invalid", cause);
 		this.pluginName = pluginName;
 	}
 }

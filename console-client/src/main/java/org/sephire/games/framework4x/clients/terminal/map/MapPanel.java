@@ -21,8 +21,8 @@ public class MapPanel extends Panel {
 		Size zoneSize = currentZone.getSize();
 		this.mapVisualization = new char[zoneSize.getWidth()][zoneSize.getHeight()];
 
-		range(0,zoneSize.getWidth()).forEach((x)->{
-			range(0,zoneSize.getHeight()).forEach((y)->{
+		range(0, zoneSize.getWidth()).forEach((x) -> {
+			range(0, zoneSize.getHeight()).forEach((y) -> {
 				mapVisualization[x][y] = ' ';
 			});
 		});

@@ -9,7 +9,7 @@ public class ConfigurationKeyNotFound extends Framework4XException {
 	private ConfigKeyEnum notFoundKey;
 
 	public ConfigurationKeyNotFound(ConfigKeyEnum notFoundKey) {
-		super("The key '"+notFoundKey+"' doesn't exist in the configuration global object");
+		super("The key '" + notFoundKey + "' doesn't exist in the configuration global object");
 		this.notFoundKey = notFoundKey;
 	}
 }

@@ -7,17 +7,17 @@ import lombok.Value;
  */
 @Value
 public class Range {
-    private int x;
-    private int y;
-    private int horizontalOffset;
-    private int verticalOffset;
+	private int x;
+	private int y;
+	private int horizontalOffset;
+	private int verticalOffset;
 
-    public boolean containsLocation(Location targetLocation) {
-        return
-                targetLocation.getX() >= x
-                        && targetLocation.getX() <= x + horizontalOffset
-                        && targetLocation.getY() >= y
-                        && targetLocation.getY() <= y + horizontalOffset;
+	public boolean containsLocation(Location targetLocation) {
+		return
+			targetLocation.getX() >= x
+				&& targetLocation.getX() <= x + horizontalOffset
+				&& targetLocation.getY() >= y
+				&& targetLocation.getY() <= y + horizontalOffset;
 
-    }
+	}
 }

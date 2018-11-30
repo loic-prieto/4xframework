@@ -14,7 +14,7 @@ public class PluginSpecFileNotFound extends Framework4XException {
 	private String pluginName;
 
 	public PluginSpecFileNotFound(String pluginName) {
-		super("The plugin.yml spec file could not be found for plugin "+pluginName);
+		super("The plugin.yml spec file could not be found for plugin " + pluginName);
 		this.pluginName = pluginName;
 	}
 }

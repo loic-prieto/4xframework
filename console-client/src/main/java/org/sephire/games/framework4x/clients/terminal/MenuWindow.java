@@ -17,11 +17,11 @@ public class MenuWindow extends BasicWindow {
 
 		Panel menuPanel = new Panel();
 		menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
-		menuPanel.addComponent(buttonFor("Start Game", wrap((b)-> out.println("Start game activated"))));
-		menuPanel.addComponent(buttonFor("Load Game",wrap((b)-> out.println("Load game activated"))));
-		menuPanel.addComponent(buttonFor("Manage Plugins",wrap((b)-> out.println("Manage Plugins activated"))));
-		menuPanel.addComponent(buttonFor("Configuration",wrap((b)-> out.println("Configuration activated"))));
-		menuPanel.addComponent(buttonFor("Exit",wrap((b)->{
+		menuPanel.addComponent(buttonFor("Start Game", wrap((b) -> out.println("Start game activated"))));
+		menuPanel.addComponent(buttonFor("Load Game", wrap((b) -> out.println("Load game activated"))));
+		menuPanel.addComponent(buttonFor("Manage Plugins", wrap((b) -> out.println("Manage Plugins activated"))));
+		menuPanel.addComponent(buttonFor("Configuration", wrap((b) -> out.println("Configuration activated"))));
+		menuPanel.addComponent(buttonFor("Exit", wrap((b) -> {
 			out.println("Exit activated");
 			close();
 		})));
@@ -30,7 +30,7 @@ public class MenuWindow extends BasicWindow {
 		setComponent(backgroundPanel.withBorder(doubleLine()));
 	}
 
-	private static Button buttonFor(String label, Function1<Button,Void> buttonAction) {
+	private static Button buttonFor(String label, Function1<Button, Void> buttonAction) {
 		Button menuItem = new Button(label);
 		menuItem.addListener(buttonAction::apply);
 

@@ -25,54 +25,54 @@ public class StartGameWindow extends BasicWindow {
 		mapSelection.addItem("Default");
 		mapSelection.setSelectedIndex(0);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(mapLabel)
-						.addComponent(mapSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(mapLabel)
+				.addComponent(mapSelection));
 
 		var difficultyLevelLabel = new Label("Choose difficulty level:");
 		var difficultyLevelSelection = new ComboBox<AIDifficultyLevel>();
 		List.of(AIDifficultyLevel.values()).forEach(difficultyLevelSelection::addItem);
 		difficultyLevelSelection.setSelectedItem(AIDifficultyLevel.NORMAL);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(difficultyLevelLabel)
-						.addComponent(difficultyLevelSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(difficultyLevelLabel)
+				.addComponent(difficultyLevelSelection));
 
 		var numberOfEnemiesLabel = new Label("Choose number of enemies:");
 		var numberOfEnemiesSelection = new ComboBox<Integer>();
-		List.range(0,21).forEach(numberOfEnemiesSelection::addItem);
+		List.range(0, 21).forEach(numberOfEnemiesSelection::addItem);
 		numberOfEnemiesSelection.setSelectedItem(0);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(difficultyLevelLabel)
-						.addComponent(difficultyLevelSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(difficultyLevelLabel)
+				.addComponent(difficultyLevelSelection));
 
 		var researchSpeedLabel = new Label("Choose Research speed:");
 		var researchSpeedSelection = new ComboBox<ResearchCostMultiplier>();
 		List.of(ResearchCostMultiplier.values()).forEach(researchSpeedSelection::addItem);
 		researchSpeedSelection.setSelectedItem(ResearchCostMultiplier.NORMAL);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(researchSpeedLabel)
-						.addComponent(researchSpeedSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(researchSpeedLabel)
+				.addComponent(researchSpeedSelection));
 
 		var victoryConditionsLabel = new Label("Choose victory conditions: ");
 		var victoryConditionsSelection = new CheckBoxList<VictoryCondition>();
 		List.of(VictoryCondition.values()).forEach(victoryConditionsSelection::addItem);
-		victoryConditionsSelection.setChecked(VictoryCondition.CONQUEST,true);
+		victoryConditionsSelection.setChecked(VictoryCondition.CONQUEST, true);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(victoryConditionsLabel)
-						.addComponent(victoryConditionsSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(victoryConditionsLabel)
+				.addComponent(victoryConditionsSelection));
 
 		var pluginsLabel = new Label("Choose active plugins: ");
 		var pluginsSelection = new CheckBoxList<String>();
 		pluginsSelection.setEnabled(false);
-		pluginsSelection.addItem("Base",true);
+		pluginsSelection.addItem("Base", true);
 		optionsPanel.addComponent(
-				new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-						.addComponent(pluginsLabel)
-						.addComponent(pluginsSelection));
+			new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
+				.addComponent(pluginsLabel)
+				.addComponent(pluginsSelection));
 
 		var statusPanel = new Panel();
 		backgroundPanel.addComponent(statusPanel.withBorder(doubleLine()));

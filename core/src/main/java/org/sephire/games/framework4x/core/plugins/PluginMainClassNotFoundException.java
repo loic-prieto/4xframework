@@ -8,12 +8,12 @@ import org.sephire.games.framework4x.core.Framework4XException;
  */
 public class PluginMainClassNotFoundException extends Framework4XException {
 
-    private String className;
-    private String pluginName;
+	private String className;
+	private String pluginName;
 
-    public PluginMainClassNotFoundException(String className, String pluginName) {
-        super("The class "+className+" does not exist, even though it was defined in plugin "+pluginName);
-    	this.className = className;
-    	this.pluginName = pluginName;
-    }
+	public PluginMainClassNotFoundException(String className, String pluginName) {
+		super("The class " + className + " does not exist, even though it was defined in plugin " + pluginName);
+		this.className = className;
+		this.pluginName = pluginName;
+	}
 }

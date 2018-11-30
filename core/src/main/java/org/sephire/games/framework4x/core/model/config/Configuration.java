@@ -15,7 +15,7 @@ import io.vavr.control.Try;
  * store with special semantic
  */
 public class Configuration {
-	private Map<ConfigKeyEnum,Object> configuration;
+	private Map<ConfigKeyEnum, Object> configuration;
 
 	private Configuration(Map<ConfigKeyEnum, Object> configuration) {
 		this.configuration = configuration;
@@ -29,10 +29,10 @@ public class Configuration {
 	 * @return
 	 */
 	public <T> Try<T> getConfiguration(ConfigKeyEnum key, Class<T> configurationValueClass) {
-		return Try.of(()->
+		return Try.of(() ->
 			configuration.get(key)
 				.map(configurationValueClass::cast)
-				.getOrElseThrow(()-> new ConfigurationKeyNotFound(key)));
+				.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)));
 
 	}
 
@@ -44,14 +44,14 @@ public class Configuration {
 	 * To build a configuration object, use this builder.
 	 */
 	public static class Builder {
-		private Map<ConfigKeyEnum,Object> configParam;
+		private Map<ConfigKeyEnum, Object> configParam;
 
 		public Builder() {
 			this.configParam = HashMap.empty();
 		}
 
 		public Builder addConfig(ConfigKeyEnum key, Object configValue) {
-			this.configParam = this.configParam.put(key,configValue);
+			this.configParam = this.configParam.put(key, configValue);
 			return this;
 		}
 

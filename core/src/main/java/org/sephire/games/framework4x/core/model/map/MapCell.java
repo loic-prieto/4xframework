@@ -7,6 +7,6 @@ import lombok.Value;
  */
 @Value
 public class MapCell {
-    private Location location;
-    private TerrainTypeEnum terrainType;
+	private Location location;
+	private TerrainTypeEnum terrainType;
 }
