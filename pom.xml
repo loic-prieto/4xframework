@@ -30,7 +30,7 @@
         <junit.jupiter.version>5.3.1</junit.jupiter.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <yaml.version>1.0</yaml.version>
+        <cfg4j.version>4.4.0</cfg4j.version>
     </properties>
 
     <build>
@@ -139,11 +139,11 @@
                 <version>${logback.version}</version>
             </dependency>
 
-            <!-- YAML Parsing -->
+            <!-- Configuration parsing -->
             <dependency>
-                <groupId>org.snakeyaml</groupId>
-                <artifactId>snakeyaml-engine</artifactId>
-                <version>${yaml.version}</version>
+                <groupId>org.cfg4j</groupId>
+                <artifactId>cfg4j-core</artifactId>
+                <version>${cfg4j.version}</version>
             </dependency>
 
         </dependencies>

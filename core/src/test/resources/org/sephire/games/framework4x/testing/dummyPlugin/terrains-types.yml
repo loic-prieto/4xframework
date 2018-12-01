@@ -1,16 +1,11 @@
-mountain:
-  name: Mountain
-hill:
-  name: Hill
-forest:
-  name: Forest
-plain:
-  name: Plain
-ocean:
-  name: Ocean
-desert:
-  name: Desert
-tundra:
-  name: Tundra
-glacier:
-  name: Glacier
+terrains:
+  types:
+    - mountain
+    - hill
+    - forest
+    - plain
+    - ocean
+    - desert
+    - tundra
+    - glacier
+

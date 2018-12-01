@@ -1,16 +1,10 @@
 package org.sephire.games.framework4x.core.plugins;
 
 
-import io.vavr.collection.HashMap;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Value;
-
-import java.util.Map;
-
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.Predicates.instanceOf;
+import org.sephire.games.framework4x.core.plugins.configuration.CoreConfigProvider;
 
 @Value
 public class PluginSpec {
@@ -19,26 +13,29 @@ public class PluginSpec {
 	private String mainClass;
 
 	/**
-	 * Returns a new plugin spec from a raw result of a YAML deserializing with snake yaml engine,
-	 * which is a non parameterized Map of (String,Object)
+	 * Returns a plugin spec from a configuration spec file parsed by cfg4j.
 	 *
-	 * @param pluginPackage
-	 * @param rawYaml
+	 * May return:
+	 *  - InvalidPluginSpecFileException when the required fields are not present or are invalid
+	 *
+	 * @param pluginName
+	 * @param config
 	 * @return
 	 */
-	public static Try<PluginSpec> fromYAML(String pluginPackage, Map rawYaml) {
-		// noinspection unchecked
+	public static Try<PluginSpec> fromConfiguration(String pluginName, CoreConfigProvider config) {
 		return Try.of(() -> {
-			var yaml = HashMap.<String, Object>ofAll(rawYaml);
+			if (!config.existsKey("name")) {
+				throw new InvalidPluginSpecFileException("The name field is mandatory in the spec file", pluginName);
+			}
 
-			var name = (String) yaml.get("name").getOrElseThrow(() -> new InvalidPluginSpecFileException("The name field is mandatory", pluginPackage));
-			var clazz = (String) yaml.get("mainClass").getOrElse(name + ".Main");
-			var isBase = (boolean) yaml.get("isBasePlugin").getOrElse(false);
+			var name = config.getConfigFor("name", String.class).get();
+			var clazz = config.getConfigFor("mainClass", ".Main")
+				.getOrElseThrow(() -> new InvalidPluginSpecFileException("The mainClass attribute is invalid", pluginName));
+			var isBasePlugin = config.getConfigFor("isBasePlugin", Boolean.FALSE)
+				.getOrElseThrow(() -> new InvalidPluginSpecFileException("The isBasePlugin attribute is invalid", pluginName));
 
-			return new PluginSpec(name, isBase, clazz);
-		}).mapFailure(
-			Case($(instanceOf(ClassCastException.class)), e -> new InvalidPluginSpecFileException(pluginPackage, e))
-		);
+			return new PluginSpec(name, isBasePlugin, clazz);
+		});
 	}
 
 	public Option<String> getMainClass() {

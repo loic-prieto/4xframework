@@ -1,20 +1,20 @@
 package org.sephire.games.framework4x.core.plugins;
 
-import io.vavr.Tuple;
-import io.vavr.collection.HashMap;
-import io.vavr.collection.Map;
+import io.vavr.Function2;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
-import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
-import org.sephire.games.framework4x.core.model.config.InvalidResourceFileException;
-import org.snakeyaml.engine.v1.exceptions.YamlEngineException;
+import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
+import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 
-import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
-import static io.vavr.API.*;
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
 import static io.vavr.Predicates.instanceOf;
-import static org.sephire.games.framework4x.core.utils.ResourceLoading.loadYAMLConfigFile;
+import static io.vavr.control.Try.failure;
+import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToResourceSyntax;
 
 /**
@@ -31,7 +31,7 @@ public class Plugin {
 	@Getter
 	private PluginSpec specification;
 
-	private Plugin(PluginInitializer mainClass, PluginSpec spec) {
+	private Plugin(PluginSpec spec, PluginInitializer mainClass) {
 		this.mainClass = mainClass;
 		this.specification = spec;
 	}
@@ -56,13 +56,13 @@ public class Plugin {
 	public static Try<Plugin> of(String pluginName) {
 		var specTry = loadPluginSpecification(pluginName);
 		if (specTry.isFailure()) {
-			return Try.failure(specTry.getCause());
+			return failure(specTry.getCause());
 		}
 		var spec = specTry.get();
 
 		return specTry
-		  .flatMap(Plugin::initializePluginMainClass)
-		  .map(mainClass -> new Plugin(mainClass, spec));
+			.flatMap(Plugin::initializePluginMainClass)
+			.map(Function2.of(Plugin::new).apply(spec));
 	}
 
 	/**
@@ -72,23 +72,23 @@ public class Plugin {
 	 * @return
 	 */
 	private static Try<PluginInitializer> initializePluginMainClass(PluginSpec spec) {
-		//noinspection unchecked // This is needed because of mapFailure
-		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
-		  .mapFailure(
-			Case($(instanceOf(ClassNotFoundException.class)),
-			  t -> new PluginMainClassNotFoundException(spec.getMainClass().get(), spec.getPluginName()))
-		  )
-		  .map(clazz -> (Class<? extends PluginInitializer>) clazz)
-		  .flatMap((Class<? extends PluginInitializer> pluginClass) -> Try.of(() -> {
-			  PluginInitializer pluginMainClass = null;
-			  try {
-				  pluginMainClass = pluginClass.getConstructor().newInstance();
-			  } catch (Exception e) {
-				  throw new InvalidPluginMainClassException(spec.getPluginName(), pluginClass, e);
-			  }
 
-			  return pluginMainClass;
-		  }));
+		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
+			.mapFailure(
+				Case($(instanceOf(ClassNotFoundException.class)),
+					t -> new PluginMainClassNotFoundException(spec.getMainClass().get(), spec.getPluginName()))
+			)
+			.map(clazz -> (Class<? extends PluginInitializer>) clazz)
+			.flatMap((Class<? extends PluginInitializer> pluginClass) -> Try.of(() -> {
+				PluginInitializer pluginMainClass = null;
+				try {
+					pluginMainClass = pluginClass.getConstructor().newInstance();
+				} catch (Exception e) {
+					throw new InvalidPluginMainClassException(spec.getPluginName(), pluginClass, e);
+				}
+
+				return pluginMainClass;
+			}));
 	}
 
 	/**
@@ -99,46 +99,36 @@ public class Plugin {
 	 */
 	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
 
-		//noinspection unchecked
-		return loadYAMLConfigFile(packageToResourceSyntax(pluginName.concat("." + DEFAULT_PLUGIN_SPEC_FILE)))
-		  .mapFailure(
-			Case($(instanceOf(YamlEngineException.class)), e -> new InvalidPluginSpecFileException(pluginName, e)),
-			Case($(instanceOf(IOException.class)), e -> new PluginSpecFileNotFound(pluginName))
-		  )
-		  .flatMap((data) -> PluginSpec.fromYAML(pluginName, data));
+		return ConfigLoader.getConfigFor(packageToResourceSyntax(pluginName.concat("." + DEFAULT_PLUGIN_SPEC_FILE)))
+			.flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
+			.mapFailure(
+				Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
+			);
 	}
 
 	/**
 	 * Will invoke the initializing of the plugin resources and configuration with a given
 	 * external configuration ready to be filled.
-	 * <p>
+	 *
 	 * The result of this process tells if it was successful, so that dependent plugins are not
 	 * loaded.
 	 *
 	 * @param configuration
-	 * @return
+	 * @return the same configuration builder, so that it can be chained
 	 */
-	public Try<Void> load(Configuration.Builder configuration) {
-		return loadTerrainResources(configuration)
-		  // Once everything is done, let the plugin load its final configuration programmatically
-		  .andThenTry(() -> mainClass.pluginLoad(configuration));
-
-		configuration.addConfig(CoreConfigKeyEnum.TERRAIN_TYPES, terrainTypes);
+	public Try<Configuration.Builder> load(Configuration.Builder configuration) {
+		return loadTerrainResources()
+			.peek((terrainConfig) -> configuration.addConfig(TERRAIN_TYPES, terrainConfig))
+			// Once everything is done, let the plugin load its final configuration programmatically
+			.andThenTry(() -> mainClass.pluginLoad(configuration))
+			.map((discardedResult) -> configuration);
 	}
 
-	private Try<Map<String, String>> loadTerrainResources() {
-		String fileName = packageToResourceSyntax(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName()));
-		//noinspection unchecked
-		return
-		  loadYAMLConfigFile(fileName)
-			.map((rawYamlConfig) ->
-			  rawYamlConfig.entrySet().stream().map((rawEntry) -> {
-				  var entry = (java.util.Map.Entry) rawEntry;
-				  return Tuple.of(entry.getKey(), entry.getValue());
-			  }).collect(HashMap.collector());
-			)
-			.recover(e -> Match(e).of(Case($(instanceOf(IOException.class)), HashMap.empty()))) // All resource files are optional
-		  .mapFailure(Case($(instanceOf(YamlEngineException.class)), e -> new InvalidResourceFileException(fileName, e)));
+	private Try<List<String>> loadTerrainResources() {
+
+		return ConfigLoader.getConfigFor(packageToResourceSyntax(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName())))
+			.flatMap((config) -> config.getConfigFor("terrains.types", Arrays.<String>asList()));
+
 	}
 
 	/**
