@@ -1,21 +1,19 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.Function2;
+import io.vavr.collection.List;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
 import static io.vavr.Predicates.instanceOf;
 import static io.vavr.control.Try.failure;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
-import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToResourceSyntax;
+import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
 /**
  * Represents a plugin to be loaded when a game starts.
@@ -99,7 +97,7 @@ public class Plugin {
 	 */
 	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
 
-		return ConfigLoader.getConfigFor(packageToResourceSyntax(pluginName.concat("." + DEFAULT_PLUGIN_SPEC_FILE)))
+		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE))
 			.flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
 			.mapFailure(
 				Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
@@ -126,9 +124,9 @@ public class Plugin {
 
 	private Try<List<String>> loadTerrainResources() {
 
-		return ConfigLoader.getConfigFor(packageToResourceSyntax(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName())))
-			.flatMap((config) -> config.getConfigFor("terrains.types", Arrays.<String>asList()));
-
+		return ConfigLoader.getConfigFor(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName()))
+			.flatMap((config) -> config.getConfigFor("terrains.types",new String[]{}))
+		    .map(List::of);
 	}
 
 	/**
@@ -139,7 +137,7 @@ public class Plugin {
 	 * @return
 	 */
 	private String toClasspathFile(String fileName) {
-		return this.specification.getPluginName().concat("." + fileName);
+		return packageToFolderPath(this.specification.getPluginName()).concat("/" + fileName);
 	}
 
 }

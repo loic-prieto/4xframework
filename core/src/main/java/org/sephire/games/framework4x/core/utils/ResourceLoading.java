@@ -6,10 +6,10 @@ public class ResourceLoading {
 	 * Given a path specified in package syntax, transforms it
 	 * to resource folder syntax.
 	 *
-	 * @param path
+	 * @param packagePath
 	 * @return
 	 */
-	public static String packageToResourceSyntax(String path) {
-		return path.replaceAll("\\.", "/");
+	public static String packageToFolderPath(String packagePath) {
+		return packagePath.replaceAll("\\.", "/");
 	}
 }

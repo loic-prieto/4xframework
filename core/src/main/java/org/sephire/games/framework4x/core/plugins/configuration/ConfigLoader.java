@@ -3,8 +3,11 @@ package org.sephire.games.framework4x.core.plugins.configuration;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.cfg4j.provider.ConfigurationProviderBuilder;
+import org.cfg4j.source.ConfigurationSource;
 import org.cfg4j.source.classpath.ClasspathConfigurationSource;
+import org.cfg4j.source.compose.FallbackConfigurationSource;
 import org.cfg4j.source.context.filesprovider.ConfigFilesProvider;
+import org.cfg4j.source.files.FilesConfigurationSource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,10 +39,20 @@ public class ConfigLoader {
 			.map(Paths::get)
 			.map(Arrays::asList)
 			.map((array) -> (ConfigFilesProvider) () -> array)
-			.map(ClasspathConfigurationSource::new)
+			.map(ConfigLoader::buildCompositeConfigurationSource)
 			.map((source) -> new ConfigurationProviderBuilder().withConfigurationSource(source).build())
 			.map(CoreConfigProvider::new);
+	}
 
+	/**
+	 * Files can be both loaded from the classpath or the filesystem.
+	 * This composite configuration source takes care of loading from both.
+	 *
+	 * @param filesProvider
+	 * @return
+	 */
+	private static ConfigurationSource buildCompositeConfigurationSource(ConfigFilesProvider filesProvider){
+		return new FallbackConfigurationSource(new FilesConfigurationSource(filesProvider),new ClasspathConfigurationSource(filesProvider));
 	}
 
 	private static Try<URI> getClasspathFileURI(String classpathFilename) {
