@@ -11,7 +11,7 @@ public enum CoreResourcesTypes {
 	/**
 	 * Data related to the terrain types
 	 **/
-	TERRAIN_TYPES("terrains-types.yml");
+	TERRAIN_TYPES("terrains-types.yaml");
 
 	@Getter
 	private String fileName;
