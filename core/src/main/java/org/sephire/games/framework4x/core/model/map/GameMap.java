@@ -15,7 +15,7 @@ public class GameMap {
 	public Try<Void> setCurrentZone(String zoneName) {
 		return Try.of(() -> {
 			this.currentZone = zones.get(zoneName)
-				.getOrElseThrow(() -> new ZoneNotFoundException(zoneName));
+			  .getOrElseThrow(() -> new ZoneNotFoundException(zoneName));
 			return null;
 		});
 	}

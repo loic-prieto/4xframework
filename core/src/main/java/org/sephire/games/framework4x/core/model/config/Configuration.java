@@ -7,10 +7,10 @@ import io.vavr.control.Try;
 
 /**
  * This class contains the configuration as loaded by the different plugins.
- *
+ * <p>
  * The configuration is read-only once initialized, which means that it is safe
  * to share between threads and classes.
- *
+ * <p>
  * To allow for maximum flexibility, a configuration instance is basically an in-memory key/value
  * store with special semantic
  */
@@ -23,6 +23,7 @@ public class Configuration {
 
 	/**
 	 * Gets a config object and tries to cast it to the given class.
+	 *
 	 * @param key
 	 * @param configurationValueClass
 	 * @param <T>
@@ -30,9 +31,9 @@ public class Configuration {
 	 */
 	public <T> Try<T> getConfiguration(ConfigKeyEnum key, Class<T> configurationValueClass) {
 		return Try.of(() ->
-			configuration.get(key)
-				.map(configurationValueClass::cast)
-				.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)));
+		  configuration.get(key)
+			.map(configurationValueClass::cast)
+			.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)));
 
 	}
 

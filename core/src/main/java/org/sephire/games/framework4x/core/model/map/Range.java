@@ -14,10 +14,10 @@ public class Range {
 
 	public boolean containsLocation(Location targetLocation) {
 		return
-			targetLocation.getX() >= x
-				&& targetLocation.getX() <= x + horizontalOffset
-				&& targetLocation.getY() >= y
-				&& targetLocation.getY() <= y + horizontalOffset;
+		  targetLocation.getX() >= x
+			&& targetLocation.getX() <= x + horizontalOffset
+			&& targetLocation.getY() >= y
+			&& targetLocation.getY() <= y + horizontalOffset;
 
 	}
 }

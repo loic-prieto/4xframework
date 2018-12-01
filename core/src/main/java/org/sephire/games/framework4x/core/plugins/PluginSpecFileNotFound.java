@@ -6,7 +6,7 @@ import org.sephire.games.framework4x.core.Framework4XException;
 /**
  * Each plugin must have a spec file which defines the plugin's metadata.
  * This spec file sits at the root of the plugin's package, named plugin.yml
- *
+ * <p>
  * This exception occurs when there is no such file.
  */
 public class PluginSpecFileNotFound extends Framework4XException {

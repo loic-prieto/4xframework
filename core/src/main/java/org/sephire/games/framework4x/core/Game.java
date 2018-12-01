@@ -35,8 +35,8 @@ public class Game {
 	 */
 	public boolean hasPlugin(String pluginName) {
 		return plugins
-			.get(pluginName)
-			.isDefined();
+		  .get(pluginName)
+		  .isDefined();
 	}
 
 	public Option<Plugin> getPlugin(String pluginName) {
@@ -57,8 +57,8 @@ public class Game {
 				var configuration = new Configuration.Builder();
 
 				var loadedPlugins = pluginNames
-					.getOrElseThrow(() -> new PluginLoadingException("At least one plugin must be loaded", new IllegalArgumentException()))
-					.map(Plugin::of);
+				  .getOrElseThrow(() -> new PluginLoadingException("At least one plugin must be loaded", new IllegalArgumentException()))
+				  .map(Plugin::of);
 				if (loadedPlugins.length() == 0) {
 					throw new PluginLoadingException("At least one plugin must be loaded", new IllegalArgumentException());
 				}
@@ -67,15 +67,15 @@ public class Game {
 				}
 
 				var configLoadingResult = loadedPlugins
-					.map(Try::get)
-					.map((plugin -> plugin.load(configuration)));
+				  .map(Try::get)
+				  .map((plugin -> plugin.load(configuration)));
 				if (configLoadingResult.find(Try::isFailure).isDefined()) {
 					throw new PluginLoadingException(configLoadingResult.map(Try::getCause));
 				}
 
 				return new Game(
-					loadedPlugins.map(Try::get),
-					configuration.build());
+				  loadedPlugins.map(Try::get),
+				  configuration.build());
 			});
 		}
 	}

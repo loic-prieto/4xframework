@@ -11,8 +11,8 @@ public class PluginLoadingException extends Framework4XException {
 
 	public PluginLoadingException(List<Throwable> exceptions) {
 		super(exceptions
-			.map(Throwable::getMessage)
-			.reduce((a, b) -> a + "\n" + b));
+		  .map(Throwable::getMessage)
+		  .reduce((a, b) -> a + "\n" + b));
 		this.exceptions = exceptions;
 	}
 

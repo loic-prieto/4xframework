@@ -14,11 +14,11 @@ public interface PluginInitializer {
 	/**
 	 * Implement this method to get a hook into the plugin load process when all automatic configuration
 	 * has been loaded.
-	 *
+	 * <p>
 	 * This is the moment to add additional programmatic configuration to the game. The method must return either a
 	 * success or a failure loading the plugin. If the plugin returns a failure, all dependent plugins won't be loaded
 	 * and the error will be registered.
-	 *
+	 * <p>
 	 * By default, this method returns a success and performs nothing.
 	 *
 	 * @param configuration

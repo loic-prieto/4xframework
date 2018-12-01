@@ -2,7 +2,7 @@ package org.sephire.games.framework4x.core;
 
 /**
  * Base 4X Framework exception.
- *
+ * <p>
  * It is a runtime exception.
  */
 public abstract class Framework4XException extends Throwable {

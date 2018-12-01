@@ -14,9 +14,9 @@ public class PluginSpec {
 
 	/**
 	 * Returns a plugin spec from a configuration spec file parsed by cfg4j.
-	 *
+	 * <p>
 	 * May return:
-	 *  - InvalidPluginSpecFileException when the required fields are not present or are invalid
+	 * - InvalidPluginSpecFileException when the required fields are not present or are invalid
 	 *
 	 * @param pluginName
 	 * @param config
@@ -30,9 +30,9 @@ public class PluginSpec {
 
 			var name = config.getConfigFor("plugin.name", String.class).get();
 			var clazz = config.getConfigFor("plugin.mainClass", ".Main")
-				.getOrElseThrow(() -> new InvalidPluginSpecFileException("The mainClass attribute is invalid", pluginName));
+			  .getOrElseThrow(() -> new InvalidPluginSpecFileException("The mainClass attribute is invalid", pluginName));
 			var isBasePlugin = config.getConfigFor("plugin.isBasePlugin", Boolean.FALSE)
-				.getOrElseThrow(() -> new InvalidPluginSpecFileException("The isBasePlugin attribute is invalid", pluginName));
+			  .getOrElseThrow(() -> new InvalidPluginSpecFileException("The isBasePlugin attribute is invalid", pluginName));
 
 			return new PluginSpec(name, isBasePlugin, clazz);
 		});

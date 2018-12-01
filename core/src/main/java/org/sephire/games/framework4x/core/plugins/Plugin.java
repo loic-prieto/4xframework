@@ -59,8 +59,8 @@ public class Plugin {
 		var spec = specTry.get();
 
 		return specTry
-			.flatMap(Plugin::initializePluginMainClass)
-			.map(Function2.of(Plugin::new).apply(spec));
+		  .flatMap(Plugin::initializePluginMainClass)
+		  .map(Function2.of(Plugin::new).apply(spec));
 	}
 
 	/**
@@ -72,21 +72,21 @@ public class Plugin {
 	private static Try<PluginInitializer> initializePluginMainClass(PluginSpec spec) {
 
 		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
-			.mapFailure(
-				Case($(instanceOf(ClassNotFoundException.class)),
-					t -> new PluginMainClassNotFoundException(spec.getMainClass().get(), spec.getPluginName()))
-			)
-			.map(clazz -> (Class<? extends PluginInitializer>) clazz)
-			.flatMap((Class<? extends PluginInitializer> pluginClass) -> Try.of(() -> {
-				PluginInitializer pluginMainClass = null;
-				try {
-					pluginMainClass = pluginClass.getConstructor().newInstance();
-				} catch (Exception e) {
-					throw new InvalidPluginMainClassException(spec.getPluginName(), pluginClass, e);
-				}
+		  .mapFailure(
+			Case($(instanceOf(ClassNotFoundException.class)),
+			  t -> new PluginMainClassNotFoundException(spec.getMainClass().get(), spec.getPluginName()))
+		  )
+		  .map(clazz -> (Class<? extends PluginInitializer>) clazz)
+		  .flatMap((Class<? extends PluginInitializer> pluginClass) -> Try.of(() -> {
+			  PluginInitializer pluginMainClass = null;
+			  try {
+				  pluginMainClass = pluginClass.getConstructor().newInstance();
+			  } catch (Exception e) {
+				  throw new InvalidPluginMainClassException(spec.getPluginName(), pluginClass, e);
+			  }
 
-				return pluginMainClass;
-			}));
+			  return pluginMainClass;
+		  }));
 	}
 
 	/**
@@ -98,16 +98,16 @@ public class Plugin {
 	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
 
 		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE))
-			.flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
-			.mapFailure(
-				Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
-			);
+		  .flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
+		  .mapFailure(
+			Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
+		  );
 	}
 
 	/**
 	 * Will invoke the initializing of the plugin resources and configuration with a given
 	 * external configuration ready to be filled.
-	 *
+	 * <p>
 	 * The result of this process tells if it was successful, so that dependent plugins are not
 	 * loaded.
 	 *
@@ -116,17 +116,17 @@ public class Plugin {
 	 */
 	public Try<Configuration.Builder> load(Configuration.Builder configuration) {
 		return loadTerrainResources()
-			.peek((terrainConfig) -> configuration.addConfig(TERRAIN_TYPES, terrainConfig))
-			// Once everything is done, let the plugin load its final configuration programmatically
-			.andThenTry(() -> mainClass.pluginLoad(configuration))
-			.map((discardedResult) -> configuration);
+		  .peek((terrainConfig) -> configuration.addConfig(TERRAIN_TYPES, terrainConfig))
+		  // Once everything is done, let the plugin load its final configuration programmatically
+		  .andThenTry(() -> mainClass.pluginLoad(configuration))
+		  .map((discardedResult) -> configuration);
 	}
 
 	private Try<List<String>> loadTerrainResources() {
 
 		return ConfigLoader.getConfigFor(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName()))
-			.flatMap((config) -> config.getConfigFor("terrains.types",new String[]{}))
-		    .map(List::of);
+		  .flatMap((config) -> config.getConfigFor("terrains.types", new String[]{}))
+		  .map(List::of);
 	}
 
 	/**

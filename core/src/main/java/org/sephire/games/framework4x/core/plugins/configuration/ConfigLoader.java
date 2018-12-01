@@ -26,9 +26,9 @@ public class ConfigLoader {
 
 	/**
 	 * Given a classpath file name, returns a cf4j configuration provider.
-	 *
+	 * <p>
 	 * May return:
-	 *  - ConfigFileNotFoundException
+	 * - ConfigFileNotFoundException
 	 *
 	 * @param classpathFilename
 	 * @return
@@ -36,12 +36,12 @@ public class ConfigLoader {
 	public static Try<CoreConfigProvider> getConfigFor(String classpathFilename) {
 
 		return getClasspathFileURI(classpathFilename)
-			.map(Paths::get)
-			.map(Arrays::asList)
-			.map((array) -> (ConfigFilesProvider) () -> array)
-			.map(ConfigLoader::buildCompositeConfigurationSource)
-			.map((source) -> new ConfigurationProviderBuilder().withConfigurationSource(source).build())
-			.map(CoreConfigProvider::new);
+		  .map(Paths::get)
+		  .map(Arrays::asList)
+		  .map((array) -> (ConfigFilesProvider) () -> array)
+		  .map(ConfigLoader::buildCompositeConfigurationSource)
+		  .map((source) -> new ConfigurationProviderBuilder().withConfigurationSource(source).build())
+		  .map(CoreConfigProvider::new);
 	}
 
 	/**
@@ -51,15 +51,15 @@ public class ConfigLoader {
 	 * @param filesProvider
 	 * @return
 	 */
-	private static ConfigurationSource buildCompositeConfigurationSource(ConfigFilesProvider filesProvider){
-		return new FallbackConfigurationSource(new FilesConfigurationSource(filesProvider),new ClasspathConfigurationSource(filesProvider));
+	private static ConfigurationSource buildCompositeConfigurationSource(ConfigFilesProvider filesProvider) {
+		return new FallbackConfigurationSource(new FilesConfigurationSource(filesProvider), new ClasspathConfigurationSource(filesProvider));
 	}
 
 	private static Try<URI> getClasspathFileURI(String classpathFilename) {
 		return Try.of(() -> Option.of(ClassLoader.getSystemClassLoader().getResource(classpathFilename))
-			.getOrElseThrow(() -> new ConfigFileNotFoundException(classpathFilename)))
-			.flatMap((url) -> Try.of(() -> url.toURI()))
-			.mapFailure(Case($(instanceOf(URISyntaxException.class)), e -> new ConfigFileNotFoundException(classpathFilename)));
+		  .getOrElseThrow(() -> new ConfigFileNotFoundException(classpathFilename)))
+		  .flatMap((url) -> Try.of(() -> url.toURI()))
+		  .mapFailure(Case($(instanceOf(URISyntaxException.class)), e -> new ConfigFileNotFoundException(classpathFilename)));
 	}
 
 }

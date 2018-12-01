@@ -12,6 +12,7 @@ public class Functions {
 	 * methods use vavr function classes with void return function, but still be able
 	 * to write functions that return nothing, which otherwise Function classes force you
 	 * to do it.
+	 *
 	 * @param consumer
 	 * @param <T>
 	 * @return

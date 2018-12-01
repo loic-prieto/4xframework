@@ -22,11 +22,12 @@ public class CoreConfigProvider {
 	/**
 	 * For a given config key path (in cfg4j style) in the resource content,
 	 * try to retrieve its value.
-	 *
+	 * <p>
 	 * May return:
-	 *  - NoSuchElementException if the key does not exist
-	 *  - IllegalArgumentException if the value class is not correct
-	 *  - IllegalStateException if the configuration could not be fetched from the file (cfg4j internal error)
+	 * - NoSuchElementException if the key does not exist
+	 * - IllegalArgumentException if the value class is not correct
+	 * - IllegalStateException if the configuration could not be fetched from the file (cfg4j internal error)
+	 *
 	 * @param key
 	 * @param valueClass
 	 * @param <T>
@@ -39,10 +40,11 @@ public class CoreConfigProvider {
 	/**
 	 * Tries to get a value from a given key path (in cfg4j style) in the resource content,
 	 * or returns the given default value if it could not find it.
-	 *
+	 * <p>
 	 * May return:
-	 *  - IllegalArgumentException if the value class is not correct for the key
-	 *  - IllegalStateException if the configuration could not be fetched from the source file (cf4j internal error)
+	 * - IllegalArgumentException if the value class is not correct for the key
+	 * - IllegalStateException if the configuration could not be fetched from the source file (cf4j internal error)
+	 *
 	 * @param key
 	 * @param defaultValue
 	 * @param <T>
@@ -51,13 +53,14 @@ public class CoreConfigProvider {
 	public <T> Try<T> getConfigFor(String key, T defaultValue) {
 		var valueClass = (Class<T>) defaultValue.getClass();
 		return Try.of(() -> configuration.getProperty(key, valueClass))
-			.recover((e) -> Match(e).of(
-				Case($(instanceOf(NoSuchElementException.class)), () -> defaultValue))
-			);
+		  .recover((e) -> Match(e).of(
+			Case($(instanceOf(NoSuchElementException.class)), () -> defaultValue))
+		  );
 	}
 
 	/**
 	 * Returns whether a given key exists inside the configuration source file.
+	 *
 	 * @param key
 	 * @return
 	 */
@@ -66,7 +69,7 @@ public class CoreConfigProvider {
 			configuration.getProperty(key, Object.class);
 			return true;
 		}).recover((e) -> Match(e).of(
-			Case($(instanceOf(NoSuchElementException.class)), false)
+		  Case($(instanceOf(NoSuchElementException.class)), false)
 		)).get();
 	}
 }
