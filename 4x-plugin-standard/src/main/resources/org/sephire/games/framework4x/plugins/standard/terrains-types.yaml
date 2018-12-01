@@ -1,0 +1,8 @@
+types:
+  - mountain
+  - hill
+  - forest
+  - plain
+  - ocean
+  - desert
+  - glacier

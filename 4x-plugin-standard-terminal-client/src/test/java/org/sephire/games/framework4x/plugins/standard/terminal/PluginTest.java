@@ -26,7 +26,7 @@ public class PluginTest {
 
 		assertTrue(mappings.isDefined());
 		assertNotNull(((TerrainsMapping) mappings.get())
-		  .mappings()
+		  .getMappings()
 		  .get(FOREST.getId()));
 	}
 }

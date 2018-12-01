@@ -1,22 +1,22 @@
 mappings:
   mountain:
-    character: ▲
+    character: '\u25B2'
     color: red
   hill:
-    character: ▴
+    character: '\u25B4'
     color: red
   forest:
-    character: ⍋
+    character: '\u234B'
     color: red
   plain:
-    character: ⚏
+    character: '\u268F'
     color: red
   ocean:
-    character: ♒
+    character: '\u2652'
     color: red
   desert:
-    character: 🌵
+    character: '\u1F335'
     color: red
   glacier:
-    character: 🗻
+    character: '\u1F5FB'
     color: red
