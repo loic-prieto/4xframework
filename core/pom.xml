@@ -42,12 +42,6 @@
             <artifactId>apiguardian-api</artifactId>
         </dependency>
 
-        <!-- YAML Parsing -->
-        <dependency>
-            <groupId>org.snakeyaml</groupId>
-            <artifactId>snakeyaml-engine</artifactId>
-        </dependency>
-
         <!-- Config parsing -->
         <dependency>
             <groupId>org.cfg4j</groupId>

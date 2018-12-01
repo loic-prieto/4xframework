@@ -1,15 +1,15 @@
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.API;
 import io.vavr.Function2;
-import io.vavr.collection.List;
+import io.vavr.collection.Set;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
+import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
 import static io.vavr.control.Try.failure;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
@@ -115,18 +115,30 @@ public class Plugin {
 	 * @return the same configuration builder, so that it can be chained
 	 */
 	public Try<Configuration.Builder> load(Configuration.Builder configuration) {
-		return loadTerrainResources()
-		  .peek((terrainConfig) -> configuration.addConfig(TERRAIN_TYPES, terrainConfig))
+		return loadTerrainResources(configuration)
 		  // Once everything is done, let the plugin load its final configuration programmatically
-		  .andThenTry(() -> mainClass.pluginLoad(configuration))
-		  .map((discardedResult) -> configuration);
+		  .onSuccess((config) -> mainClass.pluginLoad(config));
 	}
 
-	private Try<List<String>> loadTerrainResources() {
+	private Try<Configuration.Builder> loadTerrainResources(Configuration.Builder configuration) {
 
 		return ConfigLoader.getConfigFor(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName()))
 		  .flatMap((config) -> config.getConfigFor("terrains.types", new String[]{}))
-		  .map(List::of);
+		  .map(API::Set)
+		  // Merge with previous terrain config
+		  .peek((terrainSet) -> {
+			  var newTerrainSet = terrainSet;
+			  var existentTerrainConfig = configuration.getConfig(TERRAIN_TYPES);
+			  if (existentTerrainConfig.isDefined()) {
+				  newTerrainSet = newTerrainSet.union((Set<String>) existentTerrainConfig.get());
+			  }
+			  configuration.addConfig(TERRAIN_TYPES, newTerrainSet);
+		  })
+		  .map((discardedResult) -> configuration)
+		  // The terrain file is not mandatory for a plugin
+		  .recover((e) -> Match(e).of(
+			Case($(instanceOf(ConfigFileNotFoundException.class)), configuration)
+		  ));
 	}
 
 	/**

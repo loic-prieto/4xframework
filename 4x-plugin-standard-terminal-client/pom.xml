@@ -12,9 +12,16 @@
     <artifactId>4x-plugin-standard-terminal-client</artifactId>
 
     <dependencies>
+
+        <!-- 4X Framework dependencies -->
         <dependency>
             <groupId>org.sephire.games.strategy-framework</groupId>
             <artifactId>4x-plugin-standard</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sephire.games.strategy-framework</groupId>
+            <artifactId>console-client</artifactId>
             <version>0.1.0</version>
         </dependency>
 

@@ -51,9 +51,21 @@ public class Configuration {
 			this.configParam = HashMap.empty();
 		}
 
+		/**
+		 * Adds a config value for a given key.
+		 *
+		 * @param key
+		 * @param configValue
+		 * @return
+		 */
 		public Builder addConfig(ConfigKeyEnum key, Object configValue) {
+
 			this.configParam = this.configParam.put(key, configValue);
 			return this;
+		}
+
+		public Option<Object> getConfig(ConfigKeyEnum key) {
+			return configParam.get(key);
 		}
 
 		public Configuration build() {

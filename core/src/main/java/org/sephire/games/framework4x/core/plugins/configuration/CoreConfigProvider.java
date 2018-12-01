@@ -20,6 +20,24 @@ public class CoreConfigProvider {
 	}
 
 	/**
+	 * For a given binding class and config key, tries to map every
+	 * field found in the config value to the binding class fields.
+	 * <p>
+	 * May return:
+	 * - NoSuchElementException if the key does not exist
+	 * - IllegalArgumentException if the value class is not correct
+	 * - IllegalStateException if the configuration could not be fetched from the file (cfg4j internal error)
+	 *
+	 * @param key
+	 * @param bindingClass
+	 * @param <T>
+	 * @return
+	 */
+	public <T> Try<T> bindConfigFor(String key, Class<T> bindingClass) {
+		return Try.of(() -> configuration.bind(key, bindingClass));
+	}
+
+	/**
 	 * For a given config key path (in cfg4j style) in the resource content,
 	 * try to retrieve its value.
 	 * <p>

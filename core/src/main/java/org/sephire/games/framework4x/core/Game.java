@@ -70,7 +70,9 @@ public class Game {
 				  .map(Try::get)
 				  .map((plugin -> plugin.load(configuration)));
 				if (configLoadingResult.find(Try::isFailure).isDefined()) {
-					throw new PluginLoadingException(configLoadingResult.map(Try::getCause));
+					throw new PluginLoadingException(configLoadingResult
+					  .filter(Try::isFailure)
+					  .map(Try::getCause));
 				}
 
 				return new Game(

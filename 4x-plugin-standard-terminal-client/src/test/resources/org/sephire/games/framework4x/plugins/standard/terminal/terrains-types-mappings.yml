@@ -1,0 +1,22 @@
+mappings:
+  mountain:
+    character: ▲
+    color: red
+  hill:
+    character: ▴
+    color: red
+  forest:
+    character: ⍋
+    color: red
+  plain:
+    character: ⚏
+    color: red
+  ocean:
+    character: ♒
+    color: red
+  desert:
+    character: 🌵
+    color: red
+  glacier:
+    character: 🗻
+    color: red
