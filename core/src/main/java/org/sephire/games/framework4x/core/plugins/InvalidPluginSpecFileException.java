@@ -5,7 +5,7 @@ import org.sephire.games.framework4x.core.Framework4XException;
 
 /**
  * This exception appears when a plugin spec file is loaded but it has invalid syntax or it does not
- * map correctly to the PluginSpec class.
+ * map correctly to the PluginSpecMapping class.
  */
 public class InvalidPluginSpecFileException extends Framework4XException {
 	@Getter

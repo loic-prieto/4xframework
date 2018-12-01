@@ -3,10 +3,12 @@ package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import lombok.Value;
-import org.sephire.games.framework4x.core.plugins.configuration.CoreConfigProvider;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.sephire.games.framework4x.core.plugins.configuration.PluginSpecMapping;
 
-@Value
+@Getter
+@AllArgsConstructor
 public class PluginSpec {
 	private String pluginName;
 	private Boolean isBasePlugin;
@@ -16,25 +18,23 @@ public class PluginSpec {
 	 * Returns a plugin spec from a configuration spec file parsed by cfg4j.
 	 * <p>
 	 * May return:
-	 * - InvalidPluginSpecFileException when the required fields are not present or are invalid
+	 * - InvalidPluginSpecFileException when the required fields (name) are not present
 	 *
 	 * @param pluginName
 	 * @param config
 	 * @return
 	 */
-	public static Try<PluginSpec> fromConfiguration(String pluginName, CoreConfigProvider config) {
+	public static Try<PluginSpec> fromConfiguration(String pluginName, PluginSpecMapping config) {
 		return Try.of(() -> {
-			if (!config.existsKey("plugin.name")) {
+
+			if (config.getName() == null) {
 				throw new InvalidPluginSpecFileException("The name field is mandatory in the spec file", pluginName);
 			}
 
-			var name = config.getConfigFor("plugin.name", String.class).get();
-			var clazz = config.getConfigFor("plugin.mainClass", ".Main")
-			  .getOrElseThrow(() -> new InvalidPluginSpecFileException("The mainClass attribute is invalid", pluginName));
-			var isBasePlugin = config.getConfigFor("plugin.isBasePlugin", Boolean.FALSE)
-			  .getOrElseThrow(() -> new InvalidPluginSpecFileException("The isBasePlugin attribute is invalid", pluginName));
+			var clazz = config.getMainClass() != null ? config.getMainClass() : pluginName.concat(".Main");
+			var isBasePlugin = config.getIsBasePlugin() != null ? config.getIsBasePlugin() : false;
 
-			return new PluginSpec(name, isBasePlugin, clazz);
+			return new PluginSpec(config.getName(), isBasePlugin, clazz);
 		});
 	}
 

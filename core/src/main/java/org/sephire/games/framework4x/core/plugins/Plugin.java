@@ -8,6 +8,8 @@ import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
+import org.sephire.games.framework4x.core.plugins.configuration.PluginSpecMapping;
+import org.sephire.games.framework4x.core.plugins.configuration.TerrainsTypesMapping;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
@@ -22,14 +24,14 @@ import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageTo
  * override and extend the configuration of a base plugin.
  */
 public class Plugin {
-	private static final String DEFAULT_PLUGIN_SPEC_FILE = "plugin.yml";
+	private static final String DEFAULT_PLUGIN_SPEC_FILE = "plugin.yaml";
 
 	@Getter
 	private PluginInitializer mainClass;
 	@Getter
-	private PluginSpec specification;
+	private org.sephire.games.framework4x.core.plugins.PluginSpec specification;
 
-	private Plugin(PluginSpec spec, PluginInitializer mainClass) {
+	private Plugin(org.sephire.games.framework4x.core.plugins.PluginSpec spec, PluginInitializer mainClass) {
 		this.mainClass = mainClass;
 		this.specification = spec;
 	}
@@ -69,7 +71,7 @@ public class Plugin {
 	 * @param spec
 	 * @return
 	 */
-	private static Try<PluginInitializer> initializePluginMainClass(PluginSpec spec) {
+	private static Try<PluginInitializer> initializePluginMainClass(org.sephire.games.framework4x.core.plugins.PluginSpec spec) {
 
 		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
 		  .mapFailure(
@@ -96,9 +98,8 @@ public class Plugin {
 	 * @return
 	 */
 	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
-
-		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE))
-		  .flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
+		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE), PluginSpecMapping.class)
+		  .flatMap(Function2.of(org.sephire.games.framework4x.core.plugins.PluginSpec::fromConfiguration).apply(pluginName))
 		  .mapFailure(
 			Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
 		  );
@@ -121,9 +122,9 @@ public class Plugin {
 	}
 
 	private Try<Configuration.Builder> loadTerrainResources(Configuration.Builder configuration) {
-
-		return ConfigLoader.getConfigFor(toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName()))
-		  .flatMap((config) -> config.getConfigFor("terrains.types", new String[]{}))
+		var terrainTypesFilename = toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName());
+		return ConfigLoader.getConfigFor(terrainTypesFilename, TerrainsTypesMapping.class)
+		  .map((mapping) -> mapping.getTypes().toArray(new String[]{}))
 		  .map(API::Set)
 		  // Merge with previous terrain config
 		  .peek((terrainSet) -> {

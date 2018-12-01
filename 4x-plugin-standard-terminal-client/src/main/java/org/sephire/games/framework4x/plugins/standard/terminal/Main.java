@@ -28,8 +28,8 @@ public class Main implements PluginInitializer {
 	}
 
 	private Try<TerrainsMapping> loadTerrainMappings(Configuration.Builder configuration) {
-		return ConfigLoader.getConfigFor(packageToFolderPath(getPackageName()).concat("/terrains-types-mappings.yml"))
-		  .flatMap((rawMappingConfig) -> rawMappingConfig.bindConfigFor("mappings", TerrainsMapping.class))
+		var terrainsTypesMappingsFilename = packageToFolderPath(getPackageName()).concat("/terrains-types-mappings.yaml");
+		return ConfigLoader.getConfigFor(terrainsTypesMappingsFilename, TerrainsMapping.class)
 		  .peek((terrainsMappings) -> configuration.addConfig(ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING, terrainsMappings));
 	}
 

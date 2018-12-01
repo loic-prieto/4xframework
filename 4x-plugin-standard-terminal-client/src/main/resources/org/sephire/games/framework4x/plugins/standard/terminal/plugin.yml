@@ -1,4 +1,3 @@
-plugin:
-  name: org.sephire.games.framework4x.plugins.standard.terminal
-  mainClass: org.sephire.games.framework4x.plugins.standard.terminal.Main
-  isBasePlugin: false
+name: org.sephire.games.framework4x.plugins.standard.terminal
+mainClass: org.sephire.games.framework4x.plugins.standard.terminal.Main
+isBasePlugin: false

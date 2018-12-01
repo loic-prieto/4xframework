@@ -44,8 +44,8 @@
 
         <!-- Config parsing -->
         <dependency>
-            <groupId>org.cfg4j</groupId>
-            <artifactId>cfg4j-core</artifactId>
+            <groupId>com.github.fabriziocucci</groupId>
+            <artifactId>yacl4j-core</artifactId>
         </dependency>
 
     </dependencies>

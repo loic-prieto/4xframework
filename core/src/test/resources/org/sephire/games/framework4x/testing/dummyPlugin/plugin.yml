@@ -1,4 +1,0 @@
-plugin:
-  name: org.sephire.games.framework4x.testing.dummyPlugin
-  mainClass: org.sephire.games.framework4x.testing.dummyPlugin.Main
-  isBasePlugin: true
