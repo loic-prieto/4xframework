@@ -3,7 +3,6 @@ package org.sephire.games.framework4x.core;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.plugins.PluginLoadingException;
-import org.sephire.games.framework4x.core.plugins.PluginMainClassNotFoundException;
 import org.sephire.games.framework4x.core.plugins.PluginSpecFileNotFound;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,7 +11,6 @@ import static org.sephire.games.framework4x.testing.dummyPlugin.DummyPluginConfi
 public class GameTest {
 
 	private static final String DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.dummyPlugin";
-	private static final String INVALID_DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.invalidDummyPlugin";
 
 	@Test
 	@DisplayName("Should complain if a requested plugin doesn't exist in classpath when loading framework")
@@ -40,20 +38,6 @@ public class GameTest {
 
 		var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
 		assertTrue(exceptions.exists((e) -> IllegalArgumentException.class.isAssignableFrom(e.getClass())));
-	}
-
-	@Test
-	@DisplayName("Should complain when main class of a plugin does not exist")
-	public void should_complain_when_main_class_does_not_exist() {
-		var gameBuildingTry = new Game.Builder()
-			.withPlugins(INVALID_DUMMY_PLUGIN_NAME)
-			.build();
-
-		assertTrue(gameBuildingTry.isFailure());
-		assertTrue(gameBuildingTry.getCause().getClass().isAssignableFrom(PluginLoadingException.class));
-
-		var exceptions = PluginLoadingException.class.cast(gameBuildingTry.getCause()).getExceptions();
-		assertTrue(exceptions.exists((e) -> PluginMainClassNotFoundException.class.isAssignableFrom(e.getClass())));
 	}
 
 	@Test
