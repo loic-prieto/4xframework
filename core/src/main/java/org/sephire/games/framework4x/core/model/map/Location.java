@@ -3,14 +3,13 @@ package org.sephire.games.framework4x.core.model.map;
 import lombok.Value;
 
 /**
- * The location of an item in a 3D space.
- * Along with the (x,y,z) coordinates, this class provides some basic arithmetic to ease usage.
+ * The location of an item in a 2D space.
+ * Along with the (x,y) coordinates, this class provides some basic arithmetic to ease usage.
  */
 @Value
 public class Location {
 	private int x;
 	private int y;
-	private int z;
 
 	/**
 	 * Very simple convenience fluent factory method for locations.
@@ -19,8 +18,8 @@ public class Location {
 	 * @param y
 	 * @return
 	 */
-	public static Location of(int x, int y, int z) {
-		return new Location(x, y, z);
+	public static Location of(int x, int y) {
+		return new Location(x, y);
 	}
 
 	/**
@@ -32,11 +31,11 @@ public class Location {
 	 * @return
 	 */
 	public Location substract(Location location) {
-		return new Location(this.x - location.x, this.y - location.y, this.z - location.z);
+		return new Location(this.x - location.x, this.y - location.y);
 	}
 
 	public Location substract(int x, int y, int z) {
-		return this.substract(new Location(x, y, z));
+		return this.substract(new Location(x, y));
 	}
 
 	/**
@@ -48,10 +47,10 @@ public class Location {
 	 * @return
 	 */
 	public Location add(Location location) {
-		return new Location(this.x + location.x, this.y + location.y, this.z + location.z);
+		return new Location(this.x + location.x, this.y + location.y);
 	}
 
 	public Location add(int x, int y) {
-		return this.add(new Location(x, y, z));
+		return this.add(new Location(x, y));
 	}
 }

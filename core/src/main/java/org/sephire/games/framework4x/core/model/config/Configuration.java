@@ -5,6 +5,10 @@ import io.vavr.collection.Map;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+import static io.vavr.Predicates.instanceOf;
+
 /**
  * This class contains the configuration as loaded by the different plugins.
  * <p>
@@ -33,7 +37,10 @@ public class Configuration {
 		return Try.of(() ->
 		  configuration.get(key)
 			.map(configurationValueClass::cast)
-			.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)));
+			.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)))
+		  .mapFailure(
+		    Case($(instanceOf(ClassCastException.class)),(e)->new InvalidConfigurationObjectCast(key,configurationValueClass))
+		  );
 
 	}
 

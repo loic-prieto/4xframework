@@ -1,16 +1,28 @@
-package org.sephire.games.framework4x.clients.terminal;
+package org.sephire.games.framework4x.clients.terminal.gui;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.collection.List;
+import io.vavr.control.Try;
+import org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType;
+import org.sephire.games.framework4x.core.Game;
 import org.sephire.games.framework4x.core.model.ai.AIDifficultyLevel;
+import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.gameplay.VictoryCondition;
+import org.sephire.games.framework4x.core.model.map.GameMap;
+import org.sephire.games.framework4x.core.model.map.MapZone;
+import org.sephire.games.framework4x.core.model.map.Size;
 import org.sephire.games.framework4x.core.model.research.ResearchCostMultiplier;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
+import static org.sephire.games.framework4x.core.model.map.GameMap.builder;
 
 public class StartGameWindow extends BasicWindow {
+
 	public StartGameWindow() {
 		super("Start game");
+		setHints(java.util.List.of(Window.Hint.FULL_SCREEN));
 
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
@@ -44,8 +56,8 @@ public class StartGameWindow extends BasicWindow {
 		numberOfEnemiesSelection.setSelectedItem(0);
 		optionsPanel.addComponent(
 		  new Panel().setLayoutManager(new LinearLayout(Direction.HORIZONTAL))
-			.addComponent(difficultyLevelLabel)
-			.addComponent(difficultyLevelSelection));
+			.addComponent(numberOfEnemiesLabel)
+			.addComponent(numberOfEnemiesSelection));
 
 		var researchSpeedLabel = new Label("Choose Research speed:");
 		var researchSpeedSelection = new ComboBox<ResearchCostMultiplier>();
@@ -74,10 +86,47 @@ public class StartGameWindow extends BasicWindow {
 			.addComponent(pluginsLabel)
 			.addComponent(pluginsSelection));
 
+		var startButton = new Button("Start game!",()->{
+			var newGameTry = new Game.Builder()
+			  .withPlugins(
+			    "org.sephire.games.framework4x.plugins.standard"
+				,"org.sephire.games.framework4x.plugins.standard.terminal")
+			  .withMap(buildFakeMap())
+			  .build();
+			if(newGameTry.isFailure()) {
+				var errorMessage = String.format("Could not create the game: %s",newGameTry.getCause().getMessage());
+				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.Close);
+				return;
+			}
+
+			var gameWindow = GameWindow.of(newGameTry.get());
+			if(gameWindow.isFailure()){
+				var errorMessage = String.format("Could not create the game: %s",gameWindow.getCause().getMessage());
+				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.Close);
+				return;
+			}
+
+			this.getTextGUI().addWindow(gameWindow.get());
+			this.getTextGUI().setActiveWindow(gameWindow.get());
+			this.getTextGUI().removeWindow(this);
+		});
+		optionsPanel.addComponent(startButton);
+
 		var statusPanel = new Panel();
 		backgroundPanel.addComponent(statusPanel.withBorder(doubleLine()));
 
 		setComponent(backgroundPanel);
+	}
 
+	private GameMap buildFakeMap(){
+		return GameMap.builder()
+		  .addZone(MapZone.builder()
+			.withName("level0")
+		  	.withDefaultCells(new Size(20,20), FakeTerrainType.FAKE)
+		  	.build()
+			.get())
+		  .withDefaultZone("level0")
+		  .build()
+		  .get();
 	}
 }

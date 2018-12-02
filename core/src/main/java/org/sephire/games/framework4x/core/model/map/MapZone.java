@@ -1,7 +1,11 @@
 package org.sephire.games.framework4x.core.model.map;
 
+import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
+import io.vavr.control.Try;
 import lombok.Getter;
+
+import static io.vavr.collection.List.range;
 
 /**
  * A map map is divided into zones. They are meant to represent maps of the same map universe,
@@ -16,7 +20,8 @@ public class MapZone {
 	private Map<Location, MapCell> cells;
 	private Size size;
 
-	public MapZone(Map<Location, MapCell> cells) {
+	private MapZone(String name,Map<Location, MapCell> cells) {
+		this.name = name;
 		this.cells = cells;
 		buildSize();
 	}
@@ -35,5 +40,62 @@ public class MapZone {
 		  .reduce((previousY, currentY) -> currentY < previousY ? previousY : currentY);
 
 		this.size = new Size(maxXPosition, maxYPosition);
+	}
+
+	/**
+	 * Gets the builder for this class
+	 * @return
+	 */
+	public static MapZoneBuilderNameField builder() {
+		return new Builder();
+	}
+
+	public static class Builder implements MapZoneBuilderNameField, MapZoneBuilderCellsField,MapZoneBuilderBuild {
+		private String name;
+		private Map<Location, MapCell> cells;
+
+		@Override
+		public MapZoneBuilderCellsField withName(String name) {
+			this.name = name;
+			return this;
+		}
+
+		@Override
+		public MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType) {
+			java.util.Map<Location,MapCell> mutableMap = new java.util.HashMap<>();
+
+			range(0,size.getHeight()).forEach((y)->{
+				range(0,size.getWidth()).forEach((x)->{
+					mutableMap.put(Location.of(x,y),new MapCell(Location.of(x,y),defaultTerrainType));
+				});
+			});
+
+			this.cells = HashMap.ofAll(mutableMap);
+
+			return this;
+		}
+
+		@Override
+		public Try<MapZone> build() {
+			return Try.of(()->{
+				if(name == null || "".equals(name)) {
+					throw new IllegalArgumentException("Name field cannot be null or blank");
+				}
+
+				return new MapZone(name,cells);
+			});
+		}
+	}
+
+	public interface MapZoneBuilderNameField {
+		MapZoneBuilderCellsField withName(String name);
+	}
+
+	public interface MapZoneBuilderCellsField {
+		MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType);
+	}
+
+	public interface MapZoneBuilderBuild {
+		Try<MapZone> build();
 	}
 }
