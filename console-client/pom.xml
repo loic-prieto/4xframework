@@ -100,12 +100,42 @@
             <version>0.1.0</version>
         </dependency>
 
-        <!-- The terminal client will always include the standard 4x plugin -->
-        <dependency>
-            <groupId>org.sephire.games.strategy-framework</groupId>
-            <artifactId>4x-plugin-standard</artifactId>
-            <version>0.1.0</version>
-        </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>run-standard</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <!-- This launches the application with the standard plugins for the terminal client -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <includeProjectDependencies>true</includeProjectDependencies>
+                            <includePluginDependencies>false</includePluginDependencies>
+                            <mainClass>org.sephire.games.framework4x.clients.terminal.Launcher</mainClass>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>../4x-plugins-standard-terminal-client/target/4x-plugin-standard-terminal-client-0.1.0.jar</additionalClasspathElement>
+                                <additionalClasspathElement>../4x-plugins-standard/target/4x-plugin-standard-0.1.0.jar</additionalClasspathElement>
+                            </additionalClasspathElements>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
 </project>
