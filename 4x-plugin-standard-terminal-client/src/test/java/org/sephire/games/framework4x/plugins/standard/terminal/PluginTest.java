@@ -4,6 +4,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.clients.terminal.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.Game;
+import org.sephire.games.framework4x.core.model.map.GameMap;
+import org.sephire.games.framework4x.core.model.map.MapZone;
+import org.sephire.games.framework4x.core.model.map.Size;
+import org.sephire.games.framework4x.plugins.standard.StandardTerrainTypes;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +23,10 @@ public class PluginTest {
 	@DisplayName("Should load terrain mappings for the terminal client when loading the plugin")
 	public void should_load_terrain_mappings_when_loading_plugin() {
 
-		var gameTry = new Game.Builder().withPlugins(STANDARD_PLUGIN_NAME, STANDARD_TERMINAL_EXTENSION_PLUGIN_NAME).build();
+		var gameTry = new Game.Builder()
+		  .withPlugins(STANDARD_PLUGIN_NAME, STANDARD_TERMINAL_EXTENSION_PLUGIN_NAME)
+		  .withMap(buildMap())
+		  .build();
 
 		assertTrue(gameTry.isSuccess());
 		var mappings = gameTry.get().getConfiguration().getConfiguration(TERRAIN_CHARACTER_MAPPING);
@@ -28,5 +35,15 @@ public class PluginTest {
 		assertNotNull(((TerrainsMapping) mappings.get())
 		  .getMappings()
 		  .get(FOREST.getId()));
+	}
+
+	private static GameMap buildMap(){
+		return GameMap.builder()
+		  .addZone(MapZone.builder()
+		  	.withName("test")
+		  	.withDefaultCells(new Size(10,10), StandardTerrainTypes.HILL)
+		  	.build().get())
+		  .withDefaultZone("test")
+		  .build().get();
 	}
 }

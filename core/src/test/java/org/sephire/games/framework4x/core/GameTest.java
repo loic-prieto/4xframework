@@ -2,6 +2,10 @@ package org.sephire.games.framework4x.core;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.sephire.games.framework4x.core.model.map.GameMap;
+import org.sephire.games.framework4x.core.model.map.MapZone;
+import org.sephire.games.framework4x.core.model.map.Size;
+import org.sephire.games.framework4x.core.model.map.TerrainTypeEnum;
 import org.sephire.games.framework4x.core.plugins.PluginLoadingException;
 import org.sephire.games.framework4x.core.plugins.PluginSpecFileNotFound;
 
@@ -45,6 +49,7 @@ public class GameTest {
 	public void should_load_successfully_plugin_present_on_classpath() {
 		var gameBuildingTry = new Game.Builder()
 		  .withPlugins(DUMMY_PLUGIN_NAME)
+		  .withMap(buildFakeMap())
 		  .build();
 
 		assertTrue(gameBuildingTry.isSuccess());
@@ -56,8 +61,24 @@ public class GameTest {
 	public void should_load_configuration_of_plugin_when_loaded() {
 		var gameBuildingTry = new Game.Builder()
 		  .withPlugins(DUMMY_PLUGIN_NAME)
+		  .withMap(buildFakeMap())
 		  .build();
 
 		assertTrue(gameBuildingTry.get().getConfiguration().getConfiguration(KEY1).isDefined());
+	}
+
+	private GameMap buildFakeMap() {
+		return GameMap.builder()
+		  .addZone(MapZone.builder()
+			.withName("test")
+			.withDefaultCells(new Size(10,10),TestTerrainTypeEnum.TEST)
+			.build().get())
+		  .withDefaultZone("test")
+		  .build()
+		  .get();
+	}
+
+	private enum TestTerrainTypeEnum implements TerrainTypeEnum  {
+		TEST;
 	}
 }
