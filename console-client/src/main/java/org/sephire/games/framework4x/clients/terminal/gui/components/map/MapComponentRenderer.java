@@ -23,7 +23,7 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 
 	@Override
 	public TerminalSize getPreferredSize(MapComponent component) {
-		return component.getPreferredSize();
+		return new TerminalSize(viewport.getSize().getWidth(),viewport.getSize().getHeight());
 	}
 
 	@Override
