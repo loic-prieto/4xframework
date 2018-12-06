@@ -2,7 +2,7 @@ package org.sephire.games.framework4x.clients.terminal.gui.components.map;
 
 import com.googlecode.lanterna.gui2.AbstractComponent;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
-import org.sephire.games.framework4x.clients.terminal.config.TerrainsMapping;
+import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
 

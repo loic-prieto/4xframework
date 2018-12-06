@@ -2,8 +2,8 @@ package org.sephire.games.framework4x.plugins.standard.terminal;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import org.sephire.games.framework4x.clients.terminal.config.ConsoleClientConfigKeyEnum;
-import org.sephire.games.framework4x.clients.terminal.config.TerrainsMapping;
+import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
+import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.PluginInitializer;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;

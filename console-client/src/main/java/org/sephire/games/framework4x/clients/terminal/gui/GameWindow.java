@@ -3,15 +3,13 @@ package org.sephire.games.framework4x.clients.terminal.gui;
 import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Window;
 import io.vavr.control.Try;
-import org.sephire.games.framework4x.clients.terminal.config.TerrainsMapping;
+import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.clients.terminal.gui.components.map.MapComponent;
 import org.sephire.games.framework4x.core.Game;
-import org.sephire.games.framework4x.core.model.config.Configuration;
-import org.sephire.games.framework4x.core.model.map.GameMap;
 
 import java.util.List;
 
-import static org.sephire.games.framework4x.clients.terminal.config.ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING;
+import static org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING;
 
 /**
  * Represents the window of a game. Holds the map, the information/actions side panel, the top menu and the bottom
