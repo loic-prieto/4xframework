@@ -8,4 +8,5 @@ module org.sephire.games.framework4x.plugins.standard.terminal {
 
 	requires lombok;
 	requires io.vavr;
+	requires slf4j.api;
 }

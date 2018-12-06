@@ -6,4 +6,5 @@ module org.sephire.games.framework4x.plugins.standard {
 	requires transitive org.sephire.games.framework4x.core;
 	requires io.vavr;
 	requires lombok;
+	requires slf4j.api;
 }
