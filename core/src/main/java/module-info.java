@@ -10,6 +10,7 @@ module org.sephire.games.framework4x.core {
 	exports org.sephire.games.framework4x.core.utils;
 
 	requires io.vavr;
-	requires lombok;
+	requires static lombok;
 	requires yacl4j.core;
+	requires org.slf4j;
 }

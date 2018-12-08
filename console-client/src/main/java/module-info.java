@@ -6,5 +6,6 @@ module org.sephire.games.framework4x.clients.terminal {
 	requires lanterna;
 	requires io.vavr;
 	requires static lombok;
-	requires slf4j.api;
+	requires org.slf4j;
+	requires ch.qos.logback.core;
 }
