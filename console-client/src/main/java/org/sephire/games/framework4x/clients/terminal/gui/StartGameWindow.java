@@ -4,11 +4,9 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.collection.List;
-import io.vavr.control.Try;
 import org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType;
 import org.sephire.games.framework4x.core.Game;
 import org.sephire.games.framework4x.core.model.ai.AIDifficultyLevel;
-import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.gameplay.VictoryCondition;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.MapZone;
@@ -16,7 +14,6 @@ import org.sephire.games.framework4x.core.model.map.Size;
 import org.sephire.games.framework4x.core.model.research.ResearchCostMultiplier;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
-import static org.sephire.games.framework4x.core.model.map.GameMap.builder;
 
 public class StartGameWindow extends BasicWindow {
 
@@ -95,14 +92,14 @@ public class StartGameWindow extends BasicWindow {
 			  .build();
 			if(newGameTry.isFailure()) {
 				var errorMessage = String.format("Could not create the game: %s",newGameTry.getCause().getMessage());
-				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.Close);
+				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
 				return;
 			}
 
 			var gameWindow = GameWindow.of(newGameTry.get());
 			if(gameWindow.isFailure()){
 				var errorMessage = String.format("Could not create the game: %s",gameWindow.getCause().getMessage());
-				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.Close);
+				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
 				return;
 			}
 

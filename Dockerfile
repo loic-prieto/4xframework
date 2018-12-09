@@ -7,10 +7,18 @@ RUN cd /tmp/project && \
 
 
 FROM openjdk:11-slim
-RUN mkdir -p /tmp/project
+RUN mkdir -p /tmp/project/classpath
 WORKDIR /tmp/project
-COPY --from=0 /tmp/project/console-client/target/modules ./modules
-CMD java --module-path modules -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000 \
-    --module org.sephire.games.framework4x.clients.terminal/org.sephire.games.framework4x.clients.terminal.Launcher
 
+# Include the client dependencies and also the standard plugin
+COPY --from=0 /tmp/project/console-client/target/modules ./classpath
+COPY --from=0 /tmp/project/4x-plugin-standard/target/4x-plugin-standard*.jar ./classpath
+COPY --from=0 /tmp/project/4x-plugin-standard-terminal-client/target/4x-plugin*.jar ./classpath
+
+# Launch the client with the standard plugin loaded on debug mode
+CMD java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000 \
+    -classpath "classpath/*" \
+    org.sephire.games.framework4x.clients.terminal.Launcher
+
+# Debug port
 EXPOSE 8000
