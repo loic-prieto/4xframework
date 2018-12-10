@@ -1,5 +1,7 @@
 package org.sephire.games.framework4x.clients.terminal.gui.components.map;
 
+import com.googlecode.lanterna.TerminalPosition;
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.AbstractComponent;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
@@ -19,7 +21,7 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 	private TerrainsMapping mappings;
 
 	public MapComponent(GameMap map, TerrainsMapping mappings) {
-		this.viewport = new MapViewport(Location.of(0,0),sizeFromTerminalSize(this.getPreferredSize()));
+		this.viewport = new MapViewport();
 		this.map = map;
 		this.mappings = mappings;
 	}
