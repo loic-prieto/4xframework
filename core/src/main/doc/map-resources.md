@@ -38,4 +38,4 @@ public class PluginTestMapGenerator {
 ```
 
 This class can live anywhere inside the plugin root package, it will be scanned at plugin load time. 
-The only restriction is that name must be unique. 
+The only restriction is that the field name of the MapGenerator annotation must be unique. 

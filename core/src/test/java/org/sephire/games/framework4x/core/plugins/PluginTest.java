@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.core;
+package org.sephire.games.framework4x.core.plugins;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
