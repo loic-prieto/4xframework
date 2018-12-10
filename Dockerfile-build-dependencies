@@ -1,0 +1,7 @@
+FROM maven:3.6.0-jdk-11-slim
+
+ADD . /tmp/project
+
+RUN cd /tmp/project && \
+    mvn package -Dmaven.test.skip=true && \
+    cd .. && rm -rf project

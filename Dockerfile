@@ -1,4 +1,4 @@
-FROM maven:3.6.0-jdk-11-slim
+FROM 4xframework-mvn-dependencies:latest
 
 RUN mkdir -p /tmp/project
 ADD . /tmp/project
