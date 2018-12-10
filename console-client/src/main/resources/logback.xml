@@ -5,7 +5,16 @@
         </encoder>
     </appender>
 
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>4x-terminal-client.log</file>
+        <immediateFlush>true</immediateFlush>
+        <append>true</append>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <root level="info">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="file" />
     </root>
 </configuration>
