@@ -33,3 +33,23 @@ module will provide basic terrain types.
 
 Other plugins will be derived plugins which exist only with another base plugin.
 
+### Derived plugins
+
+While base plugins implement all that is needed by the core framework to be able to create a game, derived plugins
+complement base plugins with additional info, or behaviour. They can also serve as bridges to a particular client.
+For example, the framework ships with a standard base plugin which is civ-like in features. There's a standard for 
+terminal client plugin, that allows the standard plugin to work with the terminal client.
+
+Content declared in the derived plugin will override content defined in the base plugin and previously loaded plugins.
+
+### Using a plugin
+
+First and foremost, the plugin we want to use must be in the classpath of the client we launch. There's no convention,
+although, at this stage of the development, we put every jar inside the same folder and declare the classpath to be that
+folder. Take a look at the Dockerfile of the project to check how we launch the terminal client with the standard plugins.
+
+Once a plugin is in the classpath, it is visible to the plugin loader. When creating a game, the client must declare
+which plugins are to be loaded. This can be fetched from a selection given by the user, or with a fixed one. Each plugin,
+on initialization, will automatically load every resource that the core recognizes. For the other resources, each plugin
+may define a main class (by default, Main class inside the root package of the plugin) that will initialize everything
+else.
