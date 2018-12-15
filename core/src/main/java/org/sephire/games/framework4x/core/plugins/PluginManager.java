@@ -2,6 +2,7 @@ package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.collection.List;
 import io.vavr.control.Try;
+import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import static io.vavr.Predicates.instanceOf;
 public class PluginManager {
 
 	public static final String PLUGIN_NAME_MANIFEST_ENTRY_LABEL = "X-4XPlugin-Name";
+	public static final String PLUGIN_MAIN_CLASS_MANIFEST_ENTRY_LABEL = "X-4XPlugin-MainClass";
 
 	private File pluginFolder;
 
@@ -49,6 +51,13 @@ public class PluginManager {
 			return pluginsJars.map(Try::get)
 			  .flatMap(PluginManager::getPluginNameFromManifest)
 			  .sorted();
+		});
+	}
+
+	public Try<Configuration> loadPlugins() {
+		return Try.of(()->{
+
+			return null;
 		});
 	}
 

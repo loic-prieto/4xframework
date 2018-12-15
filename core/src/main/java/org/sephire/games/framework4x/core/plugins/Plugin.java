@@ -29,9 +29,9 @@ public class Plugin {
 	@Getter
 	private PluginInitializer mainClass;
 	@Getter
-	private org.sephire.games.framework4x.core.plugins.PluginSpec specification;
+	private PluginSpec specification;
 
-	private Plugin(org.sephire.games.framework4x.core.plugins.PluginSpec spec, PluginInitializer mainClass) {
+	private Plugin(PluginSpec spec, PluginInitializer mainClass) {
 		this.mainClass = mainClass;
 		this.specification = spec;
 	}
@@ -71,7 +71,7 @@ public class Plugin {
 	 * @param spec
 	 * @return
 	 */
-	private static Try<PluginInitializer> initializePluginMainClass(org.sephire.games.framework4x.core.plugins.PluginSpec spec) {
+	private static Try<PluginInitializer> initializePluginMainClass(PluginSpec spec) {
 
 		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
 		  .mapFailure(
@@ -99,7 +99,7 @@ public class Plugin {
 	 */
 	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
 		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE), PluginSpecMapping.class)
-		  .flatMap(Function2.of(org.sephire.games.framework4x.core.plugins.PluginSpec::fromConfiguration).apply(pluginName))
+		  .flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
 		  .mapFailure(
 			Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
 		  );

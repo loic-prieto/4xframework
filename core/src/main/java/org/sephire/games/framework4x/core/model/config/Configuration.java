@@ -10,19 +10,19 @@ import static io.vavr.API.Case;
 import static io.vavr.Predicates.instanceOf;
 
 /**
- * This class contains the configuration as loaded by the different plugins.
+ * This class contains the configMap as loaded by the different plugins.
  * <p>
- * The configuration is read-only once initialized, which means that it is safe
+ * The configMap is read-only once initialized, which means that it is safe
  * to share between threads and classes.
  * <p>
- * To allow for maximum flexibility, a configuration instance is basically an in-memory key/value
+ * To allow for maximum flexibility, a configMap instance is basically an in-memory key/value
  * store with special semantic
  */
 public class Configuration {
-	private Map<ConfigKeyEnum, Object> configuration;
+	private Map<ConfigKeyEnum, Object> configMap;
 
-	private Configuration(Map<ConfigKeyEnum, Object> configuration) {
-		this.configuration = configuration;
+	private Configuration(Map<ConfigKeyEnum, Object> configMap) {
+		this.configMap = configMap;
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class Configuration {
 	 */
 	public <T> Try<T> getConfiguration(ConfigKeyEnum key, Class<T> configurationValueClass) {
 		return Try.of(() ->
-		  configuration.get(key)
+		  configMap.get(key)
 			.map(configurationValueClass::cast)
 			.getOrElseThrow(() -> new ConfigurationKeyNotFound(key)))
 		  .mapFailure(
@@ -45,11 +45,23 @@ public class Configuration {
 	}
 
 	public Option<Object> getConfiguration(ConfigKeyEnum key) {
-		return configuration.get(key);
+		return configMap.get(key);
 	}
 
 	/**
-	 * To build a configuration object, use this builder.
+	 * Returns a new configuration object that is the result of merging the new configuration with the old.
+	 *
+	 * The new object keys have precedence over the old keys, which means that new configuration override old configurations.
+	 *
+	 * @param overridingConfiguration
+	 * @return
+	 */
+	public Configuration mergeWith(Configuration overridingConfiguration) {
+		return new Configuration(this.configMap.merge(overridingConfiguration.configMap,(oldConfig,newConfig)->newConfig));
+	}
+
+	/**
+	 * To build a configMap object, use this builder.
 	 */
 	public static class Builder {
 		private Map<ConfigKeyEnum, Object> configParam;

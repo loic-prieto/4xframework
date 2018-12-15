@@ -4,6 +4,7 @@ import io.vavr.collection.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.sephire.games.framework4x.testing.dummyPlugin.Main;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,13 +28,13 @@ public class PluginManagerTest {
 	public static void setup() throws IOException {
 		// Build valid plugins directory
 		validPluginsFolder = Files.createTempDirectory("PluginManagerTest-");
-		buildJarFile(validPluginsFolder,"test1",true);
-		buildJarFile(validPluginsFolder,"test2",true);
+		buildJarFile(validPluginsFolder,"dummyPlugin",Main.class,true);
+		buildJarFile(validPluginsFolder,"test2",Main.class,true);
 
 		// Build mixed plugins and non plugins folder (the plugin manager should fail here)
 		mixedPluginsFolder = Files.createTempDirectory("PluginManagerTest-Mixed-");
-		buildJarFile(mixedPluginsFolder,"test1",true);
-		buildJarFile(mixedPluginsFolder,"test2",false);
+		buildJarFile(mixedPluginsFolder,"test1", String.class,true);
+		buildJarFile(mixedPluginsFolder,"test2",Number.class,false);
 
 	}
 
@@ -62,6 +63,18 @@ public class PluginManagerTest {
 	}
 
 	@Test
+	@DisplayName("The plugin manager should load plugins successfully")
+	public void should_load_plugins_successfully() {
+		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
+		assertTrue(pluginManagerTry.isSuccess());
+
+		var pluginManager = pluginManagerTry.get();
+		var loadedPluginsTry = pluginManager.loadPlugins(List.of("test1","test2"));
+
+		assertTrue(loadedPluginsTry.isSuccess());
+	}
+
+	@Test
 	@DisplayName("The Plugin Manager should refuse to handle a folder where not all jars are plugins")
 	public void plugin_manager_should_fail_when_folder_does_not_contain_all_plugins(){
 		var pluginManager = PluginManager.fromFolder(mixedPluginsFolder);
@@ -80,13 +93,14 @@ public class PluginManagerTest {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Path buildJarFile(Path directory, String pluginName, boolean isPlugin) throws IOException {
+	private static Path buildJarFile(Path directory, String pluginName, Class mainClass, boolean isPlugin) throws IOException {
 		Path jarFilePath = Files.createTempFile(directory,TEMP_PLUGIN_FILE_PREFIX,".jar");
 
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		if(isPlugin) {
 			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_NAME_MANIFEST_ENTRY_LABEL), pluginName);
+			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_MAIN_CLASS_MANIFEST_ENTRY_LABEL), mainClass.getName());
 		}
 
 		JarOutputStream jarStream = new JarOutputStream(new FileOutputStream(jarFilePath.toFile()),manifest);
