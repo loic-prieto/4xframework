@@ -54,6 +54,12 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- Scan for classes with annotations -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

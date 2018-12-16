@@ -35,9 +35,7 @@
         <lombok.version>edge-SNAPSHOT</lombok.version>
         <antrun-plugin.version>1.8</antrun-plugin.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
-
-        <!-- Workaround to make lombok work with java 11 modules -->
-        <forkCount>0</forkCount>
+        <reflections.version>0.9.11</reflections.version>
 
     </properties>
 
@@ -155,13 +153,20 @@
                 <version>${logback.version}</version>
             </dependency>
 
-
             <!-- Configuration parsing -->
             <dependency>
                 <groupId>com.github.fabriziocucci</groupId>
                 <artifactId>yacl4j-core</artifactId>
                 <version>${yacl4j.version}</version>
             </dependency>
+
+            <!-- Runtime reflection on annotations -->
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>

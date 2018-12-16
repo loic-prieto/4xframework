@@ -11,7 +11,7 @@ import org.sephire.games.framework4x.core.plugins.configuration.PluginSpecMappin
 @AllArgsConstructor
 public class PluginSpec {
 	private String pluginName;
-	private Option<String> mainClass;
+	private String rootPackage;
 	private Option<String> parentPlugin;
 
 	/**

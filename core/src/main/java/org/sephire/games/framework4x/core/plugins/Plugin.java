@@ -1,19 +1,19 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.API;
-import io.vavr.Function2;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Getter;
+import org.reflections.Reflections;
 import org.sephire.games.framework4x.core.model.config.Configuration;
-import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
-import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
-import org.sephire.games.framework4x.core.plugins.configuration.PluginSpecMapping;
-import org.sephire.games.framework4x.core.plugins.configuration.TerrainsTypesMapping;
+import org.sephire.games.framework4x.core.plugins.configuration.*;
+
+import javax.naming.OperationNotSupportedException;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
-import static io.vavr.control.Try.failure;
+import static java.lang.String.format;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
@@ -24,85 +24,38 @@ import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageTo
  * override and extend the configuration of a base plugin.
  */
 public class Plugin {
-	private static final String DEFAULT_PLUGIN_SPEC_FILE = "plugin.yaml";
 
-	@Getter
-	private PluginInitializer mainClass;
 	@Getter
 	private PluginSpec specification;
 
-	private Plugin(PluginSpec spec, PluginInitializer mainClass) {
-		this.mainClass = mainClass;
+	private Plugin(PluginSpec spec) {
 		this.specification = spec;
 	}
 
 	/**
-	 * Given a plugin name, it will try to load it from the classpath.
-	 * A plugin name is the name of its root java package, in which the Main class resides.
-	 * This will be changed in the future to be able to specify the main class to load.
-	 * <p>
-	 * Once loaded, the plugin will be called to perform the changes to the configuration
-	 * that it wants to do, with the current configuration loaded.
-	 * <p>
+	 * Given a plugin spec, it will try to load it from the classpath.
+	 * A plugin has a root package, from which it will scan all automatic
+	 * resources and the configuration classes and initialize all those
+	 * resources.
+	 *
 	 * May return the following exceptions as errors:
-	 * - PluginMainClassNotFoundException
-	 * - PluginSpecFileNotFoundException
-	 * - InvalidPluginSpecFileException
-	 * - InvalidPluginMainClassException
 	 *
-	 * @param pluginName
+	 *
+	 * @param pluginSpec
 	 * @return
 	 */
-	public static Try<Plugin> of(String pluginName) {
-		var specTry = loadPluginSpecification(pluginName);
-		if (specTry.isFailure()) {
-			return failure(specTry.getCause());
-		}
-		var spec = specTry.get();
+	public static Try<Plugin> from(PluginSpec pluginSpec,Configuration.Builder configuration) {
+		return Try.of(()->{
+			var plugin = new Plugin(pluginSpec);
 
-		return specTry
-		  .flatMap(Plugin::initializePluginMainClass)
-		  .map(Function2.of(Plugin::new).apply(spec));
-	}
+			var loadingTry = plugin.load(configuration);
 
-	/**
-	 * Loads the main class of the plugin. Verifies that it is a valid main class.
-	 *
-	 * @param spec
-	 * @return
-	 */
-	private static Try<PluginInitializer> initializePluginMainClass(PluginSpec spec) {
+			if(loadingTry.isFailure()) {
+				throw loadingTry.getCause();
+			}
 
-		return Try.of(() -> ClassLoader.getSystemClassLoader().loadClass(spec.getMainClass().get()))
-		  .mapFailure(
-			Case($(instanceOf(ClassNotFoundException.class)),
-			  t -> new PluginMainClassNotFoundException(spec.getMainClass().get(), spec.getPluginName()))
-		  )
-		  .map(clazz -> (Class<? extends PluginInitializer>) clazz)
-		  .flatMap((Class<? extends PluginInitializer> pluginClass) -> Try.of(() -> {
-			  PluginInitializer pluginMainClass = null;
-			  try {
-				  pluginMainClass = pluginClass.getConstructor().newInstance();
-			  } catch (Exception e) {
-				  throw new InvalidPluginMainClassException(spec.getPluginName(), pluginClass, e);
-			  }
-
-			  return pluginMainClass;
-		  }));
-	}
-
-	/**
-	 * Given a plugin name (which is its package), load the yaml specification.
-	 *
-	 * @param pluginName
-	 * @return
-	 */
-	private static Try<PluginSpec> loadPluginSpecification(String pluginName) {
-		return ConfigLoader.getConfigFor(packageToFolderPath(pluginName).concat("/" + DEFAULT_PLUGIN_SPEC_FILE), PluginSpecMapping.class)
-		  .flatMap(Function2.of(PluginSpec::fromConfiguration).apply(pluginName))
-		  .mapFailure(
-			Case($(instanceOf(ConfigFileNotFoundException.class)), e -> new PluginSpecFileNotFound(pluginName))
-		  );
+			return plugin;
+		});
 	}
 
 	/**
@@ -113,12 +66,19 @@ public class Plugin {
 	 * loaded.
 	 *
 	 * @param configuration
-	 * @return the same configuration builder, so that it can be chained
 	 */
-	public Try<Configuration.Builder> load(Configuration.Builder configuration) {
-		return loadTerrainResources(configuration)
-		  // Once everything is done, let the plugin load its final configuration programmatically
-		  .onSuccess((config) -> mainClass.pluginLoad(config));
+	private Try<Void> load(Configuration.Builder configuration) {
+
+		return Try.of(()->{
+			var lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow((t)->t);
+
+			loadTerrainResources(configuration);
+
+			// Once everything is done, give a chance to the plugin to add last-minute configuration
+			lifecycleHandler.peek(handler->handler.callPluginLoadingHook(configuration));
+
+			return null;
+		});
 	}
 
 	private Try<Configuration.Builder> loadTerrainResources(Configuration.Builder configuration) {
@@ -142,6 +102,37 @@ public class Plugin {
 		  ));
 	}
 
+	private Try<Option<PluginLifecycleHandlerWrapper>> fetchLifeCycleHandler() {
+		return Try.of(()->{
+			Reflections reflections = new Reflections(this.specification.getRootPackage());
+			var lifecycleHandlersClasses = reflections.getTypesAnnotatedWith(PluginLifecycleHandler.class);
+			if(lifecycleHandlersClasses.size() > 1) {
+				throw new InvalidPluginLifecycleHandlerException(
+				  format("Too many plugin lifecycle handlers for plugin %s",specification.getPluginName()));
+			}
+
+			Option<PluginLifecycleHandlerWrapper> pluginLifecycleHandler = Option.none();
+			if(!lifecycleHandlersClasses.isEmpty()) {
+				var pluginLifecycleHandlerTry = PluginLifecycleHandlerWrapper.from(lifecycleHandlersClasses.iterator().next());
+				if (pluginLifecycleHandlerTry.isFailure()) {
+					throw pluginLifecycleHandlerTry.getCause();
+				}
+
+				pluginLifecycleHandler = Option.of(pluginLifecycleHandlerTry.get());
+			}
+
+			return pluginLifecycleHandler;
+		});
+	}
+
+	private Try<Option<Object>> fetchGameParameterProviders() {
+		return Try.failure(new OperationNotSupportedException());
+	}
+
+	private Try<Option<Object>> fetchMapProviders() {
+		return Try.failure(new OperationNotSupportedException());
+	}
+
 	/**
 	 * Given a filename to be fetched from the plugin classpath, transforms it to a fully
 	 * pathed resource.
@@ -150,7 +141,7 @@ public class Plugin {
 	 * @return
 	 */
 	private String toClasspathFile(String fileName) {
-		return packageToFolderPath(this.specification.getPluginName()).concat("/" + fileName);
+		return packageToFolderPath(this.specification.getRootPackage()).concat("/" + fileName);
 	}
 
 }

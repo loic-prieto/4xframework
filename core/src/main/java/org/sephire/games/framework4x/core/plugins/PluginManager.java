@@ -22,7 +22,7 @@ import static io.vavr.collection.Tree.Order.LEVEL_ORDER;
 public class PluginManager {
 
 	public static final String PLUGIN_NAME_MANIFEST_ENTRY_LABEL = "X-4XPlugin-Name";
-	public static final String PLUGIN_MAIN_CLASS_MANIFEST_ENTRY_LABEL = "X-4XPlugin-MainClass";
+	public static final String PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL = "X-4XPlugin-RootPackage";
 	public static final String PLUGIN_PARENT_ENTRY_LABEL = "X-4XPlugin-ParentPlugin";
 
 	private File pluginFolder;
@@ -206,12 +206,15 @@ public class PluginManager {
 			}
 
 			// A plugin may not have a main class (which means it only has automatic resources)
-			var mainClass = Option.of(manifest.getMainAttributes().getValue(PLUGIN_MAIN_CLASS_MANIFEST_ENTRY_LABEL));
+			var rootPackage = manifest.getMainAttributes().getValue(PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL);
+			if(rootPackage== null) {
+				throw new InvalidPluginJarException(jarFile.getName(),"The manifest does not contain the "+PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL+" entry");
+			}
 
 			// If the plugin is a base plugin, this will be empty
 			var parentPlugin = Option.of(manifest.getMainAttributes().getValue(PLUGIN_PARENT_ENTRY_LABEL));
 
-			return new PluginSpec(name,mainClass,parentPlugin);
+			return new PluginSpec(name,rootPackage,parentPlugin);
 		});
 	}
 
