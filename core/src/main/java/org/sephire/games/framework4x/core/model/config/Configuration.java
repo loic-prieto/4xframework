@@ -60,6 +60,10 @@ public class Configuration {
 		return new Configuration(this.configMap.merge(overridingConfiguration.configMap,(oldConfig,newConfig)->newConfig));
 	}
 
+	public static Builder builder() {
+		return new Builder();
+	}
+
 	/**
 	 * To build a configMap object, use this builder.
 	 */

@@ -1,10 +1,15 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.collection.*;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
+import org.sephire.games.framework4x.core.utils.TreeNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +18,7 @@ import java.util.jar.JarFile;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
-import static io.vavr.collection.Tree.Order.LEVEL_ORDER;
+import static java.util.function.Predicate.not;
 
 /**
  * This class provides for utility functions that can be used by clients to inspect what plugins are available,
@@ -27,6 +32,7 @@ public class PluginManager {
 
 	private File pluginFolder;
 	private Map<String,PluginSpec> availablePlugins;
+	private Map<String,Plugin> plugins;
 
 	/**
 	 * Use fromFolder static method to build
@@ -37,6 +43,7 @@ public class PluginManager {
 		this.availablePlugins = availablePlugins
 		  .map((pluginSpec -> Tuple(pluginSpec.getPluginName(),pluginSpec)))
 		  .collect(HashMap.collector());
+		this.plugins = HashMap.empty();
 	}
 
 	/**
@@ -49,24 +56,57 @@ public class PluginManager {
 
 	public Try<Configuration> loadPlugins(List<String> plugins) {
 		return Try.of(()->{
+			Configuration.Builder configuration = Configuration.builder();
+
 			// First build the dependency graph and load each plugin
 			var dependencyGraphTry = buildPluginDependencyGraph();
 			if(dependencyGraphTry.isFailure()) {
 				throw new PluginLoadingException(dependencyGraphTry.getCause());
 			}
+
 			// The graph can be traversed breadth-first to load each plugin in
 			// descendant order, so that each child is loaded only after its parents.
-			dependencyGraphTry.get().traverse(LEVEL_ORDER).forEach((pluginSpec)->{
+			var pluginLoadingTry = dependencyGraphTry.get().toOrderedListByBreadthFirstTraversal()
+			  .map((pluginSpec) -> Plugin.from(pluginSpec,configuration) );
+			if(Try.sequence(pluginLoadingTry).isFailure()) {
+				var exceptions = pluginLoadingTry.filter(Try::isFailure).map(Try::getCause);
+				throw new PluginLoadingException("Error while loading plugins",exceptions.toJavaArray(Throwable.class));
+			}
+			this.plugins = pluginLoadingTry.map(Try::get)
+			  .map(plugin->Tuple(plugin.getSpecification().getPluginName(),plugin))
+			  .collect(HashMap.collector());
 
-			});
-
-
-			return null;
+			return configuration.build();
 		});
 	}
 
-	private Try<Tree<PluginSpec>> buildPluginDependencyGraph(){
-		return null;
+	private Try<TreeNode<PluginSpec>> buildPluginDependencyGraph(){
+		return Try.of(()->{
+			// Create a root node to be the base for the base plugins to load
+			PluginSpec rootPlugin = new PluginSpec("rootPlugin","",Option.none());
+			TreeNode<PluginSpec> rootNode = new TreeNode<>(rootPlugin);
+
+			// Put the base plugins as first siblings of the tree
+			Seq<TreeNode<PluginSpec>> basePluginsNodes = this.availablePlugins.values()
+			  .filter(PluginSpec::isBasePlugin)
+			  .map(TreeNode::new);
+			rootNode.addChildren(basePluginsNodes);
+
+			// Now, for all non base plugins, put them into each appropriate tree node
+			// This solution scales very badly for large amounts of items in the tree. If this ever
+			// happens to be a problem, we could cache base plugin tree nodes so that we don't have
+			// to find them every time.
+			availablePlugins.values().filter(not(PluginSpec::isBasePlugin))
+			  .map(TreeNode::new).map((n)->(TreeNode<PluginSpec>)n)
+			  .forEach((nonBasePluginNode)-> {
+				  String parentNodeName = nonBasePluginNode.getValue().getParentPlugin().get();
+
+				  rootNode.findNode((node) -> node.getPluginName().equals(parentNodeName) )
+					.peek((parentNode)->parentNode.addChildren(nonBasePluginNode));
+			  });
+
+			return rootNode;
+		});
 	}
 
 	/**

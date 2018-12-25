@@ -2,13 +2,13 @@ package org.sephire.games.framework4x.core.plugins;
 
 
 import io.vavr.control.Option;
-import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.sephire.games.framework4x.core.plugins.configuration.PluginSpecMapping;
 
 @Getter
 @AllArgsConstructor
+@EqualsAndHashCode(of={"pluginName"})
 public class PluginSpec {
 	private String pluginName;
 	private String rootPackage;
@@ -22,4 +22,6 @@ public class PluginSpec {
 	public boolean isBasePlugin(){
 		return parentPlugin.isEmpty();
 	}
+
+
 }

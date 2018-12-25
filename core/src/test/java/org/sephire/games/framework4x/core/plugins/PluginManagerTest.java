@@ -56,10 +56,8 @@ public class PluginManagerTest {
 		var pluginList = pluginManager.get()
 		  .getAvailablePluginsNames();
 
-		assertTrue(pluginList.isSuccess());
-
-		var expectedList = List.of("test1","test2").sorted();
-		assertEquals(expectedList,pluginList.get());
+		var expectedList = List.of("test1","test2").sorted().toSet();
+		assertEquals(expectedList,pluginList);
 	}
 
 	@Test

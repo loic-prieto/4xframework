@@ -36,7 +36,6 @@
         <antrun-plugin.version>1.8</antrun-plugin.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
         <reflections.version>0.9.11</reflections.version>
-
     </properties>
 
     <repositories>
@@ -166,7 +165,6 @@
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
             </dependency>
-
 
         </dependencies>
     </dependencyManagement>
