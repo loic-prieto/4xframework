@@ -59,7 +59,7 @@ public class PluginManager {
 			Configuration.Builder configuration = Configuration.builder();
 
 			// First build the dependency list and load each plugin
-			var sortedPluginsOperation = sortPluginsByDependency();
+			var sortedPluginsOperation = buildPluginToLoadList(plugins);
 			if(sortedPluginsOperation.isFailure()) {
 				throw new PluginLoadingException(sortedPluginsOperation.getCause());
 			}
@@ -77,13 +77,18 @@ public class PluginManager {
 	}
 
 	/**
-	 * From the list of available plugins in the instance, create a list of plugin specs ordered by
-	 * dependencies between plugins, so that this list guarantee that an ordered traversal of this list
-	 * will allow to load the plugins in reverse order by dependency.
+	 * Given a list of plugins to load, build a list that orders the plugins by load order, meaning
+	 * that dependent plugins are loaded before the plugins that need them.
+	 *
+	 * This method also checks that all needed plugins are loaded. If they aren't, it will try to include
+	 * them from the list of available plugins. Failing if dependent plugins are not available.
+	 *
+	 * May return the following error:
+	 *  - {@link ParentPluginNotFoundException}
 	 *
 	 * @return
 	 */
-	private Try<List<PluginSpec>> sortPluginsByDependency(){
+	private Try<List<PluginSpec>> buildPluginToLoadList(List<String> pluginsToLoad){
 		return Try.of(()->{
 			// We use a tree to order plugins by dependency parentage
 
