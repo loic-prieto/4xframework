@@ -59,15 +59,14 @@ public class PluginManager {
 			Configuration.Builder configuration = Configuration.builder();
 
 			// First build the dependency graph and load each plugin
-			var dependencyGraphTry = buildPluginDependencyGraph();
-			if(dependencyGraphTry.isFailure()) {
-				throw new PluginLoadingException(dependencyGraphTry.getCause());
+			var sortedPluginsOperation = sortPluginsByDependency();
+			if(sortedPluginsOperation.isFailure()) {
+				throw new PluginLoadingException(sortedPluginsOperation.getCause());
 			}
 
 			// The graph can be traversed breadth-first to load each plugin in
 			// descendant order, so that each child is loaded only after its parents.
-			var pluginLoadingTry = dependencyGraphTry.get().toOrderedListByBreadthFirstTraversal()
-			  .map((pluginSpec) -> Plugin.from(pluginSpec,configuration) );
+			var pluginLoadingTry = sortedPluginsOperation.get().map((pluginSpec) -> Plugin.from(pluginSpec,configuration) );
 			if(Try.sequence(pluginLoadingTry).isFailure()) {
 				var exceptions = pluginLoadingTry.filter(Try::isFailure).map(Try::getCause);
 				throw new PluginLoadingException("Error while loading plugins",exceptions.toJavaArray(Throwable.class));
@@ -80,8 +79,17 @@ public class PluginManager {
 		});
 	}
 
-	private Try<TreeNode<PluginSpec>> buildPluginDependencyGraph(){
+	/**
+	 * From the list of available plugins in the instance, create a list of plugin specs ordered by
+	 * dependencies between plugins, so that this list guarantee that an ordered traversal of this list
+	 * will allow to load the plugins in reverse order by dependency.
+	 *
+	 * @return
+	 */
+	private Try<List<PluginSpec>> sortPluginsByDependency(){
 		return Try.of(()->{
+			// We use a tree to order plugins by dependency parentage
+
 			// Create a root node to be the base for the base plugins to load
 			PluginSpec rootPlugin = new PluginSpec("rootPlugin","",Option.none());
 			TreeNode<PluginSpec> rootNode = new TreeNode<>(rootPlugin);
@@ -101,11 +109,13 @@ public class PluginManager {
 			  .forEach((nonBasePluginNode)-> {
 				  String parentNodeName = nonBasePluginNode.getValue().getParentPlugin().get();
 
-				  rootNode.findNode((node) -> node.getPluginName().equals(parentNodeName) )
+				  rootNode.findFirstNode((node) -> node.getPluginName().equals(parentNodeName) )
 					.peek((parentNode)->parentNode.addChildren(nonBasePluginNode));
 			  });
 
-			return rootNode;
+			return rootNode.toOrderedListByBreadthFirstTraversal()
+			  // We included a root plugin only to be able to build a tree, so we now remove it
+			  .filter((pluginSpec -> !pluginSpec.getPluginName().equals("rootNode")));
 		});
 	}
 

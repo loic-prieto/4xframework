@@ -49,7 +49,7 @@ public class MapProviderWrapper {
 
 		var mapCallsTry = mapGenerators.map(mapGenerator-> Try.of(()->mapGenerator.invoke(mapProviderInstance,configuration)));
 		if(Try.sequence(mapCallsTry).isFailure()){
-			return Try.failure(new InvalidMapProviderException(mapProviderInstance.getClass(),""))
+			return Try.failure(new InvalidMapProviderException(mapProviderInstance.getClass(),""));
 		}
 
 

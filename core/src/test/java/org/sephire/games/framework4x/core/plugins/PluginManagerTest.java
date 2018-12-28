@@ -98,7 +98,7 @@ public class PluginManagerTest {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
 		if(isPlugin) {
 			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_NAME_MANIFEST_ENTRY_LABEL), pluginName);
-			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_MAIN_CLASS_MANIFEST_ENTRY_LABEL), mainClass.getName());
+			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL), pluginName);
 		}
 
 		JarOutputStream jarStream = new JarOutputStream(new FileOutputStream(jarFilePath.toFile()),manifest);
