@@ -83,7 +83,7 @@ public class StartGameWindow extends BasicWindow {
 			.addComponent(pluginsLabel)
 			.addComponent(pluginsSelection));
 
-		var startButton = new Button("Start game!",()->{
+		/*var startButton = new Button("Start game!",()->{
 			var newGameTry = new Game.Builder()
 			  .withPlugins(
 			    "org.sephire.games.framework4x.plugins.standard"
@@ -107,7 +107,7 @@ public class StartGameWindow extends BasicWindow {
 			this.getTextGUI().setActiveWindow(gameWindow.get());
 			this.getTextGUI().removeWindow(this);
 		});
-		optionsPanel.addComponent(startButton);
+		optionsPanel.addComponent(startButton);*/
 
 		var statusPanel = new Panel();
 		backgroundPanel.addComponent(statusPanel.withBorder(doubleLine()));

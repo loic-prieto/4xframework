@@ -1,3 +1,0 @@
-name: "org.sephire.games.framework4x.testing.invalidDummyPlugin"
-mainClass: "non.existent.class"
-isBasePlugin: true

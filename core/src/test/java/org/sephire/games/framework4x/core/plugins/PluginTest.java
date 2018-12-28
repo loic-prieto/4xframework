@@ -1,73 +1,59 @@
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.control.Option;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
-import org.sephire.games.framework4x.core.plugins.Plugin;
-import org.sephire.games.framework4x.core.plugins.PluginMainClassNotFoundException;
-import org.sephire.games.framework4x.core.plugins.PluginSpecFileNotFound;
-import org.sephire.games.framework4x.testing.dummyPlugin.DummyPluginConfigKeyEnum;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1ConfigKeys.TEST_VALUE;
 
 public class PluginTest {
 
-	private static final String DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.dummyPlugin";
-	private static final String INVALID_DUMMY_PLUGIN_NAME = "org.sephire.games.framework4x.testing.invalidDummyPlugin";
-	private static final String PLUGIN_WITHOUT_SPEC_FILE_NAME = "org.sephire.games.framework4x.testing.dummyPluginWithoutSpecFile";
-
-	/*@Test
-	@DisplayName("Should complain when main class of a plugin does not exist")
-	public void should_complain_when_main_class_does_not_exist() {
-		var pluginLoadingTry = Plugin.of(INVALID_DUMMY_PLUGIN_NAME);
-
-		assertTrue(pluginLoadingTry.isFailure());
-		assertTrue(pluginLoadingTry.getCause().getClass().isAssignableFrom(PluginMainClassNotFoundException.class));
-	}
+	private static final String TEST1_PLUGIN_NAME = "org.sephire.games.framework4x.testing.testPlugin1";
 
 	@Test
-	@DisplayName("Should complain when spec file doesn't exist while loading a plugin")
-	public void should_complain_when_spec_file_doesnt_exist() {
-		var pluginLoadTry = Plugin.of(PLUGIN_WITHOUT_SPEC_FILE_NAME);
-
-		assertTrue(pluginLoadTry.isFailure());
-		assertTrue(pluginLoadTry.getCause().getClass().isAssignableFrom(PluginSpecFileNotFound.class));
-	}
-
-	@Test
-	@DisplayName("When all conditions are right, should load plugin successfully")
+	@DisplayName("Given a valid spec, a plugin should load successfully")
 	public void should_load_successfully() {
-		var pluginLoadTry = Plugin.of(DUMMY_PLUGIN_NAME);
+		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var configuration = Configuration.builder();
+		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
+	}
+
+	@Test
+	@DisplayName("Given a valid spec, a plugin should put its post load configuration correctly")
+	public void should_load_configuration_successfully() {
+		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var configuration = Configuration.builder();
+		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
+
+		assertTrue(pluginLoadTry.isSuccess());
+		assertTrue(configuration.getConfig(TEST_VALUE).isDefined());
+		assertEquals("someValue", configuration.getConfig(TEST_VALUE).get());
 	}
 
 	@Test
 	@DisplayName("Should load terrain types successfully when loading a plugin with terrain data")
 	public void should_load_terrain_types_successfully() {
-		var pluginLoadTry = Plugin.of(DUMMY_PLUGIN_NAME);
+		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var configuration = Configuration.builder();
+		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
-
-		Configuration.Builder configBuilder = new Configuration.Builder();
-		pluginLoadTry.get().load(configBuilder);
-		Configuration config = configBuilder.build();
-
-		assertTrue(config.getConfiguration(CoreConfigKeyEnum.TERRAIN_TYPES).isDefined());
+		assertTrue(configuration.getConfig(CoreConfigKeyEnum.TERRAIN_TYPES).isDefined());
 	}
 
 	@Test
-	@DisplayName("Should load custom config when loading plugin successfully")
-	public void should_load_custom_config() {
-		var pluginLoadTry = Plugin.of(DUMMY_PLUGIN_NAME);
+	@DisplayName("Given a spec with an invalid package root, should complain when loading plugin")
+	public void should_complain_when_package_does_not_exist() {
+		var pluginSpec = new PluginSpec("invalidName", "invalidPackage", Option.none());
+		var pluginLoadTry = Plugin.from(pluginSpec, Configuration.builder());
 
-		assertTrue(pluginLoadTry.isSuccess());
-
-		Configuration.Builder configBuilder = new Configuration.Builder();
-		pluginLoadTry.get().load(configBuilder);
-		Configuration config = configBuilder.build();
-
-		assertTrue(config.getConfiguration(DummyPluginConfigKeyEnum.KEY1).isDefined());
-	}*/
+		assertTrue(pluginLoadTry.isFailure());
+		assertTrue(pluginLoadTry.getCause().getClass().isAssignableFrom(InvalidPluginSpecFileException.class));
+	}
 }

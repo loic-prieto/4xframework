@@ -46,6 +46,13 @@ public class Plugin {
 	 */
 	public static Try<Plugin> from(PluginSpec pluginSpec,Configuration.Builder configuration) {
 		return Try.of(()->{
+			// Verify the package exists
+			if(!doesPackageExist(pluginSpec)){
+				throw new InvalidPluginSpecFileException(
+				  format("The root package %s does not exist",pluginSpec.getRootPackage()),
+				  pluginSpec.getPluginName());
+			}
+
 			var plugin = new Plugin(pluginSpec);
 
 			var loadingTry = plugin.load(configuration);
@@ -56,6 +63,11 @@ public class Plugin {
 
 			return plugin;
 		});
+	}
+
+	private static boolean doesPackageExist(PluginSpec pluginSpec) {
+		var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
+		return ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
 	}
 
 	/**
@@ -104,7 +116,10 @@ public class Plugin {
 
 	private Try<Option<PluginLifecycleHandlerWrapper>> fetchLifeCycleHandler() {
 		return Try.of(()->{
-			Reflections reflections = new Reflections(this.specification.getRootPackage());
+			// If we don't put an extra point here, the regexp filter to search for packages becomes
+			// nameOfPackage.*, which would include nameOfPackageSomething packages at the same level.
+			// This way the regexp filter for Reflections ends the name of the package with the dot
+			Reflections reflections = new Reflections(this.specification.getRootPackage().concat("."));
 			var lifecycleHandlersClasses = reflections.getTypesAnnotatedWith(PluginLifecycleHandler.class);
 			if(lifecycleHandlersClasses.size() > 1) {
 				throw new InvalidPluginLifecycleHandlerException(

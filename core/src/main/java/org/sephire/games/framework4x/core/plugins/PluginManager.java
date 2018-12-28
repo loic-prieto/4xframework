@@ -58,14 +58,11 @@ public class PluginManager {
 		return Try.of(()->{
 			Configuration.Builder configuration = Configuration.builder();
 
-			// First build the dependency graph and load each plugin
+			// First build the dependency list and load each plugin
 			var sortedPluginsOperation = sortPluginsByDependency();
 			if(sortedPluginsOperation.isFailure()) {
 				throw new PluginLoadingException(sortedPluginsOperation.getCause());
 			}
-
-			// The graph can be traversed breadth-first to load each plugin in
-			// descendant order, so that each child is loaded only after its parents.
 			var pluginLoadingTry = sortedPluginsOperation.get().map((pluginSpec) -> Plugin.from(pluginSpec,configuration) );
 			if(Try.sequence(pluginLoadingTry).isFailure()) {
 				var exceptions = pluginLoadingTry.filter(Try::isFailure).map(Try::getCause);

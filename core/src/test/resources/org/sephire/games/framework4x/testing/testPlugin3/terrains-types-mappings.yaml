@@ -1,0 +1,4 @@
+mappings:
+  lava:
+    character: '\u25B2'
+    color: red
