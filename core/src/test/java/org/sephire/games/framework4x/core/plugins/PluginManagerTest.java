@@ -1,6 +1,7 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.collection.List;
+import io.vavr.control.Option;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,17 +24,19 @@ public class PluginManagerTest {
 	private static Path validPluginsFolder;
 	private static Path mixedPluginsFolder;
 
-	/*@BeforeAll
+	@BeforeAll
 	public static void setup() throws IOException {
 		// Build valid plugins directory
 		validPluginsFolder = Files.createTempDirectory("PluginManagerTest-");
-		buildJarFile(validPluginsFolder,"dummyPlugin",Main.class,true);
-		buildJarFile(validPluginsFolder,"test2",Main.class,true);
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin1",Option.none());
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin2",Option.none());
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin3",Option.none());
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin11",Option.of("org.sephire.games.framework4x.testing.testPlugin1"));
 
 		// Build mixed plugins and non plugins folder (the plugin manager should fail here)
 		mixedPluginsFolder = Files.createTempDirectory("PluginManagerTest-Mixed-");
-		buildJarFile(mixedPluginsFolder,"test1", String.class,true);
-		buildJarFile(mixedPluginsFolder,"test2",Number.class,false);
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin1",Option.none());
+		buildNonPluginJar(mixedPluginsFolder);
 
 	}
 
@@ -55,7 +58,13 @@ public class PluginManagerTest {
 		var pluginList = pluginManager.get()
 		  .getAvailablePluginsNames();
 
-		var expectedList = List.of("test1","test2").sorted().toSet();
+		var expectedList = List.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin2",
+		  "org.sephire.games.framework4x.testing.testPlugin3",
+		  "org.sephire.games.framework4x.testing.testPlugin11")
+		  .sorted().toSet();
+
 		assertEquals(expectedList,pluginList);
 	}
 
@@ -66,9 +75,26 @@ public class PluginManagerTest {
 		assertTrue(pluginManagerTry.isSuccess());
 
 		var pluginManager = pluginManagerTry.get();
-		var loadedPluginsTry = pluginManager.loadPlugins(List.of("test1","test2"));
+		var loadedPluginsTry = pluginManager.loadPlugins(List.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin2"));
 
 		assertTrue(loadedPluginsTry.isSuccess());
+	}
+
+	@Test
+	@DisplayName("Given a list of plugins, if a plugin dependency is not included in the list, should complain")
+	public void should_reject_loading_plugins_if_dependencies_not_satisfied() {
+		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
+		assertTrue(pluginManagerTry.isSuccess());
+
+		var pluginManager = pluginManagerTry.get();
+		var loadedPluginsTry = pluginManager.loadPlugins(List.of(
+		  "org.sephire.games.framework4x.testing.testPlugin2",
+		  "org.sephire.games.framework4x.testing.testPlugin11"));
+
+		assertTrue(loadedPluginsTry.isFailure());
+		assertEquals(PluginDependencyNotIncludedException.class,loadedPluginsTry.getCause().getClass());
 	}
 
 	@Test
@@ -79,25 +105,44 @@ public class PluginManagerTest {
 		assertTrue(pluginManager.isFailure());
 		assertEquals(PluginLoadingException.class,pluginManager.getCause().getClass());
 	}
-*/
 
 	/**
-	 * Builds a very primitive jar file with only a manifest and no classes inside.
+	 * Build a non plugin jar file.
+	 * A jar file that is not a plugin just contains a manifest with the version of the manifest,
+	 * which means it cannot be loaded by the plugin manager.
 	 *
-	 * @param directory the directory to be used to put the jar in
-	 * @param pluginName the name of the plugin if it is one
-	 * @param isPlugin whether the manifest should contain an entry to define the jar as a 4x framework plugin
+	 * @param directory
 	 * @return
 	 * @throws IOException
 	 */
-	private static Path buildJarFile(Path directory, String pluginName, Class mainClass, boolean isPlugin) throws IOException {
+	private static Path buildNonPluginJar(Path directory) throws IOException {
+		Path jarFilePath = Files.createTempFile(directory,TEMP_PLUGIN_FILE_PREFIX,".jar");
+		Manifest manifest = new Manifest();
+		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+		JarOutputStream jarStream = new JarOutputStream(new FileOutputStream(jarFilePath.toFile()),manifest);
+		jarStream.close();
+		return jarFilePath;
+	}
+
+	/**
+	 * Builds a very primitive jar file with only a manifest and no classes inside.
+	 * The manifest contains the metadata of a plugin
+	 *
+	 * @param directory the directory to be used to put the jar in
+	 * @param pluginName the name of the plugin if it is one
+	 * @param parentPlugin an optional containing the name of the parent plugin if any
+	 * @return
+	 * @throws IOException
+	 */
+	private static Path buildPluginJar(Path directory, String pluginName, Option<String> parentPlugin) throws IOException {
 		Path jarFilePath = Files.createTempFile(directory,TEMP_PLUGIN_FILE_PREFIX,".jar");
 
 		Manifest manifest = new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-		if(isPlugin) {
-			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_NAME_MANIFEST_ENTRY_LABEL), pluginName);
-			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL), pluginName);
+		manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_NAME_MANIFEST_ENTRY_LABEL), pluginName);
+		manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL), pluginName);
+		if(parentPlugin.isDefined()){
+			manifest.getMainAttributes().put(new Attributes.Name(PluginManager.PLUGIN_PARENT_ENTRY_LABEL), parentPlugin.get());
 		}
 
 		JarOutputStream jarStream = new JarOutputStream(new FileOutputStream(jarFilePath.toFile()),manifest);
