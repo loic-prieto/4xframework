@@ -31,16 +31,13 @@ public class PluginManager {
 	public static final String PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL = "X-4XPlugin-RootPackage";
 	public static final String PLUGIN_PARENT_ENTRY_LABEL = "X-4XPlugin-ParentPlugin";
 
-	private File pluginFolder;
 	private Map<String,PluginSpec> availablePlugins;
 	private Map<String,Plugin> plugins;
 
 	/**
 	 * Use fromFolder static method to build
-	 * @param pluginFolder
 	 */
-	private PluginManager(File pluginFolder,List<PluginSpec> availablePlugins) {
-		this.pluginFolder = pluginFolder;
+	private PluginManager(List<PluginSpec> availablePlugins) {
 		this.availablePlugins = availablePlugins
 		  .map((pluginSpec -> Tuple(pluginSpec.getPluginName(),pluginSpec)))
 		  .collect(HashMap.collector());
@@ -53,7 +50,7 @@ public class PluginManager {
 	 * @return
 	 */
 	public Set<String> getLoadedPlugins() {
-		return this.plugins.keySet().toSortedSet();
+		return this.plugins.keySet();
 	}
 
 	/**
@@ -71,7 +68,7 @@ public class PluginManager {
 			// First build the dependency list and load each plugin
 			var sortedPluginsOperation = buildPluginToLoadList(plugins);
 			if(sortedPluginsOperation.isFailure()) {
-				throw new PluginLoadingException(sortedPluginsOperation.getCause());
+				throw sortedPluginsOperation.getCause();
 			}
 			var pluginLoadingTry = sortedPluginsOperation.get().map((pluginSpec) -> Plugin.from(pluginSpec,configuration) );
 			if(Try.sequence(pluginLoadingTry).isFailure()) {
@@ -134,7 +131,7 @@ public class PluginManager {
 
 			return rootNode.toOrderedListByBreadthFirstTraversal()
 			  // We included a root plugin only to be able to build a tree, so we now remove it
-			  .filter((pluginSpec -> !pluginSpec.getPluginName().equals("rootNode")));
+			  .filter((pluginSpec -> !pluginSpec.getPluginName().equals("rootPlugin")));
 		});
 	}
 
@@ -203,7 +200,7 @@ public class PluginManager {
 				  String.format("While building the list of available plugins, there was an error: %s",availablePluginsTry.getCause()));
 			}
 
-			return new PluginManager(folderPath.toFile(),availablePluginsTry.get());
+			return new PluginManager(availablePluginsTry.get());
 		});
 	}
 

@@ -6,6 +6,7 @@ import io.vavr.control.Option;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1ConfigKeys;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -117,6 +118,17 @@ public class PluginManagerTest {
 
 		assertTrue(loadedPluginsTry.isFailure());
 		assertEquals(ParentPluginsNotFoundException.class,loadedPluginsTry.getCause().getClass());
+
+		var expectedMissingDependency = "nonExistentParent";
+		var actualMissingDependency = ((ParentPluginsNotFoundException)loadedPluginsTry.getCause())
+		  .getMissingPlugins().get()._2;
+		assertEquals(expectedMissingDependency,actualMissingDependency);
+
+		var expectedPluginMissingDependency = "org.sephire.games.framework4x.testing.testPlugin4";
+		var actualPluginMissingDependency = ((ParentPluginsNotFoundException)loadedPluginsTry.getCause())
+		  .getMissingPlugins().get()._1;
+		assertEquals(expectedPluginMissingDependency,actualPluginMissingDependency);
+
 	}
 
 	@Test
@@ -141,6 +153,29 @@ public class PluginManagerTest {
 
 		assertTrue(pluginManager.isFailure());
 		assertEquals(PluginLoadingException.class,pluginManager.getCause().getClass());
+	}
+
+	@Test
+	@DisplayName("Given a set of plugins to load, "+
+	  "when one of those plugins is a child of another, the child should override configuration from the parent")
+	public void configuration_should_be_overriden_by_child_plugins() {
+		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
+		assertTrue(pluginManagerTry.isSuccess());
+
+		var pluginManager = pluginManagerTry.get();
+		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin2",
+		  "org.sephire.games.framework4x.testing.testPlugin11"));
+
+		assertTrue(loadedPluginsTry.isSuccess());
+
+		var configuration = loadedPluginsTry.get();
+		var expectedConfigValue = "overridenValue";
+		var actualConfigValueOperation = configuration.getConfiguration(TestPlugin1ConfigKeys.TEST_VALUE,String.class);
+
+		assertTrue(actualConfigValueOperation.isSuccess());
+		assertEquals(expectedConfigValue,actualConfigValueOperation.get());
 	}
 
 	/**
