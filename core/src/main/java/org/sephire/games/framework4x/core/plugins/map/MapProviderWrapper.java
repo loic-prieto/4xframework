@@ -78,7 +78,7 @@ public class MapProviderWrapper {
 		return Try.of(()->{
 			return mapGenerators.map((method) -> {
 				Function1<Configuration, Try<GameMap>> generatorFunction = (configuration) -> Try.of(() -> {
-					Try<GameMap> result = (Try<GameMap>) method.invoke(configuration);
+					Try<GameMap> result = (Try<GameMap>) method.invoke(mapProviderInstance,configuration);
 					if(result.isFailure()) {
 						throw result.getCause();
 					}
@@ -109,11 +109,11 @@ public class MapProviderWrapper {
 			var erroneousMethodsExist = methods.stream()
 			  .anyMatch((method) ->
 				method.getParameterCount() != 1
-				  || !method.getParameters()[0].getType().isAssignableFrom(Configuration.Builder.class)
-				  || !method.getReturnType().isAssignableFrom(Try.class));
+				  || !method.getParameters()[0].getType().equals(Configuration.class)
+				  || !Try.class.isAssignableFrom(method.getReturnType()));
 
 			if (erroneousMethodsExist) {
-				throw new InvalidMapProviderException(mapProviderClass, "The signature of the map generators must be: Configuration.Builder -> Try<GameMap>");
+				throw new InvalidMapProviderException(mapProviderClass, "The signature of the map generators must be: Configuration -> Try<GameMap>");
 			}
 
 			return List.ofAll(methods);

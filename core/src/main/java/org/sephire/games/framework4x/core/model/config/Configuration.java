@@ -198,7 +198,7 @@ public class Configuration {
 		 * @return
 		 */
 		private static boolean isObjectOneOf(Object instance,Class<?> ...testedClasses) {
-			return List.of(testedClasses).exists((testedClass)->instance.getClass().isAssignableFrom(testedClass));
+			return List.of(testedClasses).exists((testedClass)-> testedClass.isAssignableFrom(instance.getClass()));
 		}
 
 		/**
