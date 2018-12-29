@@ -12,7 +12,7 @@ public class TestPlugin1Initializer {
 
 	@PluginLoadingHook
 	public Try<Void> handlePluginLoadingHook(Configuration.Builder configuration) {
-		configuration.addConfig(TEST_VALUE,"someValue");
+		configuration.putConfig(TEST_VALUE,"someValue");
 
 		return Try.success(null);
 	}

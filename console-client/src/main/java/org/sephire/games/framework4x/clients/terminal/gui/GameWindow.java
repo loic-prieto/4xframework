@@ -31,7 +31,8 @@ public class GameWindow extends BasicWindow {
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
 
-		var mappingsTry = game.getConfiguration().getConfiguration(TERRAIN_CHARACTER_MAPPING, TerrainsMapping.class);
+		// TBD
+		/*var mappingsTry = game.getConfiguration().getConfiguration(TERRAIN_CHARACTER_MAPPING, TerrainsMapping.class);
 		if(mappingsTry.isFailure()){
 			throw mappingsTry.getCause();
 		}
@@ -40,7 +41,7 @@ public class GameWindow extends BasicWindow {
 		this.mapComponent.setLayoutData(BorderLayout.Location.CENTER);
 		backgroundPanel.addComponent(mapComponent);
 
-		setComponent(backgroundPanel);
+		setComponent(backgroundPanel);*/
 	}
 
 	public static Try<GameWindow> of(Game game) {

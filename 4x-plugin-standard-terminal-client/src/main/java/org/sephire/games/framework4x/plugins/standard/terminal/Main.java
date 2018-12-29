@@ -32,7 +32,7 @@ public class Main {
 	private Try<TerrainsMapping> loadTerrainMappings(Configuration.Builder configuration) {
 		var terrainsTypesMappingsFilename = packageToFolderPath(getPackageName()).concat("/terrains-types-mappings.yaml");
 		return ConfigLoader.getConfigFor(terrainsTypesMappingsFilename, TerrainsMapping.class)
-		  .peek((terrainsMappings) -> configuration.addConfig(ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING, terrainsMappings));
+		  .peek((terrainsMappings) -> configuration.putConfig(ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING, terrainsMappings));
 	}
 
 }

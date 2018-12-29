@@ -9,6 +9,7 @@ import io.vavr.control.Try;
 import lombok.Getter;
 import org.reflections.Reflections;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
 import org.sephire.games.framework4x.core.plugins.map.*;
 
@@ -74,11 +75,12 @@ public class Plugin {
 	}
 
 	/**
-	 * Will invoke the initializing of the plugin resources and configuration with a given
-	 * external configuration ready to be filled.
+	 * <p>Will invoke the initializing of the plugin resources and configuration with a given
+	 * external configuration ready to be filled.</p>
 	 * <p>
 	 * The result of this process tells if it was successful, so that dependent plugins are not
 	 * loaded.
+	 * </p>
 	 *
 	 * @param configuration
 	 */
@@ -88,10 +90,15 @@ public class Plugin {
 			var lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow((t)->t);
 			var mapGenerators = fetchMapGenerators().getOrElseThrow((t)->t);
 
-			loadTerrainResources(configuration);
+			// This is the fastest way to throw if there is failure, even if we're not interested
+			// in the result
+			loadTerrainResources(configuration).getOrElseThrow((t)->t);
+			loadMapGenerators(mapGenerators,configuration).getOrElseThrow((t)->t);
 
 			// Once everything is done, give a chance to the plugin to add last-minute configuration
-			lifecycleHandler.peek(handler->handler.callPluginLoadingHook(configuration));
+			if(lifecycleHandler.isDefined()){
+				lifecycleHandler.get().callPluginLoadingHook(configuration).getOrElseThrow((t)->t);
+			}
 
 			return null;
 		});
@@ -105,7 +112,12 @@ public class Plugin {
 	 */
 	private Try<Configuration.Builder> loadMapGenerators(Set<MapGeneratorWrapper> generators,Configuration.Builder configuration) {
 		return Try.of(()->{
-			configuration.addConfig()
+			var addOperation = configuration.addAllTo(CoreConfigKeyEnum.MAPS,generators);
+			if(addOperation.isFailure()) {
+				throw new PluginLoadingException(addOperation.getCause());
+			}
+
+			return configuration;
 		});
 	}
 
@@ -121,7 +133,7 @@ public class Plugin {
 			  if (existentTerrainConfig.isDefined()) {
 				  newTerrainSet = newTerrainSet.union((Set<String>) existentTerrainConfig.get());
 			  }
-			  configuration.addConfig(TERRAIN_TYPES, newTerrainSet);
+			  configuration.putConfig(TERRAIN_TYPES, newTerrainSet);
 		  })
 		  .map((discardedResult) -> configuration)
 		  // The terrain file is not mandatory for a plugin

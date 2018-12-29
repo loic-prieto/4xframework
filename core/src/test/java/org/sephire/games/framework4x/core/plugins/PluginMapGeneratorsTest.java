@@ -36,8 +36,9 @@ public class PluginMapGeneratorsTest {
 
 		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
 		assertTrue(mapGeneratorsOperation.isSuccess());
+		assertTrue(mapGeneratorsOperation.get().isDefined());
 
-		var mapGenerators = mapGeneratorsOperation.get();
+		var mapGenerators = mapGeneratorsOperation.get().get();
 		assertEquals(2, mapGenerators.size());
 	}
 
@@ -54,8 +55,9 @@ public class PluginMapGeneratorsTest {
 
 		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
 		assertTrue(mapGeneratorsOperation.isSuccess());
+		assertTrue(mapGeneratorsOperation.get().isDefined());
 
-		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get();
+		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get().get();
 		var expectedGeneratorNames = HashSet.of("plugin2.map_generator_1","plugin2.map_generator_2");
 		var actualGeneratorNames = mapGenerators.map(MapGeneratorWrapper::getName);
 		assertEquals(expectedGeneratorNames,actualGeneratorNames);
@@ -77,7 +79,9 @@ public class PluginMapGeneratorsTest {
 
 		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
 		assertTrue(mapGeneratorsOperation.isSuccess());
-		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get().map(MapGeneratorWrapper.class::cast);
+		assertTrue(mapGeneratorsOperation.get().isDefined());
+
+		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get().get().map(MapGeneratorWrapper.class::cast);
 
 		var mapBuildingOperation = Try.sequence(mapGenerators.map(mapGeneratorWrapper -> mapGeneratorWrapper.buildMap(configuration)));
 		assertTrue(mapBuildingOperation.isSuccess());

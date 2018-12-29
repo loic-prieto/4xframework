@@ -175,7 +175,8 @@ public class PluginManagerTest {
 		var actualConfigValueOperation = configuration.getConfiguration(TestPlugin1ConfigKeys.TEST_VALUE,String.class);
 
 		assertTrue(actualConfigValueOperation.isSuccess());
-		assertEquals(expectedConfigValue,actualConfigValueOperation.get());
+		assertTrue(actualConfigValueOperation.get().isDefined());
+		assertEquals(expectedConfigValue,actualConfigValueOperation.get().get());
 	}
 
 	/**

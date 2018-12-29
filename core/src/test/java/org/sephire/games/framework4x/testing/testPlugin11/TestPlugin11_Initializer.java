@@ -12,7 +12,7 @@ public class TestPlugin11_Initializer {
 	@PluginLoadingHook
 	public Try<Void> handlePluginLoadingHook(Configuration.Builder configuration) {
 		return Try.of(()->{
-			configuration.addConfig(TestPlugin1ConfigKeys.TEST_VALUE,"overridenValue");
+			configuration.putConfig(TestPlugin1ConfigKeys.TEST_VALUE,"overridenValue");
 			return null;
 		});
 	}
