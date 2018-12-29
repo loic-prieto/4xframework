@@ -23,4 +23,6 @@ public class DynamicMapGeneratorWrapper extends MapGeneratorWrapper {
 	public Try<GameMap> buildMap(Configuration configuration) {
 		return generator.apply(configuration);
 	}
+
+
 }

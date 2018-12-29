@@ -1,6 +1,8 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.API;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -8,6 +10,7 @@ import lombok.Getter;
 import org.reflections.Reflections;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
+import org.sephire.games.framework4x.core.plugins.map.*;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -83,6 +86,7 @@ public class Plugin {
 
 		return Try.of(()->{
 			var lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow((t)->t);
+			var mapGenerators = fetchMapGenerators().getOrElseThrow((t)->t);
 
 			loadTerrainResources(configuration);
 
@@ -90,6 +94,18 @@ public class Plugin {
 			lifecycleHandler.peek(handler->handler.callPluginLoadingHook(configuration));
 
 			return null;
+		});
+	}
+
+	/**
+	 * Will load the map generators of this plugin into the configuration.
+	 * @param generators
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Configuration.Builder> loadMapGenerators(Set<MapGeneratorWrapper> generators,Configuration.Builder configuration) {
+		return Try.of(()->{
+			configuration.addConfig()
 		});
 	}
 
@@ -116,10 +132,7 @@ public class Plugin {
 
 	private Try<Option<PluginLifecycleHandlerWrapper>> fetchLifeCycleHandler() {
 		return Try.of(()->{
-			// If we don't put an extra point here, the regexp filter to search for packages becomes
-			// nameOfPackage.*, which would include nameOfPackageSomething packages at the same level.
-			// This way the regexp filter for Reflections ends the name of the package with the dot
-			Reflections reflections = new Reflections(this.specification.getRootPackage().concat("."));
+			Reflections reflections = new Reflections(normalizePackageNameForReflection(this.specification.getRootPackage()));
 			var lifecycleHandlersClasses = reflections.getTypesAnnotatedWith(PluginLifecycleHandler.class);
 			if(lifecycleHandlersClasses.size() > 1) {
 				throw new InvalidPluginLifecycleHandlerException(
@@ -144,8 +157,57 @@ public class Plugin {
 		return Try.failure(new OperationNotSupportedException());
 	}
 
-	private Try<Option<Object>> fetchMapProviders() {
-		return Try.failure(new OperationNotSupportedException());
+	/**
+	 * From the root package of the plugin, will try to fetch all map generators found inside that root package.
+	 * An empty set is a valid value.
+	 *
+	 * May return the following error:
+	 *  - {@link MapProviderWrappingException} if there was an error while wrapping a map provider or map generator
+	 *  - unknown errors as of yet, to be discovered with testing
+	 * @return
+	 */
+	private Try<Set<MapGeneratorWrapper>> fetchMapGenerators() {
+
+		return Try.of(()->{
+			Reflections reflections = new Reflections(normalizePackageNameForReflection(this.specification.getRootPackage()));
+			var mapProviders = reflections.getTypesAnnotatedWith(MapProvider.class);
+
+			Set<MapGeneratorWrapper> mapGeneratorWrappers = HashSet.empty();
+			if(!mapProviders.isEmpty()) {
+				var mapProvidersWrappingOperations = List.ofAll(mapProviders.stream()).map(MapProviderWrapper::from);
+				if(Try.sequence(mapProvidersWrappingOperations).isFailure()) {
+					var failures = mapProvidersWrappingOperations.filter(Try::isFailure).map(Try::getCause);
+					throw new MapProviderWrappingException(failures);
+				}
+
+				var mapGenerators = mapProvidersWrappingOperations.map(Try::get)
+				  .map(MapProviderWrapper::getMapGenerators)
+				  .collect(HashSet.collector());
+
+				if(Try.sequence(mapGenerators).isFailure()) {
+					var failures = mapGenerators.filter(Try::isFailure).map(Try::getCause);
+					throw new MapProviderWrappingException(failures);
+				}
+
+				mapGeneratorWrappers = mapGenerators.flatMap(Try::get);
+			}
+
+			return mapGeneratorWrappers;
+		});
+	}
+
+	/**
+	 * When using reflection to search for classes inside a package, the search is done as a regexp. We need to add a point
+	 * to the name of the package, so that packages that are named the same as this one but with more characters are not included.
+	 * See Reflections.getTypesAnnotatedWith method to see what I mean.
+	 *
+	 * @param packageName
+	 * @return
+	 */
+	private String normalizePackageNameForReflection(String packageName) {
+		return packageName.endsWith(".") ?
+			packageName :
+			packageName.concat(".");
 	}
 
 	/**

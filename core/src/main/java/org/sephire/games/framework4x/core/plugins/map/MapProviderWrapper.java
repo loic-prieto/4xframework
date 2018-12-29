@@ -1,16 +1,36 @@
 package org.sephire.games.framework4x.core.plugins.map;
 
+import com.yacl4j.core.source.optional.ConfigurationSourceNotAvailableException;
+import io.vavr.Function1;
+import io.vavr.Tuple;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
+import io.vavr.collection.Set;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.map.GameMap;
+import org.sephire.games.framework4x.core.plugins.InvalidMethodInvocationException;
+import org.sephire.games.framework4x.core.plugins.configuration.ConfigFileNotFoundException;
+import org.sephire.games.framework4x.core.plugins.configuration.InvalidConfigFileException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
+import static io.vavr.Predicates.instanceOf;
 import static java.lang.String.format;
 import static org.reflections.ReflectionUtils.getAllMethods;
 import static org.reflections.ReflectionUtils.withAnnotation;
 
+/**
+ * Plugin authors may include map providers in their plugins. As they are free-form built from the annotations
+ * @MapProvider and @MapGenerator, the core framework needs an easy way to access those generators at runtime.
+ * This is where the map provider wrapper comes in.
+ *
+ * From a class marked as a MapProvider, it will fetch the map generators, which can be used by the core framework
+ * to build maps for games.
+ */
 public class MapProviderWrapper {
 	private Object mapProviderInstance;
 	private List<Method> mapGenerators;
@@ -20,6 +40,14 @@ public class MapProviderWrapper {
 		this.mapGenerators = mapGenerators;
 	}
 
+	/**
+	 * Builder for the instance. Takes a @MapGenerator annotated class and transforms it
+	 * into a MapProviderWrapper instance.
+	 * Checks that the class conforms to the expected contract.
+	 *
+	 * @param mapProviderClass
+	 * @return
+	 */
 	public static Try<MapProviderWrapper> from(Class<?> mapProviderClass) {
 		return Try.of(() -> {
 			Object instance = null;
@@ -40,24 +68,34 @@ public class MapProviderWrapper {
 	}
 
 	/**
-	 * Call all map generators of this map provider.
-	 * That will update the configuration object with the available maps.
+	 * From this map provider class, get the list of map generators wrapped into MapGeneratorWrapper classes.
+	 * The list may be empty.
 	 *
-	 * @param configuration
+	 * I don't know what errors may be returned in the Try as of yet.
 	 * @return
 	 */
-	public Try<Void> callMapGenerators(Configuration.Builder configuration) {
+	public Try<Set<MapGeneratorWrapper>> getMapGenerators() {
+		return Try.of(()->{
+			return mapGenerators.map((method) -> {
+				Function1<Configuration, Try<GameMap>> generatorFunction = (configuration) -> Try.of(() -> {
+					Try<GameMap> result = (Try<GameMap>) method.invoke(configuration);
+					if(result.isFailure()) {
+						throw result.getCause();
+					}
+					return result.get();
+				}).mapFailure(
+				  // Map standard method calling failures
+				  Case($(instanceOf(IllegalAccessException.class)), (e) -> new InvalidMethodInvocationException(method,e)),
+				  Case($(instanceOf(InvocationTargetException.class)), (e) -> new InvalidMethodInvocationException(method,e)),
+				  Case($(instanceOf(IllegalArgumentException.class)), (e) -> new InvalidMethodInvocationException(method,e))
+				);
 
-		var mapCallsTry = mapGenerators.map(mapGenerator-> Try.of(()->mapGenerator.invoke(mapProviderInstance,configuration)));
-		if(Try.sequence(mapCallsTry).isFailure()){
-			return Try.failure(new InvalidMapProviderException(mapProviderInstance.getClass(),""));
-		}
+				var name = method.getAnnotation(MapGenerator.class).name();
+				var displayKey = method.getAnnotation(MapGenerator.class).displayKey();
 
-
-		return Try.sequence(mapGenerators.map((mapGenerator -> Try.of(() ->
-		  mapGenerator.invoke(mapProviderInstance, configuration)))
-		  )
-		).map((seq) -> null);
+				return new DynamicMapGeneratorWrapper(name,displayKey,generatorFunction);
+			}).collect(HashSet.collector());
+		});
 	}
 
 	private static Try<List<Method>> fetchMapGenerators(Class<?> mapProviderClass) {
