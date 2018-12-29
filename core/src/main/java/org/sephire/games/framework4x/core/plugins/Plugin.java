@@ -48,7 +48,7 @@ public class Plugin {
 		return Try.of(()->{
 			// Verify the package exists
 			if(!doesPackageExist(pluginSpec)){
-				throw new InvalidPluginSpecFileException(
+				throw new InvalidPluginSpecException(
 				  format("The root package %s does not exist",pluginSpec.getRootPackage()),
 				  pluginSpec.getPluginName());
 			}

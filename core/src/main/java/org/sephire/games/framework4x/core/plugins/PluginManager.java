@@ -260,12 +260,12 @@ public class PluginManager {
 	/**
 	 * Given a File, converts it into a Jar File.
 	 * May return:
-	 *  - {@link PluginFileCouldNotBeReadException}
+	 *  - {@link PluginJarFileCouldNotBeReadException}
 	 */
 	private static Try<JarFile> convertToJarFile(File file) {
 		return Try.of(()->new JarFile(file))
 		  .mapFailure(
-		  	Case($(instanceOf(IOException.class)),t -> new PluginFileCouldNotBeReadException(t.getMessage()))
+		  	Case($(instanceOf(IOException.class)),t -> new PluginJarFileCouldNotBeReadException(t.getMessage()))
 		  );
 	}
 

@@ -54,6 +54,6 @@ public class PluginTest {
 		var pluginLoadTry = Plugin.from(pluginSpec, Configuration.builder());
 
 		assertTrue(pluginLoadTry.isFailure());
-		assertTrue(pluginLoadTry.getCause().getClass().isAssignableFrom(InvalidPluginSpecFileException.class));
+		assertTrue(pluginLoadTry.getCause().getClass().isAssignableFrom(InvalidPluginSpecException.class));
 	}
 }

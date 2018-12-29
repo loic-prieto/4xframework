@@ -10,9 +10,9 @@ import static java.lang.String.format;
  * it could not be done (for a variety of reasons, mainly related to io).
  */
 @Getter
-public class PluginFileCouldNotBeReadException extends Framework4XException {
+public class PluginJarFileCouldNotBeReadException extends Framework4XException {
 
-	public PluginFileCouldNotBeReadException(String cause) {
+	public PluginJarFileCouldNotBeReadException(String cause) {
 		super(format("Could not read plugin jar file: %s",cause));
 	}
 }
