@@ -1,9 +1,13 @@
 package org.sephire.games.framework4x.clients.terminal.gui;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.Function1;
 import lombok.extern.slf4j.Slf4j;
+import org.sephire.games.framework4x.core.plugins.PluginManager;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
@@ -12,6 +16,8 @@ import static org.sephire.games.framework4x.clients.terminal.utils.Functions.wra
 
 @Slf4j
 public class MenuWindow extends BasicWindow {
+
+	private static final String DEFAULT_PLUGIN_FOLDER = "plugins";
 
 	public MenuWindow() {
 		super("4X Framework Menu");
@@ -26,9 +32,18 @@ public class MenuWindow extends BasicWindow {
 		menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 		menuPanel.addComponent(buttonFor("Start Game", wrap((b) -> {
 			log.info("Selected start game");
-			var startGameWindow = new StartGameWindow();
-			this.getTextGUI().addWindow(startGameWindow);
-			this.getTextGUI().setActiveWindow(startGameWindow);
+
+			var pluginManagerBuilding = PluginManager.fromFolder(Path.of(".",DEFAULT_PLUGIN_FOLDER));
+			if(pluginManagerBuilding.isFailure()) {
+				var errorMessage = "Could not load the list of plugins, a game cannot be created. Check logs to see detailed error";
+				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
+				log.error("The plugin manager could not load: ",pluginManagerBuilding.getCause().getMessage());
+				return;
+			}
+
+			var selectPluginsWindow = new SelectPluginsWindow(pluginManagerBuilding.get());
+			this.getTextGUI().addWindow(selectPluginsWindow);
+			this.getTextGUI().setActiveWindow(selectPluginsWindow);
 	  	})));
 
 		menuPanel.addComponent(buttonFor("Load Game", wrap((b) -> out.println("Load game activated"))));
