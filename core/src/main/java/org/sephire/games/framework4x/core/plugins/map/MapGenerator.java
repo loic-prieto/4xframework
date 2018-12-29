@@ -7,7 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation is to be used on the methods of a class marked as a MapProvider. The method must have the signature:
- * public GameMap nameOfMethod().
+ * <br />
+ * public Try&lt;GameMap&gt; nameOfMethod().
  *
  *
  */

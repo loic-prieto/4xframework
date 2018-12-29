@@ -17,6 +17,7 @@ public class MapProviderWrapper {
 
 	private MapProviderWrapper(Object mapProviderInstance, List<Method> mapGenerators) {
 		this.mapProviderInstance = mapProviderInstance;
+		this.mapGenerators = mapGenerators;
 	}
 
 	public static Try<MapProviderWrapper> from(Class<?> mapProviderClass) {
@@ -74,7 +75,7 @@ public class MapProviderWrapper {
 				  || !method.getReturnType().isAssignableFrom(Try.class));
 
 			if (erroneousMethodsExist) {
-				throw new InvalidMapProviderException(mapProviderClass, "The signature of the map generators must be: Configuration.Builder -> Try<Void>");
+				throw new InvalidMapProviderException(mapProviderClass, "The signature of the map generators must be: Configuration.Builder -> Try<GameMap>");
 			}
 
 			return List.ofAll(methods);

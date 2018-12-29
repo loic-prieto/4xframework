@@ -6,17 +6,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * <p>
  * This annotation is to be used on a class that will act as a map generator, to let the core
  * framework know that it can use it to get map generators that can be used by clients to let the user choose
  * a map.
+ * </p>
  *
  * Example:
  * <pre>
- * @MapProvider
+ * &#64;MapProvider
  * public class PluginTestMapGenerator {
  *
- * 	@MapGenerator(name="hills_generator",displayName="plugintest.i18n.hills_generator_name")
- * 	public GameMap generateRandomMap() {
+ * 	&#64;MapGenerator(name="hills_generator",displayName="plugintest.i18n.hills_generator_name")
+ * 	public Try&lt;GameMap&gt; generateRandomMap() {
  * 		return GameMap.builder()
  *           .addZone(MapZone.builder()
  *             .withName("level0")
