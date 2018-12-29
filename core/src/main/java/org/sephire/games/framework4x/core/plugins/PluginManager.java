@@ -1,9 +1,10 @@
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.collection.*;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
-import io.vavr.collection.Seq;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -47,6 +48,15 @@ public class PluginManager {
 	}
 
 	/**
+	 * Returns a set of plugins loaded inside the plugin manager.
+	 *
+	 * @return
+	 */
+	public Set<String> getLoadedPlugins() {
+		return this.plugins.keySet().toSortedSet();
+	}
+
+	/**
 	 * Return a list of plugins names available to load from the plugin folder.
 	 * @return
 	 */
@@ -54,7 +64,7 @@ public class PluginManager {
 		return availablePlugins.keySet();
 	}
 
-	public Try<Configuration> loadPlugins(List<String> plugins) {
+	public Try<Configuration> loadPlugins(Set<String> plugins) {
 		return Try.of(()->{
 			Configuration.Builder configuration = Configuration.builder();
 
@@ -84,12 +94,19 @@ public class PluginManager {
 	 * them from the list of available plugins. Failing if dependent plugins are not available.
 	 *
 	 * May return the following error:
-	 *  - {@link ParentPluginNotFoundException}
+	 *  - {@link ParentPluginsNotFoundException}
 	 *
 	 * @return
 	 */
-	private Try<List<PluginSpec>> buildPluginToLoadList(List<String> pluginsToLoad){
+	private Try<List<PluginSpec>> buildPluginToLoadList(Set<String> pluginsToLoad){
 		return Try.of(()->{
+
+			// Check we have all needed dependencies
+			var completePluginList = completeNeededPlugins(pluginsToLoad);
+			if(completePluginList.isFailure()){
+				throw completePluginList.getCause();
+			}
+
 			// We use a tree to order plugins by dependency parentage
 
 			// Create a root node to be the base for the base plugins to load
@@ -97,7 +114,7 @@ public class PluginManager {
 			TreeNode<PluginSpec> rootNode = new TreeNode<>(rootPlugin);
 
 			// Put the base plugins as first siblings of the tree
-			Seq<TreeNode<PluginSpec>> basePluginsNodes = this.availablePlugins.values()
+			Set<TreeNode<PluginSpec>> basePluginsNodes = completePluginList.get()
 			  .filter(PluginSpec::isBasePlugin)
 			  .map(TreeNode::new);
 			rootNode.addChildren(basePluginsNodes);
@@ -106,7 +123,7 @@ public class PluginManager {
 			// This solution scales very badly for large amounts of items in the tree. If this ever
 			// happens to be a problem, we could cache base plugin tree nodes so that we don't have
 			// to find them every time.
-			availablePlugins.values().filter(not(PluginSpec::isBasePlugin))
+			completePluginList.get().filter(not(PluginSpec::isBasePlugin))
 			  .map(TreeNode::new).map((n)->(TreeNode<PluginSpec>)n)
 			  .forEach((nonBasePluginNode)-> {
 				  String parentNodeName = nonBasePluginNode.getValue().getParentPlugin().get();
@@ -118,6 +135,41 @@ public class PluginManager {
 			return rootNode.toOrderedListByBreadthFirstTraversal()
 			  // We included a root plugin only to be able to build a tree, so we now remove it
 			  .filter((pluginSpec -> !pluginSpec.getPluginName().equals("rootNode")));
+		});
+	}
+
+	/**
+	 * Given a set of plugins names to check, this function will add all needed dependencies that were not
+	 * specified in the set, if they can be found in the list of available plugins.
+	 * If they can't be found in the list of available plugins, an error will be returned.
+	 *
+	 * May return errors:
+	 *   - {@link PluginsNotFoundException} if some plugin name from the given set was not found
+	 *   - {@link ParentPluginsNotFoundException} if a needed dependency was not found in the list of available plugins
+	 * @param requestedPluginsNames
+	 * @return
+	 */
+	private Try<Set<PluginSpec>> completeNeededPlugins(Set<String> requestedPluginsNames) {
+		return Try.of(()->{
+			var missingPlugins = requestedPluginsNames.filter((plugin)->availablePlugins.get(plugin).isEmpty());
+			if(missingPlugins.length() > 0) {
+				throw new PluginsNotFoundException(missingPlugins);
+			}
+
+			var requestedPlugins = requestedPluginsNames.flatMap(availablePlugins::get);
+			var neededDependencies = requestedPlugins
+			  .filter(not(PluginSpec::isBasePlugin))
+			  .map((pluginSpec -> Tuple.of(pluginSpec,availablePlugins.get(pluginSpec.getParentPlugin().get()))));
+
+			var missingDependencies = neededDependencies
+			  .filter((pluginDependencyTuple)-> pluginDependencyTuple._2.isEmpty());
+			if(missingDependencies.length() > 0) {
+				throw new ParentPluginsNotFoundException(missingDependencies
+				  .map((t)->Tuple.of(t._1.getPluginName(),t._1.getParentPlugin().get())));
+			}
+
+			return neededDependencies.flatMap(Tuple2::_2)
+			  .union(requestedPlugins);
 		});
 	}
 

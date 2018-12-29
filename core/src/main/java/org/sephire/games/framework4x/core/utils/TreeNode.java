@@ -33,7 +33,7 @@ public class TreeNode<NODE_TYPE> {
 		this.children = this.children.union(HashSet.of(children));
 	}
 
-	public void addChildren(Seq<TreeNode<NODE_TYPE>> children) {
+	public void addChildren(Set<TreeNode<NODE_TYPE>> children) {
 		this.children = this.children.union(HashSet.ofAll(children));
 	}
 

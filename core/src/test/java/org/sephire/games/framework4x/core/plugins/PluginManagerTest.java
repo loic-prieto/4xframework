@@ -1,5 +1,6 @@
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +33,7 @@ public class PluginManagerTest {
 		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin2",Option.none());
 		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin3",Option.none());
 		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin11",Option.of("org.sephire.games.framework4x.testing.testPlugin1"));
+		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin4",Option.of("nonExistentParent"));
 
 		// Build mixed plugins and non plugins folder (the plugin manager should fail here)
 		mixedPluginsFolder = Files.createTempDirectory("PluginManagerTest-Mixed-");
@@ -62,6 +64,7 @@ public class PluginManagerTest {
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2",
 		  "org.sephire.games.framework4x.testing.testPlugin3",
+		  "org.sephire.games.framework4x.testing.testPlugin4",
 		  "org.sephire.games.framework4x.testing.testPlugin11")
 		  .sorted().toSet();
 
@@ -75,7 +78,7 @@ public class PluginManagerTest {
 		assertTrue(pluginManagerTry.isSuccess());
 
 		var pluginManager = pluginManagerTry.get();
-		var loadedPluginsTry = pluginManager.loadPlugins(List.of(
+		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2"));
 
@@ -83,18 +86,52 @@ public class PluginManagerTest {
 	}
 
 	@Test
-	@DisplayName("Given a list of plugins, if a plugin dependency is not included in the list, should complain")
-	public void should_reject_loading_plugins_if_dependencies_not_satisfied() {
+	@DisplayName("Given a list of plugins, if a plugin dependency is not included in the list, the plugin manager should add it")
+	public void should_complete_list_of_needed_plugins() {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
 		var pluginManager = pluginManagerTry.get();
-		var loadedPluginsTry = pluginManager.loadPlugins(List.of(
+		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin2",
 		  "org.sephire.games.framework4x.testing.testPlugin11"));
 
+		assertTrue(loadedPluginsTry.isSuccess());
+		var expectedLoadedPlugins = HashSet.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin2",
+		  "org.sephire.games.framework4x.testing.testPlugin11");
+		assertEquals(expectedLoadedPlugins,pluginManager.getLoadedPlugins());
+	}
+
+	@Test
+	@DisplayName("Given a set of plugins to load, if one of the plugin dependencies is not found, it should raise an error")
+	public void should_complain_if_needed_plugin_is_not_found() {
+		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
+		assertTrue(pluginManagerTry.isSuccess());
+
+		var pluginManager = pluginManagerTry.get();
+		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin4"));
+
 		assertTrue(loadedPluginsTry.isFailure());
-		assertEquals(PluginDependencyNotIncludedException.class,loadedPluginsTry.getCause().getClass());
+		assertEquals(ParentPluginsNotFoundException.class,loadedPluginsTry.getCause().getClass());
+	}
+
+	@Test
+	@DisplayName("Given a set of plugins to load, the plugin manager should complain if one of them cannot be found in plugin folder")
+	public void should_complain_if_loaded_plugin_does_not_exist() {
+		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
+		assertTrue(pluginManagerTry.isSuccess());
+
+		var pluginLoadingTry = pluginManagerTry.get().loadPlugins(
+		  HashSet.of(
+		    "org.sephire.games.framework4x.testing.testPlugin1"
+			,"nonExistentPlugin"));
+
+		assertTrue(pluginLoadingTry.isFailure());
+		assertEquals(PluginsNotFoundException.class,pluginLoadingTry.getCause().getClass());
 	}
 
 	@Test
