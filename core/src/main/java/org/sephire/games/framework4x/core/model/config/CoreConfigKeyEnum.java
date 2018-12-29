@@ -7,12 +7,13 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 */
 	TERRAIN_TYPES,
 	/**
+	 * Under this key exists a list of game map generators that are available to choose when creating a game.
+	 * Map generators may be dynamic, or fixed (as in programmatic or resource-based).
+	 */
+	MAPS,
+	/**
 	 * This key is to be used to store the game parameters as defined by the different plugins and
 	 * given value by the user when creating a game.
 	 */
-	GAME_PARAMETERS,
-	/**
-	 * A list of loaded plugins.
-	 */
-	LOADED_PLUGINS;
+	GAME_PARAMETERS;
 }

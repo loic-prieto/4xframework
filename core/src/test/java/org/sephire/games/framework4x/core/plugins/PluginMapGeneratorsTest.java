@@ -1,10 +1,16 @@
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Set;
 import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
+import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -21,10 +27,59 @@ public class PluginMapGeneratorsTest {
 	@DisplayName("When loading a plugin, maps generators should be loaded and available")
 	public void should_create_map_generator_when_loading_plugin() {
 		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
-		var configuration = Configuration.builder();
+		var configurationBuilder = Configuration.builder();
 
-		var pluginLoadingTry = Plugin.from(pluginSpec,configuration);
+		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var configuration = configurationBuilder.build();
 
 		assertTrue(pluginLoadingTry.isSuccess());
+
+		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
+		assertTrue(mapGeneratorsOperation.isSuccess());
+
+		var mapGenerators = mapGeneratorsOperation.get();
+		assertEquals(2, mapGenerators.size());
+	}
+
+	@Test
+	@DisplayName("When loading map generators from a plugin, name and i18n display key of the generator should be retrieved")
+	public void should_have_retrieved_name_and_displayKey_from_generators() {
+		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
+		var configurationBuilder = Configuration.builder();
+
+		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var configuration = configurationBuilder.build();
+
+		assertTrue(pluginLoadingTry.isSuccess());
+
+		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
+		assertTrue(mapGeneratorsOperation.isSuccess());
+
+		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get();
+		var expectedGeneratorNames = HashSet.of("plugin2.map_generator_1","plugin2.map_generator_2");
+		var actualGeneratorNames = mapGenerators.map(MapGeneratorWrapper::getName);
+		assertEquals(expectedGeneratorNames,actualGeneratorNames);
+
+		var expectedDisplayKeys = HashSet.of("plugin2.map_generators.1.displayName","plugin2.map_generators.2.displayName");
+		var actualDisplayKeys = mapGenerators.map(MapGeneratorWrapper::getDisplayKey);
+		assertEquals(expectedDisplayKeys,actualDisplayKeys);
+	}
+
+	@Test
+	@DisplayName("The loaded map generators should be able to produce a map given a configuration")
+	public void map_generators_should_produce_maps() {
+		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
+		var configurationBuilder = Configuration.builder();
+
+		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var configuration = configurationBuilder.build();
+		assertTrue(pluginLoadingTry.isSuccess());
+
+		var mapGeneratorsOperation = configuration.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class);
+		assertTrue(mapGeneratorsOperation.isSuccess());
+		Set<MapGeneratorWrapper> mapGenerators = mapGeneratorsOperation.get().map(MapGeneratorWrapper.class::cast);
+
+		var mapBuildingOperation = Try.sequence(mapGenerators.map(mapGeneratorWrapper -> mapGeneratorWrapper.buildMap(configuration)));
+		assertTrue(mapBuildingOperation.isSuccess());
 	}
 }
