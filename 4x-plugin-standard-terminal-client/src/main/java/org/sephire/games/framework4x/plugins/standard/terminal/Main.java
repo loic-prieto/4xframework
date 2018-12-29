@@ -5,19 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.model.config.Configuration;
-import org.sephire.games.framework4x.core.plugins.PluginInitializer;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
+import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
+import org.sephire.games.framework4x.core.plugins.configuration.PluginLoadingHook;
 
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
 @Slf4j
-public class Main implements PluginInitializer {
+@PluginLifecycleHandler
+public class Main {
 
 	private static String getPackageName() {
 		return Main.class.getPackageName();
 	}
 
-	@Override
+	@PluginLoadingHook
 	public Try<Void> pluginLoad(Configuration.Builder configuration) {
 
 		return loadTerrainMappings(configuration)
