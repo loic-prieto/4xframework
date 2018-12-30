@@ -25,6 +25,7 @@ public class PluginManagerTest {
 
 	private static Path validPluginsFolder;
 	private static Path mixedPluginsFolder;
+	private static Path invalidPluginFolder1;
 
 	@BeforeAll
 	public static void setup() throws IOException {
@@ -40,6 +41,10 @@ public class PluginManagerTest {
 		mixedPluginsFolder = Files.createTempDirectory("PluginManagerTest-Mixed-");
 		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin1",Option.none());
 		buildNonPluginJar(mixedPluginsFolder);
+
+		invalidPluginFolder1 = Files.createTempDirectory("PluginManagerTest-Invalid-1-");
+		buildPluginJar(invalidPluginFolder1,"org.sephire.games.framework4x.testing.testPlugin1",
+		  Option.of("org.sephire.games.framework4x.testing.testPlugin1"));
 
 	}
 
@@ -59,7 +64,7 @@ public class PluginManagerTest {
 		assertTrue(pluginManager.isSuccess());
 
 		var pluginList = pluginManager.get()
-		  .getAvailablePluginsNames();
+		  .getAvailablePlugins();
 
 		var expectedList = List.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
@@ -67,7 +72,7 @@ public class PluginManagerTest {
 		  "org.sephire.games.framework4x.testing.testPlugin3",
 		  "org.sephire.games.framework4x.testing.testPlugin4",
 		  "org.sephire.games.framework4x.testing.testPlugin11")
-		  .sorted().toSet();
+		  .sorted().toSet().map((name)->new PluginSpec(name,name,Option.none()));
 
 		assertEquals(expectedList,pluginList);
 	}
@@ -177,6 +182,21 @@ public class PluginManagerTest {
 		assertTrue(actualConfigValueOperation.isSuccess());
 		assertTrue(actualConfigValueOperation.get().isDefined());
 		assertEquals(expectedConfigValue,actualConfigValueOperation.get().get());
+	}
+
+	@Test
+	@DisplayName("Given a plugin jar file, if the parent is defined with the same name as the plugin, it should complain")
+	public void should_complain_if_plugin_defines_parent_as_itself() {
+		var pluginManagerTry = PluginManager.fromFolder(invalidPluginFolder1);
+		assertTrue(pluginManagerTry.isFailure());
+		assertEquals(PluginLoadingException.class,pluginManagerTry.getCause().getClass());
+
+		var exceptions = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions();
+		var isExpectedException = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions()
+		  .exists((t)->InvalidPluginJarException.class.isAssignableFrom(t.getClass()));
+
+		assertTrue(isExpectedException);
+		assertEquals(1,exceptions.length());
 	}
 
 	/**

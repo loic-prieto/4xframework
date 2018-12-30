@@ -19,6 +19,7 @@ import java.util.jar.JarFile;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
+import static java.lang.String.format;
 import static java.util.function.Predicate.not;
 
 /**
@@ -54,11 +55,11 @@ public class PluginManager {
 	}
 
 	/**
-	 * Return a list of plugins names available to load from the plugin folder.
+	 * Return a list of plugins available to load from the plugin folder.
 	 * @return
 	 */
-	public Set<String> getAvailablePluginsNames(){
-		return availablePlugins.keySet();
+	public Set<PluginSpec> getAvailablePlugins(){
+		return availablePlugins.values().toSet();
 	}
 
 	public Try<Configuration> loadPlugins(Set<String> plugins) {
@@ -181,7 +182,7 @@ public class PluginManager {
 	public static Try<PluginManager> fromFolder(Path folderPath) {
 		return Try.of(()->{
 			if(!folderPath.toFile().exists() && !folderPath.toFile().isDirectory()) {
-				throw new IllegalArgumentException(String.format("The path %s is not a valid folder",folderPath));
+				throw new IllegalArgumentException(format("The path %s is not a valid folder",folderPath));
 			}
 
 			var folderHasOnlyPlugins = checkFolderHasOnlyPlugins(folderPath.toFile());
@@ -191,13 +192,14 @@ public class PluginManager {
 
 			if(!folderHasOnlyPlugins.get()) {
 				throw new PluginLoadingException(
-				  String.format("The plugin folder %s contains jars that are not plugins, this is not valid",folderPath.toAbsolutePath()));
+				  format("The plugin folder %s contains jars that are not plugins, this is not valid",folderPath.toAbsolutePath()));
 			}
 
 			var availablePluginsTry = buildAvailablePlugins(folderPath.toFile());
 			if(availablePluginsTry.isFailure()){
 				throw new PluginLoadingException(
-				  String.format("While building the list of available plugins, there was an error: %s",availablePluginsTry.getCause()));
+				  format("While building the list of available plugins, there was an error: %s",availablePluginsTry.getCause()),
+				  availablePluginsTry.getCause());
 			}
 
 			return new PluginManager(availablePluginsTry.get());
@@ -247,7 +249,7 @@ public class PluginManager {
 				  .map(Throwable::getMessage)
 				  .reduce(Reduce.strings());
 
-				throw new PluginLoadingException(String.format("Jar files in folder %s could not be loaded: %s",folder,cause));
+				throw new PluginLoadingException(format("Jar files in folder %s could not be loaded: %s",folder,cause));
 			}
 
 			var someJarIsNotPlugin = jarFiles.map(Try::get)
@@ -314,6 +316,11 @@ public class PluginManager {
 
 			// If the plugin is a base plugin, this will be empty
 			var parentPlugin = Option.of(manifest.getMainAttributes().getValue(PLUGIN_PARENT_ENTRY_LABEL));
+			if(parentPlugin.isDefined()) {
+				if(parentPlugin.get().equals(name)) {
+					throw new InvalidPluginJarException(jarFile.getName(),"A plugin cannot be a parent of itself");
+				}
+			}
 
 			return new PluginSpec(name,rootPackage,parentPlugin);
 		});
