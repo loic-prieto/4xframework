@@ -52,4 +52,22 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <X-4XPlugin-Name>org.sephire.games.framework4x.plugins.standard.terminal</X-4XPlugin-Name>
+                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard.terminal</X-4XPlugin-RootPackage>
+                            <X-4XPlugin-ParentPlugin>org.sephire.games.framework4x.plugins.standard.terminal</X-4XPlugin-ParentPlugin>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
