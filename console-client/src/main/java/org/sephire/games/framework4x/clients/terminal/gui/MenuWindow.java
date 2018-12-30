@@ -19,8 +19,11 @@ public class MenuWindow extends BasicWindow {
 
 	private static final String DEFAULT_PLUGIN_FOLDER = "plugins";
 
-	public MenuWindow() {
+	private WindowBasedTextGUI textGUI;
+
+	public MenuWindow(WindowBasedTextGUI textGUI) {
 		super("4X Framework Menu");
+		this.textGUI = textGUI;
 
 		setHints(List.of(Window.Hint.FULL_SCREEN));
 
@@ -41,7 +44,7 @@ public class MenuWindow extends BasicWindow {
 				return;
 			}
 
-			var selectPluginsWindow = new SelectPluginsWindow(pluginManagerBuilding.get());
+			var selectPluginsWindow = new SelectPluginsWindow(pluginManagerBuilding.get(),this.textGUI);
 			this.getTextGUI().addWindow(selectPluginsWindow);
 			this.getTextGUI().setActiveWindow(selectPluginsWindow);
 	  	})));

@@ -28,7 +28,7 @@ public class Launcher {
 			WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
 			screen.startScreen();
 
-			Window menuWindow = new MenuWindow();
+			Window menuWindow = new MenuWindow(gui);
 			menuWindow.setHints(List.of(Window.Hint.FULL_SCREEN));
 			gui.addWindowAndWait(menuWindow);
 

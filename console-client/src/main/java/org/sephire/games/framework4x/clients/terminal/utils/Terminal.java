@@ -30,7 +30,7 @@ public class Terminal {
 		 */
 		public static TerminalSize sizeWithHeightToPercent(TerminalSize size, float percentage) {
 			var newRows = (int) Math.floor(size.getRows() * percentage);
-			return size.withColumns(newRows);
+			return size.withRows(newRows);
 		}
 	}
 
