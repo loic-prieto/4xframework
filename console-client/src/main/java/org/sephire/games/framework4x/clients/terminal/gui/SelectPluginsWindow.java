@@ -5,11 +5,12 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import io.vavr.Function1;
 import io.vavr.Tuple;
-import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
 import org.sephire.games.framework4x.core.plugins.Plugin;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
@@ -38,7 +39,7 @@ public class SelectPluginsWindow extends BasicWindow {
 	// The purpose of this object is to store the position of plugin specs inside the checkbox, and to be able
 	// to search parents quickly.
 	private Map<String,PluginSpec> pluginCache;
-	private CheckBoxList<PluginSpec> pluginCheckBoxList;
+	private CheckBoxList<ToStringDecorator<PluginSpec>> pluginCheckBoxList;
 	private Button selectButton;
 
 	private final static String DEFAULT_DESCRIPTION = "Select a plugin to see it's description";
@@ -98,29 +99,21 @@ public class SelectPluginsWindow extends BasicWindow {
 		  .map((p) -> Tuple.of(p.getPluginName(), p))
 		  .collect(HashMap.collector());
 
-		this.pluginCheckBoxList = new CheckBoxList<PluginSpec>();
+		this.pluginCheckBoxList = new CheckBoxList<>();
 		pluginCheckBoxList.setLayoutData(LinearLayout.createLayoutData(Fill));
-		pluginCheckBoxList.setListItemRenderer(new CheckBoxList.CheckBoxListItemRenderer<>() {
-			@Override
-			public String getLabel(CheckBoxList<PluginSpec> listBox, int index, PluginSpec item) {
-				var label = (item.isBasePlugin() ? "[Base] " : "").concat(item.getPluginName());
-				log.trace("The get label method of the checkbox was called, with result {}",label);
-				return label;
-			}
-		});
 		pluginCheckBoxList.addListener((itemIndex, checked) -> {
-			var selectedPlugin = pluginCheckBoxList.getItemAt(itemIndex);
+			var selectedPlugin = pluginCheckBoxList.getItemAt(itemIndex).getWrappedObject();
 			log.trace("The plugin {} was checked? {}",selectedPlugin.getPluginName(),checked);
 			if (checked && !selectedPlugin.isBasePlugin()) {
 				// If a child plugin is selected, check also the parent if found
 				var parentPluginSearch = pluginCache.get(selectedPlugin.getParentPlugin().get());
 				if (parentPluginSearch.isDefined()) {
-					pluginCheckBoxList.setChecked(parentPluginSearch.get(),true);
+					pluginCheckBoxList.setChecked(wrap(parentPluginSearch.get()),true);
 				} else {
 					var errorMessage = "The parent of this plugin could not be found, make sure it is present in the plugins folder";
 					MessageDialog.showMessageDialog(textGUI,"Error",errorMessage, MessageDialogButton.OK);
 					log.error("A child plugin was selected but it's parent is not in the list of available plugins");
-					pluginCheckBoxList.setChecked(selectedPlugin,false);
+					pluginCheckBoxList.setChecked(wrap(selectedPlugin),false);
 				}
 			} else {
 				// If a parent is unchecked, uncheck the children too
@@ -128,13 +121,13 @@ public class SelectPluginsWindow extends BasicWindow {
 					pluginCache.values()
 					  .filter(not(PluginSpec::isBasePlugin))
 					  .filter((child)->child.getParentPlugin().get().equals(selectedPlugin.getPluginName()))
-					  .forEach((child)->pluginCheckBoxList.setChecked(child,false));
+					  .forEach((child)->pluginCheckBoxList.setChecked(wrap(child),false));
 				}
 			}
 
 			updateSelectButtonState();
 		});
-		pluginCache.values().forEach(pluginCheckBoxList::addItem);
+		pluginCache.values().map(SelectPluginsWindow::wrap).forEach(pluginCheckBoxList::addItem);
 		pluginListPanel.addComponent(pluginCheckBoxList);
 		
 
@@ -152,7 +145,9 @@ public class SelectPluginsWindow extends BasicWindow {
 	 * @return
 	 */
 	private void updateSelectButtonState() {
-		var isBasePluginSelected = pluginCheckBoxList.getCheckedItems().stream().anyMatch((p)->p.isBasePlugin());
+		var isBasePluginSelected = pluginCheckBoxList.getCheckedItems().stream()
+		  .map(SelectPluginsWindow::unwrap)
+		  .anyMatch(PluginSpec::isBasePlugin);
 
 		selectButton.setEnabled(isBasePluginSelected);
 	}
@@ -187,6 +182,15 @@ public class SelectPluginsWindow extends BasicWindow {
 
 	private void updateInfoLabel(String description) {
 		infoLabel.setText(description);
+	}
+
+	// The code below only exists because ToStringDecorator is not elegant to see
+	private static final Function1<PluginSpec,String> pluginSpecStringifier = PluginSpec::getPluginName;
+	private static ToStringDecorator<PluginSpec> wrap(PluginSpec pluginSpec) {
+		return new ToStringDecorator<>(pluginSpec,pluginSpecStringifier);
+	}
+	private static PluginSpec unwrap(ToStringDecorator<PluginSpec> pluginSpecToStringDecorator) {
+		return pluginSpecToStringDecorator.getWrappedObject();
 	}
 
 }

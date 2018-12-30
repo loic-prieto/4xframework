@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode(of={"pluginName"})
-public class PluginSpec {
+public class PluginSpec implements Comparable<PluginSpec> {
 	private String pluginName;
 	private String rootPackage;
 	private Option<String> parentPlugin;
@@ -24,4 +24,8 @@ public class PluginSpec {
 	}
 
 
+	@Override
+	public int compareTo(PluginSpec o) {
+		return pluginName.compareTo(o.pluginName);
+	}
 }
