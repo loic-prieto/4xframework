@@ -56,7 +56,7 @@ public class ToStringDecorator<WRAPPED_CLASS> implements Comparable<ToStringDeco
 	 */
 	@Override
 	public boolean equals(Object o) {
-		return wrappedObject.equals(o);
+		return wrappedObject.equals(((ToStringDecorator<WRAPPED_CLASS>)o).wrappedObject);
 	}
 
 	/**

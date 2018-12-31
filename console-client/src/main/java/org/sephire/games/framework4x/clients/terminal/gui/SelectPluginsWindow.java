@@ -11,7 +11,6 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
-import org.sephire.games.framework4x.core.plugins.Plugin;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.Fill;
-import static java.util.function.Predicate.not;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Size.sizeWithWidthToPercent;
 
 /**
@@ -38,7 +36,7 @@ public class SelectPluginsWindow extends BasicWindow {
 	private WindowBasedTextGUI textGUI;
 	// The purpose of this object is to store the position of plugin specs inside the checkbox, and to be able
 	// to search parents quickly.
-	private Map<String,PluginSpec> pluginCache;
+	private Map<String, ToStringDecorator<PluginSpec>> pluginCache;
 	private CheckBoxList<ToStringDecorator<PluginSpec>> pluginCheckBoxList;
 	private Button selectButton;
 
@@ -53,8 +51,6 @@ public class SelectPluginsWindow extends BasicWindow {
 
 		setupWindowFrame();
 		addComponents();
-
-
 	}
 
 	private void setupWindowFrame() {
@@ -96,7 +92,8 @@ public class SelectPluginsWindow extends BasicWindow {
 
 		// Build the cache of plugins inside the checkbox
 		pluginCache = pluginManager.getAvailablePlugins()
-		  .map((p) -> Tuple.of(p.getPluginName(), p))
+		  .map(SelectPluginsWindow::wrap)
+		  .map((p)->Tuple.of(p.getWrappedObject().getPluginName(),p))
 		  .collect(HashMap.collector());
 
 		this.pluginCheckBoxList = new CheckBoxList<>();
@@ -108,26 +105,26 @@ public class SelectPluginsWindow extends BasicWindow {
 				// If a child plugin is selected, check also the parent if found
 				var parentPluginSearch = pluginCache.get(selectedPlugin.getParentPlugin().get());
 				if (parentPluginSearch.isDefined()) {
-					pluginCheckBoxList.setChecked(wrap(parentPluginSearch.get()),true);
+					pluginCheckBoxList.setChecked(parentPluginSearch.get(),true);
 				} else {
 					var errorMessage = "The parent of this plugin could not be found, make sure it is present in the plugins folder";
 					MessageDialog.showMessageDialog(textGUI,"Error",errorMessage, MessageDialogButton.OK);
 					log.error("A child plugin was selected but it's parent is not in the list of available plugins");
-					pluginCheckBoxList.setChecked(wrap(selectedPlugin),false);
+					pluginCheckBoxList.setChecked(pluginCheckBoxList.getItemAt(itemIndex),false);
 				}
 			} else {
 				// If a parent is unchecked, uncheck the children too
 				if(!checked && selectedPlugin.isBasePlugin()) {
 					pluginCache.values()
-					  .filter(not(PluginSpec::isBasePlugin))
-					  .filter((child)->child.getParentPlugin().get().equals(selectedPlugin.getPluginName()))
-					  .forEach((child)->pluginCheckBoxList.setChecked(wrap(child),false));
+					  .filter((p)->!p.getWrappedObject().isBasePlugin())
+					  .filter((child)->child.getWrappedObject().getParentPlugin().get().equals(selectedPlugin.getPluginName()))
+					  .forEach((child)->pluginCheckBoxList.setChecked(child,false));
 				}
 			}
 
 			updateSelectButtonState();
 		});
-		pluginCache.values().map(SelectPluginsWindow::wrap).forEach(pluginCheckBoxList::addItem);
+		pluginCache.values().forEach(pluginCheckBoxList::addItem);
 		pluginListPanel.addComponent(pluginCheckBoxList);
 		
 
