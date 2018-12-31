@@ -182,7 +182,8 @@ public class SelectPluginsWindow extends BasicWindow {
 	}
 
 	// The code below only exists because ToStringDecorator is not elegant to see
-	private static final Function1<PluginSpec,String> pluginSpecStringifier = PluginSpec::getPluginName;
+	private static final Function1<PluginSpec,String> pluginSpecStringifier = (pluginSpec ->
+	  (pluginSpec.isBasePlugin() ? "[Base] " : "").concat(pluginSpec.getPluginName()));
 	private static ToStringDecorator<PluginSpec> wrap(PluginSpec pluginSpec) {
 		return new ToStringDecorator<>(pluginSpec,pluginSpecStringifier);
 	}
