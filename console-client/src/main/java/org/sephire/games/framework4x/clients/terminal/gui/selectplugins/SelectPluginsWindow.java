@@ -3,14 +3,11 @@ package org.sephire.games.framework4x.clients.terminal.gui.selectplugins;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
-import io.vavr.Function1;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
-import org.sephire.games.framework4x.clients.terminal.gui.selectplugins.PluginInteractedEvent;
-import org.sephire.games.framework4x.clients.terminal.gui.selectplugins.PluginsCheckboxList;
-import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
+import org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
@@ -18,6 +15,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.Fill;
+import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.ERROR;
+import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.INFO;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Size.sizeWithWidthToPercent;
 
 /**
@@ -31,8 +30,6 @@ import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Size
 public class SelectPluginsWindow extends Basic4XWindow {
 
 	private PluginManager pluginManager;
-	private Label pluginInfoLabel;
-	private Label infoLabel;
 
 	/**
 	 * The set of selected plugins by the user inside the plugins checkbox list.
@@ -44,6 +41,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	private final static String DEFAULT_DESCRIPTION = "Select a plugin to see it's description";
 	private final static String DEFAULT_INFO = "Select the desired plugins to load then press enter to open the create game window, or escape to go back to the menu";
 	private final static String PLUGIN_LIST_LABEL = "Select the plugins you wish to load:";
+	private final static String NEEDS_BASE_PLUGIN_SELECTED = "To start a game at least a base plugin needs to be selected";
 
 	public SelectPluginsWindow(PluginManager pluginManager, WindowBasedTextGUI textGUI) {
 		super("Plugin selection screen",textGUI);
@@ -52,6 +50,19 @@ public class SelectPluginsWindow extends Basic4XWindow {
 
 		setupWindowFrame();
 		addComponents();
+		setupEvents();
+	}
+
+	private void setupEvents() {
+		registerEventListener(PluginInteractedEvent.class,(event)->{
+			if(event.isSelected()) {
+				selectedPlugins = selectedPlugins.add(event.getPlugin());
+			} else {
+				selectedPlugins = selectedPlugins.remove(event.getPlugin());
+			}
+
+			fireEvent(new SelectedPluginsListUpdatedEvent(selectedPlugins));
+		});
 	}
 
 	private void setupWindowFrame() {
@@ -99,14 +110,8 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		selectButton.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.End));
 		selectButton.setEnabled(false);
 		pluginListPanel.addComponent(selectButton);
-		registerEventListener(PluginInteractedEvent.class,(event)->{
-			if(event.isSelected()) {
-				selectedPlugins = selectedPlugins.add(event.getPlugin());
-			} else {
-				selectedPlugins = selectedPlugins.remove(event.getPlugin());
-			}
-
-			var isBasePluginSelected = selectedPlugins.exists(PluginSpec::isBasePlugin);
+		registerEventListener(SelectedPluginsListUpdatedEvent.class,(event)->{
+			var isBasePluginSelected = event.getSelectedPlugins().exists(PluginSpec::isBasePlugin);
 			selectButton.setEnabled(isBasePluginSelected);
 		});
 
@@ -118,9 +123,18 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginInfoPanel.setPreferredSize(sizeWithWidthToPercent(getOverridenTextGui().getScreen().getTerminalSize(), 0.4f));
 		pluginInfoPanel.setLayoutData(BorderLayout.Location.RIGHT);
 		pluginInfoPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-		pluginInfoLabel = new Label(DEFAULT_DESCRIPTION);
+
+		var headerLabel = new Label(DEFAULT_DESCRIPTION);
+		headerLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
+		pluginInfoPanel.addComponent(headerLabel);
+
+		var pluginInfoLabel = new Label("");
 		pluginInfoLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginInfoPanel.addComponent(pluginInfoLabel);
+
+		registerEventListener(PluginTraversedEvent.class,(event)->{
+			pluginInfoLabel.setText(event.getSelectedPlugin().getPluginName());
+		});
 
 		backgroundPanel.addComponent(pluginInfoPanel.withBorder(Borders.singleLine()));
 	}
@@ -130,18 +144,24 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		infoPanel.setPreferredSize(getOverridenTextGui().getScreen().getTerminalSize().withRows(4));
 		infoPanel.setLayoutData(BorderLayout.Location.BOTTOM);
 		infoPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-		infoLabel = new Label(DEFAULT_INFO);
-		infoLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
-		infoPanel.addComponent(infoLabel);
+
+		var messagePanel = new MessagePanel();
+		messagePanel.setLayoutData(LinearLayout.createLayoutData(Fill));
+		infoPanel.addComponent(messagePanel);
+
+		messagePanel.addMessage(DEFAULT_INFO, INFO);
+		messagePanel.addMessage(NEEDS_BASE_PLUGIN_SELECTED,ERROR);
+
+		registerEventListener(SelectedPluginsListUpdatedEvent.class,(event)->{
+			var needsBasePluginSelected = !event.getSelectedPlugins().exists(PluginSpec::isBasePlugin);
+			if(needsBasePluginSelected) {
+				messagePanel.addMessageIfNotExists(NEEDS_BASE_PLUGIN_SELECTED,ERROR);
+			} else {
+				messagePanel.removeMessage(NEEDS_BASE_PLUGIN_SELECTED);
+			}
+		});
+
 
 		backgroundPanel.addComponent(infoPanel.withBorder(Borders.singleLine()));
-	}
-
-	private void updatePluginInfoLabel(String description) {
-		pluginInfoLabel.setText(description);
-	}
-
-	private void updateInfoLabel(String description) {
-		infoLabel.setText(description);
 	}
 }
