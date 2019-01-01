@@ -19,28 +19,28 @@ public class WindowEventBusTest {
 	public void should_send_event_to_listener(){
 		var wasCalled = new MutableValue<>("");
 
-		Consumer<ExamplePayload> listener = (payload) -> wasCalled.setValue(payload.getData());
+		Consumer<ExampleEvent> listener = (payload) -> wasCalled.setValue(payload.getData());
 
 		WindowEventBus eventBus = new WindowEventBus();
-		eventBus.registerListenerFor("eventTest",listener);
-		eventBus.fireEvent("eventTest",new ExamplePayload("testData"));
+		eventBus.registerListener(ExampleEvent.class,listener);
+		eventBus.fireEvent(new ExampleEvent("testData"));
 
 		assertEquals("testData",wasCalled.getValue());
 	}
 
 	@Test
 	@DisplayName("Given an event bus, if a component fires an event, it should be received only by the correct listener")
-	public void should_send_event_to_listener(){
+	public void should_send_event_to_correct_listener(){
 		var listener1State = new MutableValue<>("");
 		var listener2State = new MutableValue<>("");
 
-		Consumer<ExamplePayload> listener1 = (payload) -> listener1State.setValue(payload.getData());
-		Consumer<ExamplePayload> listener2 = (payload) -> listener2State.setValue(payload.getData());
+		Consumer<ExampleEvent> listener1 = (payload) -> listener1State.setValue(payload.getData());
+		Consumer<ExampleEvent2> listener2 = (payload) -> listener2State.setValue(payload.getData());
 
 		WindowEventBus eventBus = new WindowEventBus();
-		eventBus.registerListenerFor("eventTest1",listener1);
-		eventBus.registerListenerFor("eventTest2",listener2);
-		eventBus.fireEvent("eventTest1",new ExamplePayload("testData"));
+		eventBus.registerListener(ExampleEvent.class,listener1);
+		eventBus.registerListener(ExampleEvent2.class,listener2);
+		eventBus.fireEvent(new ExampleEvent("testData"));
 
 		assertEquals("testData",listener1State.getValue());
 		assertEquals("",listener2State.getValue());
@@ -50,12 +50,12 @@ public class WindowEventBusTest {
 	@DisplayName("Given an event bus, if a listener fails for some reason, the bus should gobble the error")
 	public void the_event_bus_should_gobble_listener_errors(){
 
-		Consumer<ExamplePayload> listener = (payload) ->{ throw new RuntimeException("error");};
+		Consumer<ExampleEvent> listener = (payload) ->{ throw new RuntimeException("error");};
 
 		WindowEventBus eventBus = new WindowEventBus();
-		eventBus.registerListenerFor("eventTest",listener);
+		eventBus.registerListener(ExampleEvent.class,listener);
 		var eventSendingExecution = Try.of(()->{
-			eventBus.fireEvent("eventTest",new ExamplePayload("testData"));
+			eventBus.fireEvent(new ExampleEvent("testData"));
 			return null;
 		});
 
@@ -65,7 +65,13 @@ public class WindowEventBusTest {
 
 @AllArgsConstructor
 @Getter
-class ExamplePayload {
+class ExampleEvent {
+	private String data;
+}
+
+@AllArgsConstructor
+@Getter
+class ExampleEvent2 {
 	private String data;
 }
 
