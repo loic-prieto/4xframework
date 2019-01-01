@@ -3,6 +3,7 @@ package org.sephire.games.framework4x.clients.terminal.gui.selectplugins;
 import com.googlecode.lanterna.gui2.CheckBoxList;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
+import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.Function1;
 import io.vavr.Tuple;
 import io.vavr.collection.HashMap;
@@ -12,6 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
+
+import static com.googlecode.lanterna.input.KeyType.ArrowDown;
+import static com.googlecode.lanterna.input.KeyType.ArrowUp;
+import static io.vavr.API.*;
+import static io.vavr.Predicates.isIn;
 
 @Slf4j
 public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSpec>> {
@@ -63,12 +69,20 @@ public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSp
 	}
 
 	@Override
-	public synchronized CheckBoxList<ToStringDecorator<PluginSpec>> setSelectedIndex(int index) {
-		var superReturnValue = super.setSelectedIndex(index);
-		var pluginSpec = this.getItemAt(index).getWrappedObject();
+	public synchronized Result handleKeyStroke(KeyStroke keyStroke) {
+		var superReturn = super.handleKeyStroke(keyStroke);
 
-		((Basic4XWindow)getBasePane()).fireEvent(new PluginTraversedEvent(pluginSpec));
+		Match(keyStroke.getKeyType()).of(
+		  	Case($(isIn(ArrowDown, ArrowUp)),this::fireMoveEvent),
+		  	Case($(),()->null)
+		);
 
-		return superReturnValue;
+		return superReturn;
+	}
+
+	public Object fireMoveEvent() {
+		var selectedPlugin = this.getSelectedItem().getWrappedObject();
+		((Basic4XWindow)getBasePane()).fireEvent(new PluginTraversedEvent(selectedPlugin));
+		return null;
 	}
 }
