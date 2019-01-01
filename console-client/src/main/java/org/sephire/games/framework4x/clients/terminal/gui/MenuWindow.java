@@ -5,6 +5,7 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.Function1;
 import lombok.extern.slf4j.Slf4j;
+import org.sephire.games.framework4x.clients.terminal.gui.selectplugins.SelectPluginsWindow;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 
 import java.nio.file.Path;
