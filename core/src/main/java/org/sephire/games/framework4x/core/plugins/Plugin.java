@@ -8,12 +8,18 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
 import org.sephire.games.framework4x.core.plugins.map.*;
 
 import javax.naming.OperationNotSupportedException;
+
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
@@ -31,9 +37,50 @@ public class Plugin {
 
 	@Getter
 	private PluginSpec specification;
+	@Getter
+	private Set<String> availableResourceBundleNames;
 
 	private Plugin(PluginSpec spec) {
 		this.specification = spec;
+		this.availableResourceBundleNames = getAvailableI18NResourceBundles();
+	}
+
+	public Try<String> getTitle(Locale locale) {
+		return Try.of(()->{
+			var keyName = String.format("%s.plugin.title",this.specification.getPluginName());
+
+			// We must iterate over each resource bundle, because we don't want the user to use a specific named
+			// resource bundle to define this
+			return availableResourceBundleNames.map((name)-> PropertyResourceBundle.getBundle(name,locale))
+			  .find((bundle)->bundle.containsKey(keyName))
+			  .map((bundle)->bundle.getString(keyName))
+			  .getOrElseThrow(()->new InvalidPluginException("The plugin's title has not been found among its resource files"));
+		});
+	}
+
+	public Try<String> getDescription(Locale locale) {
+		return Try.of(()->{
+			var keyName = String.format("%s.plugin.description",this.specification.getPluginName());
+
+			// We must iterate over each resource bundle, because we don't want the user to use a specific named
+			// resource bundle to define this
+			return availableResourceBundleNames.map((name)->ResourceBundle.getBundle(name,locale))
+			  .find((bundle)->bundle.containsKey(keyName))
+			  .map((bundle)->bundle.getString(keyName))
+			  .getOrElseThrow(()->new InvalidPluginException("The plugin's description has not been found among its resource files"));
+		});
+	}
+
+	private Set<String> getAvailableI18NResourceBundles() {
+
+		Reflections reflections = new Reflections(
+		  normalizePackageNameForReflection(this.specification.getRootPackage().concat(".i18n")),
+		  new ResourcesScanner());
+
+		return HashSet.ofAll(reflections.getResources(Pattern.compile(".*\\.properties")))
+		  .map((name)->name.replaceAll("\\.properties",""))
+		  .map((name)->name.replaceAll("(.*)_.*$","$1"));
+
 	}
 
 	/**
@@ -65,13 +112,23 @@ public class Plugin {
 				throw loadingTry.getCause();
 			}
 
+			var locale = Locale.ENGLISH;
+			var i18nTry = plugin.getTitle(locale).andThen(()->plugin.getDescription(locale));
+			if(i18nTry.isFailure()) {
+				throw i18nTry.getCause();
+			}
+
 			return plugin;
 		});
 	}
 
 	private static boolean doesPackageExist(PluginSpec pluginSpec) {
 		var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
-		return ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
+		var i18nFolder = "i18n/".concat(pluginSpec.getPluginName());
+		var standardResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
+		var i18nResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(i18nFolder) != null;
+
+		return standardResourcesFolderExists || i18nResourcesFolderExists;
 	}
 
 	/**
@@ -232,5 +289,4 @@ public class Plugin {
 	private String toClasspathFile(String fileName) {
 		return packageToFolderPath(this.specification.getRootPackage()).concat("/" + fileName);
 	}
-
 }
