@@ -48,6 +48,30 @@ public class Configuration {
 	}
 
 	/**
+	 * <p>The I18N data loaded from each plugin is stored in the configuration object under the
+	 * CoreConfigKeyEnum.I18N enum value.</p>
+	 *
+	 * <p>The usual key for a plugin i18n resource is: pluginRootPackage.key
+	 * Where pluginRootPackage is the full root package of the plugin and the key is the normal properties key wich
+	 * may include any valid character</p>
+	 *
+	 * <p>The I18N resource may be parameterized and this parameterization follows the java standard conventions:<br/>
+	 *
+	 * </p>
+	 *
+	 * @param key
+	 * @param params
+	 * @return
+	 */
+	public Option<String> getTranslationFor(String key,Object... params) {
+		return Option.none();
+	}
+
+	public Option<String> getTranslationFromPlugin(String plugin, String key, Object... params) {
+		return Option.none();
+	}
+
+	/**
 	 * Returns a new configuration object that is the result of merging the new configuration with the old.
 	 *
 	 * The new object keys have precedence over the old keys, which means that new configuration override old configurations.

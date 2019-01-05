@@ -95,4 +95,16 @@ public class PluginTest {
 		assertTrue(pluginLoadTry.isFailure());
 		assertTrue(InvalidPluginException.class.isAssignableFrom(pluginLoadTry.getCause().getClass()));
 	}
+
+	@Test
+	@DisplayName("When loading a plugin, it should ensure the i18n resources of its bundles are put into the configuration")
+	public void should_load_i18n_resources_when_loading_pluginb(){
+		var pluginSpec = new PluginSpec(TEST_PLUGIN_WITH_I18N_NAME, TEST_PLUGIN_WITH_I18N_NAME, Option.none());
+		var configuration = Configuration.builder();
+		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
+
+		assertTrue(pluginLoadTry.isSuccess());
+		var plugin = pluginLoadTry.get();
+		assertTrue(false);
+	}
 }
