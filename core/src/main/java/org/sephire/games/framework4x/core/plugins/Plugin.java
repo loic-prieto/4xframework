@@ -1,9 +1,12 @@
 package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.API;
-import io.vavr.collection.HashSet;
+import io.vavr.Tuple;
+import io.vavr.Tuple3;
 import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Set;
+import io.vavr.collection.*;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Getter;
@@ -12,10 +15,12 @@ import org.reflections.scanners.ResourcesScanner;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
-import org.sephire.games.framework4x.core.plugins.map.*;
+import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
+import org.sephire.games.framework4x.core.plugins.map.MapProvider;
+import org.sephire.games.framework4x.core.plugins.map.MapProviderWrapper;
+import org.sephire.games.framework4x.core.plugins.map.MapProviderWrappingException;
 
 import javax.naming.OperationNotSupportedException;
-
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -24,63 +29,23 @@ import java.util.regex.Pattern;
 import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
 import static java.lang.String.format;
+import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.I18N;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
+import static org.sephire.games.framework4x.core.utils.ResourceLoading.normalizePackageNameForReflection;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
 /**
- * Represents a plugin to be loaded when a game starts.
- * <p>
- * A plugin may define model entities as declared in the core framework, if it is a base plugin, or may
- * override and extend the configuration of a base plugin.
+ * <p>Represents a plugin to be loaded when a game starts.</p>
+ * <p>A plugin may define model entities as declared in the core framework, if it is a base plugin, or may
+ * override and extend the configuration of a base plugin.</p>
  */
 public class Plugin {
 
 	@Getter
 	private PluginSpec specification;
-	@Getter
-	private Set<String> availableResourceBundleNames;
 
 	private Plugin(PluginSpec spec) {
 		this.specification = spec;
-		this.availableResourceBundleNames = getAvailableI18NResourceBundles();
-	}
-
-	public Try<String> getTitle(Locale locale) {
-		return Try.of(()->{
-			var keyName = String.format("%s.plugin.title",this.specification.getPluginName());
-
-			// We must iterate over each resource bundle, because we don't want the user to use a specific named
-			// resource bundle to define this
-			return availableResourceBundleNames.map((name)-> PropertyResourceBundle.getBundle(name,locale))
-			  .find((bundle)->bundle.containsKey(keyName))
-			  .map((bundle)->bundle.getString(keyName))
-			  .getOrElseThrow(()->new InvalidPluginException("The plugin's title has not been found among its resource files"));
-		});
-	}
-
-	public Try<String> getDescription(Locale locale) {
-		return Try.of(()->{
-			var keyName = String.format("%s.plugin.description",this.specification.getPluginName());
-
-			// We must iterate over each resource bundle, because we don't want the user to use a specific named
-			// resource bundle to define this
-			return availableResourceBundleNames.map((name)->ResourceBundle.getBundle(name,locale))
-			  .find((bundle)->bundle.containsKey(keyName))
-			  .map((bundle)->bundle.getString(keyName))
-			  .getOrElseThrow(()->new InvalidPluginException("The plugin's description has not been found among its resource files"));
-		});
-	}
-
-	private Set<String> getAvailableI18NResourceBundles() {
-
-		Reflections reflections = new Reflections(
-		  normalizePackageNameForReflection(this.specification.getRootPackage().concat(".i18n")),
-		  new ResourcesScanner());
-
-		return HashSet.ofAll(reflections.getResources(Pattern.compile(".*\\.properties")))
-		  .map((name)->name.replaceAll("\\.properties",""))
-		  .map((name)->name.replaceAll("(.*)_.*$","$1"));
-
 	}
 
 	/**
@@ -90,39 +55,37 @@ public class Plugin {
 	 * resources.
 	 *
 	 * May return the following exceptions as errors:
-	 *
+	 *  - InvalidPluginSpecException
+	 *  - InvalidPluginLifecycleHandlerException
+	 *  - PluginLoadingException
 	 *
 	 * @param pluginSpec
 	 * @return
 	 */
 	public static Try<Plugin> from(PluginSpec pluginSpec,Configuration.Builder configuration) {
 		return Try.of(()->{
-			// Verify the package exists
-			if(!doesPackageExist(pluginSpec)){
+			if (!doesRootPackageExist(pluginSpec)) {
 				throw new InvalidPluginSpecException(
 				  format("The root package %s does not exist",pluginSpec.getRootPackage()),
 				  pluginSpec.getPluginName());
 			}
 
 			var plugin = new Plugin(pluginSpec);
-
 			var loadingTry = plugin.load(configuration);
-
 			if(loadingTry.isFailure()) {
 				throw loadingTry.getCause();
-			}
-
-			var locale = Locale.ENGLISH;
-			var i18nTry = plugin.getTitle(locale).andThen(()->plugin.getDescription(locale));
-			if(i18nTry.isFailure()) {
-				throw i18nTry.getCause();
 			}
 
 			return plugin;
 		});
 	}
 
-	private static boolean doesPackageExist(PluginSpec pluginSpec) {
+	/**
+	 * Checks whether the root package declared for the plugin exists in the classpath.
+	 * @param pluginSpec
+	 * @return
+	 */
+	private static boolean doesRootPackageExist(PluginSpec pluginSpec) {
 		var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
 		var i18nFolder = "i18n/".concat(pluginSpec.getPluginName());
 		var standardResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
@@ -131,31 +94,97 @@ public class Plugin {
 		return standardResourcesFolderExists || i18nResourcesFolderExists;
 	}
 
+	private static void updateConfigWithBundleEntry(Configuration.Builder configuration, Tuple3<Locale, String, String> bundleEntry) {
+		var i18nMap = configuration.getConfig(CoreConfigKeyEnum.I18N).map((v) -> (Map<Locale, Map<String, String>>) v)
+		  .getOrElse(HashMap.empty());
+		var i18nLocaleMap = i18nMap.get(bundleEntry._1).getOrElse(HashMap.empty());
+		configuration.putConfig(
+		  I18N,
+		  i18nMap.put(
+			bundleEntry._1,
+			i18nLocaleMap.put(
+			  bundleEntry._2, bundleEntry._3)));
+	}
+
+	private static Option<ResourceBundle> bundleFromFileName(String filename) {
+		var bundleInfo = filename.split("_");
+		if (bundleInfo.length < 2 || bundleInfo.length > 3) {
+			return Option.none();
+		} else {
+			if (bundleInfo.length == 2) {
+				return Option.of(PropertyResourceBundle.getBundle(
+				  bundleInfo[0],
+				  Locale.forLanguageTag(
+					bundleInfo[1])));
+			} else {
+				return Option.of(
+				  PropertyResourceBundle.getBundle(
+					bundleInfo[0],
+					Locale.forLanguageTag(
+					  bundleInfo[1]
+						.concat("-")
+						.concat(bundleInfo[2]))));
+			}
+		}
+	}
+
+	private static Set<Tuple3<Locale, String, String>> entriesFromBundle(ResourceBundle bundle) {
+		return HashSet.ofAll(bundle.keySet())
+		  .map((key) -> Tuple.of(bundle.getLocale(), key, bundle.getString(key)));
+	}
+
 	/**
 	 * <p>Will invoke the initializing of the plugin resources and configuration with a given
 	 * external configuration ready to be filled.</p>
-	 * <p>
-	 * The result of this process tells if it was successful, so that dependent plugins are not
-	 * loaded.
-	 * </p>
+	 * <p>The result of this process tells if it was successful, so that dependent plugins are not
+	 * loaded</p>
+	 * <p>The configuration object will be updated in place</p>
 	 *
 	 * @param configuration
 	 */
 	private Try<Void> load(Configuration.Builder configuration) {
 
+		return loadTerrainResources(configuration)
+		  .andThen(() -> loadMapGenerators(configuration))
+		  .andThen(() -> loadI18NResources(configuration))
+		  .andThen(() -> callPluginLoadingHooks(configuration));
+	}
+
+	/**
+	 * Allows a plugin to hook into the plugin loading process, which allows to put some extra configuration
+	 * that cannot be generated by the standard resource files or generators.
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> callPluginLoadingHooks(Configuration.Builder configuration) {
 		return Try.of(()->{
 			var lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow((t)->t);
-			var mapGenerators = fetchMapGenerators().getOrElseThrow((t)->t);
-
-			// This is the fastest way to throw if there is failure, even if we're not interested
-			// in the result
-			loadTerrainResources(configuration).getOrElseThrow((t)->t);
-			loadMapGenerators(mapGenerators,configuration).getOrElseThrow((t)->t);
-
-			// Once everything is done, give a chance to the plugin to add last-minute configuration
 			if(lifecycleHandler.isDefined()){
 				lifecycleHandler.get().callPluginLoadingHook(configuration).getOrElseThrow((t)->t);
 			}
+			return null;
+		});
+	}
+
+	/**
+	 * Will load all i18n resources into the configuration object from the plugin's i18n package folder
+	 * Resources are defined as standard resource bundle properties files.
+	 * The configuration will have the following type inside the I18N key: Map&lt;Locale, Map&lt;String,String&gt;&gt;
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> loadI18NResources(Configuration.Builder configuration) {
+		return Try.of(() -> {
+			Reflections reflections = new Reflections(
+			  normalizePackageNameForReflection(this.specification.getRootPackage().concat(".i18n")),
+			  new ResourcesScanner());
+
+			HashSet.ofAll(reflections.getResources(Pattern.compile(".*\\.properties")))
+			  .map((name) -> name.replaceAll("\\.properties", ""))
+			  .map(Plugin::bundleFromFileName)
+			  .filter(Option::isDefined).map(Option::get)
+			  .flatMap(Plugin::entriesFromBundle)
+			  .forEach(bundleEntry -> updateConfigWithBundleEntry(configuration, bundleEntry));
 
 			return null;
 		});
@@ -163,22 +192,29 @@ public class Plugin {
 
 	/**
 	 * Will load the map generators of this plugin into the configuration.
-	 * @param generators
 	 * @param configuration
 	 * @return
 	 */
-	private Try<Configuration.Builder> loadMapGenerators(Set<MapGeneratorWrapper> generators,Configuration.Builder configuration) {
+	private Try<Void> loadMapGenerators(Configuration.Builder configuration) {
 		return Try.of(()->{
-			var addOperation = configuration.addAllTo(CoreConfigKeyEnum.MAPS,generators);
+			var mapGenerators = fetchMapGenerators().getOrElseThrow((t) -> t);
+			var addOperation = configuration.addAllTo(CoreConfigKeyEnum.MAPS, mapGenerators);
 			if(addOperation.isFailure()) {
 				throw new PluginLoadingException(addOperation.getCause());
 			}
 
-			return configuration;
+			return null;
 		});
 	}
 
-	private Try<Configuration.Builder> loadTerrainResources(Configuration.Builder configuration) {
+	/**
+	 * Loads the terrain resources defined in this plugin, found in the CoreResourcesTypes.TERRAIN_TYPES.getFileName() file
+	 * in the class folder of the plugin, into the configuration under the CoreConfigKeyEnum.TERRAIN_TYPES key.
+	 *
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> loadTerrainResources(Configuration.Builder configuration) {
 		var terrainTypesFilename = toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName());
 		return ConfigLoader.getConfigFor(terrainTypesFilename, TerrainsTypesMapping.class)
 		  .map((mapping) -> mapping.getTypes().toArray(new String[]{}))
@@ -192,13 +228,17 @@ public class Plugin {
 			  }
 			  configuration.putConfig(TERRAIN_TYPES, newTerrainSet);
 		  })
-		  .map((discardedResult) -> configuration)
+		  .map((discardedResult) -> (Void) null)
 		  // The terrain file is not mandatory for a plugin
 		  .recover((e) -> Match(e).of(
-			Case($(instanceOf(ConfigFileNotFoundException.class)), configuration)
+			Case($(instanceOf(ConfigFileNotFoundException.class)), (Void) null)
 		  ));
 	}
 
+	/**
+	 * Retrieve the plugin lifecycle hooks if any have been defined.
+	 * @return
+	 */
 	private Try<Option<PluginLifecycleHandlerWrapper>> fetchLifeCycleHandler() {
 		return Try.of(()->{
 			Reflections reflections = new Reflections(normalizePackageNameForReflection(this.specification.getRootPackage()));
@@ -263,20 +303,6 @@ public class Plugin {
 
 			return mapGeneratorWrappers;
 		});
-	}
-
-	/**
-	 * When using reflection to search for classes inside a package, the search is done as a regexp. We need to add a point
-	 * to the name of the package, so that packages that are named the same as this one but with more characters are not included.
-	 * See Reflections.getTypesAnnotatedWith method to see what I mean.
-	 *
-	 * @param packageName
-	 * @return
-	 */
-	private String normalizePackageNameForReflection(String packageName) {
-		return packageName.endsWith(".") ?
-			packageName :
-			packageName.concat(".");
 	}
 
 	/**

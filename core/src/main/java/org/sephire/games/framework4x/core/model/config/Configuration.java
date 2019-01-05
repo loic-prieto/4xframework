@@ -4,7 +4,9 @@ import io.vavr.collection.*;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 
+import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Locale;
 
 import static io.vavr.API.$;
 import static io.vavr.API.Case;
@@ -49,38 +51,31 @@ public class Configuration {
 
 	/**
 	 * <p>The I18N data loaded from each plugin is stored in the configuration object under the
-	 * CoreConfigKeyEnum.I18N enum value.</p>
-	 *
-	 * <p>The usual key for a plugin i18n resource is: pluginRootPackage.key
+	 * CoreConfigKeyEnum.I18N enum value, with type signature Map&lt;Locale,Map&lt;String,String&gt;&gt;</p>
+	 *<p>The usual key for a plugin i18n resource is: pluginRootPackage.key
 	 * Where pluginRootPackage is the full root package of the plugin and the key is the normal properties key wich
 	 * may include any valid character</p>
+	 *<p>The I18N resource may be parameterized and this parametrization follows the java MessageFormat standard conventions:
+	 *	<pre><code>
+	 *	   // the resource bundle key "some.plugin.some.key" has the value "Your civilization is {0}"
+	 *	   var civilizationName = "Sumeria";
+	 *	   var userLanguage = Locale.ENGLISH;
+	 *	   var civilizationLabel = configuration.getTranslationFor(userLanguage,"some.plugin.some.key",civilizationName);
 	 *
-	 * <p>The I18N resource may be parameterized and this parameterization follows the java standard conventions:<br/>
-	 *
+	 *	   assert civilizationLabel.get().equals("Your civilization is Sumeria")
+	 *	</code></pre>
 	 * </p>
 	 *
 	 * @param key
 	 * @param params
 	 * @return
 	 */
-	public Option<String> getTranslationFor(String key,Object... params) {
-		return Option.none();
-	}
-
-	public Option<String> getTranslationFromPlugin(String plugin, String key, Object... params) {
-		return Option.none();
-	}
-
-	/**
-	 * Returns a new configuration object that is the result of merging the new configuration with the old.
-	 *
-	 * The new object keys have precedence over the old keys, which means that new configuration override old configurations.
-	 *
-	 * @param overridingConfiguration
-	 * @return
-	 */
-	public Configuration mergeWith(Configuration overridingConfiguration) {
-		return new Configuration(this.configMap.merge(overridingConfiguration.configMap,(oldConfig,newConfig)->newConfig));
+	public Option<String> getTranslationFor(Locale locale, String key, Object... params) {
+		return configMap.get(CoreConfigKeyEnum.I18N)
+		  .map(rawMap -> (Map<Locale, Map<String, String>>) rawMap)
+		  .flatMap(i18nMap -> i18nMap.get(locale))
+		  .flatMap(localeMap -> localeMap.get(key))
+		  .map(value -> MessageFormat.format(value, params));
 	}
 
 	public static Builder builder() {
