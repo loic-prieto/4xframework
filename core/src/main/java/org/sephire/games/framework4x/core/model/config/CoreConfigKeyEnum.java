@@ -15,5 +15,11 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 * This key is to be used to store the game parameters as defined by the different plugins and
 	 * given value by the user when creating a game.
 	 */
-	GAME_PARAMETERS;
+	GAME_PARAMETERS,
+	/**
+	 * The key used to store I18N resources loaded from every plugin.
+	 * The value is a Map of key-value I18N resources.
+	 * By convention, the key should be: packageOfPlugin.restOfTheKey
+	 */
+	I18N;
 }
