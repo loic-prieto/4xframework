@@ -26,10 +26,14 @@ public class PluginMapGeneratorsTest {
 	@Test
 	@DisplayName("When loading a plugin, maps generators should be loaded and available")
 	public void should_create_map_generator_when_loading_plugin() {
-		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder().withPluginName(MAP_GENERATOR_PLUGIN_NAME)
+		  .withRootPackage(MAP_GENERATOR_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configurationBuilder = Configuration.builder();
 
-		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var pluginLoadingTry = Plugin.from(pluginSpec.get(),configurationBuilder);
 		var configuration = configurationBuilder.build();
 
 		assertTrue(pluginLoadingTry.isSuccess());
@@ -45,10 +49,14 @@ public class PluginMapGeneratorsTest {
 	@Test
 	@DisplayName("When loading map generators from a plugin, name and i18n display key of the generator should be retrieved")
 	public void should_have_retrieved_name_and_displayKey_from_generators() {
-		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder().withPluginName(MAP_GENERATOR_PLUGIN_NAME)
+		  .withRootPackage(MAP_GENERATOR_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configurationBuilder = Configuration.builder();
 
-		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var pluginLoadingTry = Plugin.from(pluginSpec.get(),configurationBuilder);
 		var configuration = configurationBuilder.build();
 
 		assertTrue(pluginLoadingTry.isSuccess());
@@ -70,10 +78,14 @@ public class PluginMapGeneratorsTest {
 	@Test
 	@DisplayName("The loaded map generators should be able to produce a map given a configuration")
 	public void map_generators_should_produce_maps() {
-		var pluginSpec = new PluginSpec(MAP_GENERATOR_PLUGIN_NAME,MAP_GENERATOR_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder().withPluginName(MAP_GENERATOR_PLUGIN_NAME)
+		  .withRootPackage(MAP_GENERATOR_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configurationBuilder = Configuration.builder();
 
-		var pluginLoadingTry = Plugin.from(pluginSpec,configurationBuilder);
+		var pluginLoadingTry = Plugin.from(pluginSpec.get(),configurationBuilder);
 		var configuration = configurationBuilder.build();
 		assertTrue(pluginLoadingTry.isSuccess());
 

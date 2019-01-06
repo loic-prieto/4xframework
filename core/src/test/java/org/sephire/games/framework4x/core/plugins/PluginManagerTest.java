@@ -26,6 +26,7 @@ public class PluginManagerTest {
 	private static Path validPluginsFolder;
 	private static Path mixedPluginsFolder;
 	private static Path invalidPluginFolder1;
+	private static Path invalidPluginFolder2;
 
 	@BeforeAll
 	public static void setup() throws IOException {
@@ -42,9 +43,17 @@ public class PluginManagerTest {
 		buildPluginJar(validPluginsFolder,"org.sephire.games.framework4x.testing.testPlugin1",Option.none());
 		buildNonPluginJar(mixedPluginsFolder);
 
+		// A folder with an invalid plugin because of plugin defining itself as its parent plugin
 		invalidPluginFolder1 = Files.createTempDirectory("PluginManagerTest-Invalid-1-");
 		buildPluginJar(invalidPluginFolder1,"org.sephire.games.framework4x.testing.testPlugin1",
 		  Option.of("org.sephire.games.framework4x.testing.testPlugin1"));
+
+		// A folder with an invalid plugin because the i18n basic plugin info hasn't been provided
+		invalidPluginFolder2 = Files.createTempDirectory("PluginManagerTest-Invalid-2-");
+		buildPluginJar(invalidPluginFolder2,"org.sephire.games.framework4x.testing.testPluginWithoutI18N",
+		  Option.none());
+		buildPluginJar(invalidPluginFolder2,"org.sephire.games.framework4x.testing.testPlugin1",
+		  Option.none());
 
 	}
 
@@ -194,6 +203,21 @@ public class PluginManagerTest {
 		var exceptions = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions();
 		var isExpectedException = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions()
 		  .exists((t)->InvalidPluginJarException.class.isAssignableFrom(t.getClass()));
+
+		assertTrue(isExpectedException);
+		assertEquals(1,exceptions.length());
+	}
+
+	@Test
+	@DisplayName("When a plugin in the plugin folder is invalid because of i18n, the plugin manager should refuse to start")
+	public void should_complain_if_a_plugin_is_invalid() {
+		var pluginManagerTry = PluginManager.fromFolder(invalidPluginFolder2);
+		assertTrue(pluginManagerTry.isFailure());
+		assertEquals(PluginLoadingException.class,pluginManagerTry.getCause().getClass());
+
+		var exceptions = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions();
+		var isExpectedException = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions()
+		  .exists((t)->InvalidPluginException.class.isAssignableFrom(t.getClass()));
 
 		assertTrue(isExpectedException);
 		assertEquals(1,exceptions.length());

@@ -322,7 +322,16 @@ public class PluginManager {
 				}
 			}
 
-			return new PluginSpec(name,rootPackage,parentPlugin);
+			var pluginSpec = PluginSpec.builder()
+			  .withRootPackage(rootPackage)
+			  .withPluginName(name)
+			  .withParent(parentPlugin)
+			  .build();
+			if(pluginSpec.isFailure()){
+				throw pluginSpec.getCause();
+			}
+
+			return pluginSpec.get();
 		});
 	}
 

@@ -23,9 +23,14 @@ public class PluginTest {
 	@Test
 	@DisplayName("Given a valid spec, a plugin should load successfully")
 	public void should_load_successfully() {
-		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder()
+		  .withPluginName(TEST1_PLUGIN_NAME)
+		  .withRootPackage(TEST1_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configuration = Configuration.builder();
-		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
+		var pluginLoadTry = Plugin.from(pluginSpec.get(), configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
 	}
@@ -33,9 +38,14 @@ public class PluginTest {
 	@Test
 	@DisplayName("Given a valid spec, a plugin should put its post load configuration correctly")
 	public void should_load_configuration_successfully() {
-		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder()
+		  .withPluginName(TEST1_PLUGIN_NAME)
+		  .withRootPackage(TEST1_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configuration = Configuration.builder();
-		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
+		var pluginLoadTry = Plugin.from(pluginSpec.get(), configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
 		assertTrue(configuration.getConfig(TEST_VALUE).isDefined());
@@ -45,22 +55,17 @@ public class PluginTest {
 	@Test
 	@DisplayName("Should load terrain types successfully when loading a plugin with terrain data")
 	public void should_load_terrain_types_successfully() {
-		var pluginSpec = new PluginSpec(TEST1_PLUGIN_NAME, TEST1_PLUGIN_NAME, Option.none());
+		var pluginSpec = PluginSpec.builder()
+		  .withPluginName(TEST1_PLUGIN_NAME)
+		  .withRootPackage(TEST1_PLUGIN_NAME)
+		  .build();
+		assertTrue(pluginSpec.isSuccess());
+
 		var configuration = Configuration.builder();
-		var pluginLoadTry = Plugin.from(pluginSpec, configuration);
+		var pluginLoadTry = Plugin.from(pluginSpec.get(), configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
 		assertTrue(configuration.getConfig(CoreConfigKeyEnum.TERRAIN_TYPES).isDefined());
-	}
-
-	@Test
-	@DisplayName("Given a spec with an invalid package root, should complain when loading plugin")
-	public void should_complain_when_package_does_not_exist() {
-		var pluginSpec = new PluginSpec("invalidName", "invalidPackage", Option.none());
-		var pluginLoadTry = Plugin.from(pluginSpec, Configuration.builder());
-
-		assertTrue(pluginLoadTry.isFailure());
-		assertTrue(pluginLoadTry.getCause().getClass().isAssignableFrom(InvalidPluginSpecException.class));
 	}
 
 	@Test

@@ -39,11 +39,6 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	 */
 	private Set<PluginSpec> selectedPlugins;
 
-	private final static String DEFAULT_DESCRIPTION = "Select a plugin to see it's description";
-	private final static String DEFAULT_INFO = "Select the desired plugins to load then press enter to open the create game window, or escape to go back to the menu";
-	private final static String PLUGIN_LIST_LABEL = "Select the plugins you wish to load:";
-	private final static String NEEDS_BASE_PLUGIN_SELECTED = "To start a game at least a base plugin needs to be selected";
-
 	public SelectPluginsWindow(PluginManager pluginManager, WindowBasedTextGUI textGUI) {
 		super(textGUI);
 		setTitle(getTranslationFor("selectPluginWindow.title", Locale.ENGLISH));
@@ -135,7 +130,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginInfoPanel.addComponent(pluginInfoLabel);
 
 		registerEventListener(PluginTraversedEvent.class,(event)->{
-			pluginInfoLabel.setText(event.getSelectedPlugin().getPluginName());
+			pluginInfoLabel.setText(event.getSelectedPlugin().getDescription(Locale.ENGLISH).get());
 		});
 
 		backgroundPanel.addComponent(pluginInfoPanel.withBorder(Borders.singleLine()));

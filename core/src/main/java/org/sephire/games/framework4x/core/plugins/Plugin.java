@@ -55,7 +55,6 @@ public class Plugin {
 	 * resources.
 	 *
 	 * May return the following exceptions as errors:
-	 *  - InvalidPluginSpecException
 	 *  - InvalidPluginLifecycleHandlerException
 	 *  - PluginLoadingException
 	 *
@@ -64,12 +63,6 @@ public class Plugin {
 	 */
 	public static Try<Plugin> from(PluginSpec pluginSpec,Configuration.Builder configuration) {
 		return Try.of(()->{
-			if (!doesRootPackageExist(pluginSpec)) {
-				throw new InvalidPluginSpecException(
-				  format("The root package %s does not exist",pluginSpec.getRootPackage()),
-				  pluginSpec.getPluginName());
-			}
-
 			var plugin = new Plugin(pluginSpec);
 			var loadingTry = plugin.load(configuration);
 			if(loadingTry.isFailure()) {
@@ -78,20 +71,6 @@ public class Plugin {
 
 			return plugin;
 		});
-	}
-
-	/**
-	 * Checks whether the root package declared for the plugin exists in the classpath.
-	 * @param pluginSpec
-	 * @return
-	 */
-	private static boolean doesRootPackageExist(PluginSpec pluginSpec) {
-		var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
-		var i18nFolder = "i18n/".concat(pluginSpec.getPluginName());
-		var standardResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
-		var i18nResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(i18nFolder) != null;
-
-		return standardResourcesFolderExists || i18nResourcesFolderExists;
 	}
 
 	private static void updateConfigWithBundleEntry(Configuration.Builder configuration, Tuple3<Locale, String, String> bundleEntry) {

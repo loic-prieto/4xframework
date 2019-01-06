@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.sephire.games.framework4x.core.plugins.configuration.InvalidPluginLifecycleHandlerException;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -97,5 +98,72 @@ public class PluginSpec implements Comparable<PluginSpec> {
 		return HashSet.ofAll(reflections.getResources(Pattern.compile(".*\\.properties")))
 		  .map((name) -> name.replaceAll("\\.properties", ""))
 		  .map((name) -> name.replaceAll("(.*)_.*$", "$1"));
+	}
+
+	public static Builder builder() {
+		return new Builder();
+	}
+
+	public static class Builder {
+		private String rootPackage;
+		private String pluginName;
+		private Option<String> parentPlugin;
+
+		public Builder withRootPackage(String rootPackage) {
+			this.rootPackage = rootPackage;
+			return this;
+		}
+		public Builder withPluginName(String pluginName) {
+			this.pluginName = pluginName;
+			return this;
+		}
+		public Builder withParent(String parentPlugin) {
+			this.parentPlugin = Option.of(parentPlugin);
+			return this;
+		}
+		public Builder withParent(Option<String> parentPlugin) {
+			this.parentPlugin = parentPlugin;
+			return this;
+		}
+
+		public Try<PluginSpec> build() {
+			return Try.of(()->{
+				if(parentPlugin == null) {
+					parentPlugin = Option.none();
+				}
+
+				if(rootPackage == null || pluginName == null) {
+					pluginName = pluginName == null? "unspecified" : pluginName;
+					throw new InvalidPluginSpecException(pluginName,"rootPackage and pluginName are mandatory parameters");
+				}
+
+				var pluginSpec = new PluginSpec(pluginName,rootPackage,parentPlugin);
+
+				if(!doesRootPackageExist(pluginSpec)) {
+					throw new InvalidPluginSpecException(pluginName,"the root package hasn't been found in the classpath");
+				}
+
+				// This checks the availability of basic i18n metadata inside the plugin
+				pluginSpec.getTitle(Locale.ENGLISH)
+				  .andThen(()->pluginSpec.getDescription(Locale.ENGLISH))
+				  .getOrElseThrow((t)->t);
+
+				return pluginSpec;
+			});
+		}
+
+		/**
+		 * Checks whether the root package declared for the plugin exists in the classpath.
+		 * @param pluginSpec
+		 * @return
+		 */
+		private static boolean doesRootPackageExist(PluginSpec pluginSpec) {
+			var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
+			var i18nFolder = "i18n/".concat(pluginSpec.getPluginName());
+			var standardResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
+			var i18nResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(i18nFolder) != null;
+
+			return standardResourcesFolderExists || i18nResourcesFolderExists;
+		}
 	}
 }

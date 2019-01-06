@@ -1,6 +1,5 @@
 package org.sephire.games.framework4x.core.plugins;
 
-import io.vavr.control.Option;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +16,13 @@ public class PluginSpecTest {
 	@Test
 	@DisplayName("Given a plugin spec, it should retrieve its title and description for a given locale")
 	public void should_retrieve_plugin_title_and_description() {
-		var pluginSpec = new PluginSpec(TEST_PLUGIN_WITH_I18N_NAME, TEST_PLUGIN_WITH_I18N_NAME, Option.none());
+		var pluginSpecTry = PluginSpec.builder()
+		  .withRootPackage(TEST_PLUGIN_WITH_I18N_NAME)
+		  .withPluginName(TEST_PLUGIN_WITH_I18N_NAME)
+		  .build();
+
+		assertTrue(pluginSpecTry.isSuccess());
+		var pluginSpec = pluginSpecTry.get();
 
 		var expectedTitle = "Test plugin with I18N resources";
 		var expectedDescription = "A test plugin that contains an i18n resource so that its name and description can be retrieved";
@@ -33,12 +38,25 @@ public class PluginSpecTest {
 	@Test
 	@DisplayName("If a plugin doest not have basic i18n metadata, it should be invalid")
 	public void if_basic_plugin_i18n_is_not_provided_complain() {
-		var pluginSpec = new PluginSpec(TEST_PLUGIN_WITHOUT_I18N_NAME, TEST_PLUGIN_WITHOUT_I18N_NAME, Option.none());
-		var titleFetchTry = pluginSpec.getTitle(Locale.ENGLISH);
+		var pluginSpecTry = PluginSpec.builder()
+		  .withPluginName(TEST_PLUGIN_WITHOUT_I18N_NAME)
+		  .withRootPackage(TEST_PLUGIN_WITHOUT_I18N_NAME)
+		  .build();
 
-		assertTrue(titleFetchTry.isFailure());
-		assertTrue(InvalidPluginException.class.isAssignableFrom(titleFetchTry.getCause().getClass()));
+		assertTrue(pluginSpecTry.isFailure());
+		assertTrue(InvalidPluginException.class.isAssignableFrom(pluginSpecTry.getCause().getClass()));
 	}
 
+	@Test
+	@DisplayName("If a plugin declares an invalid root package, it should be invalid")
+	public void if_plugin_has_nonexistent_root_package_complain() {
+		var pluginSpecTry = PluginSpec.builder()
+		  .withPluginName(TEST_PLUGIN_WITH_I18N_NAME)
+		  .withRootPackage("non.existent.root.package")
+		  .build();
+
+		assertTrue(pluginSpecTry.isFailure());
+		assertTrue(InvalidPluginSpecException.class.isAssignableFrom(pluginSpecTry.getCause().getClass()));
+	}
 
 }
