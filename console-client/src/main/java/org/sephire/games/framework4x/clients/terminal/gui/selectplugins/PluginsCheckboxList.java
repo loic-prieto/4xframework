@@ -14,6 +14,8 @@ import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
+import java.util.Locale;
+
 import static com.googlecode.lanterna.input.KeyType.ArrowDown;
 import static com.googlecode.lanterna.input.KeyType.ArrowUp;
 import static io.vavr.API.*;
@@ -25,7 +27,7 @@ public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSp
 	private Map<String, ToStringDecorator<PluginSpec>> pluginCache;
 
 	private static final Function1<PluginSpec,String> pluginSpecStringifier = (pluginSpec ->
-	  (pluginSpec.isBasePlugin() ? "[Base] " : "").concat(pluginSpec.getPluginName()));
+	  (pluginSpec.isBasePlugin() ? "[Base] " : "").concat(pluginSpec.getTitle(Locale.ENGLISH).get()));
 
 	public PluginsCheckboxList(Set<PluginSpec> plugins) {
 
