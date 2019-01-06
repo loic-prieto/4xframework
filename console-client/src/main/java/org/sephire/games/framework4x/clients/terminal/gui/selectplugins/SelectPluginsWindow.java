@@ -126,11 +126,12 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginInfoPanel.addComponent(headerLabel);
 
 		var pluginInfoLabel = new Label("");
+		pluginInfoLabel.setLabelWidth(pluginInfoPanel.getPreferredSize().getColumns()-3);
 		pluginInfoLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginInfoPanel.addComponent(pluginInfoLabel);
 
 		registerEventListener(PluginTraversedEvent.class,(event)->{
-			pluginInfoLabel.setText(event.getSelectedPlugin().getDescription(Locale.ENGLISH).get());
+			pluginInfoLabel.setText("\n"+event.getSelectedPlugin().getDescription(Locale.ENGLISH).get());
 		});
 
 		backgroundPanel.addComponent(pluginInfoPanel.withBorder(Borders.singleLine()));
