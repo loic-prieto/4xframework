@@ -12,6 +12,7 @@ import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.Fill;
@@ -44,7 +45,8 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	private final static String NEEDS_BASE_PLUGIN_SELECTED = "To start a game at least a base plugin needs to be selected";
 
 	public SelectPluginsWindow(PluginManager pluginManager, WindowBasedTextGUI textGUI) {
-		super("Plugin selection screen",textGUI);
+		super(textGUI);
+		setTitle(getTranslationFor("selectPluginWindow.title", Locale.ENGLISH));
 		this.pluginManager = pluginManager;
 		this.selectedPlugins = HashSet.empty();
 
@@ -97,7 +99,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginListPanel.setLayoutData(BorderLayout.Location.CENTER);
 		pluginListPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
-		var pluginsListLabel = new Label(PLUGIN_LIST_LABEL);
+		var pluginsListLabel = new Label(getTranslationFor("selectPluginWindow.pluginList.description",Locale.ENGLISH));
 		pluginsListLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginListPanel.addComponent(pluginsListLabel);
 
@@ -106,7 +108,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginListPanel.addComponent(pluginCheckBoxList);
 
 
-		var selectButton = new Button("Start Creating Game");
+		var selectButton = new Button(getTranslationFor("selectPluginWindow.pluginList.startButton",Locale.ENGLISH));
 		selectButton.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.End));
 		selectButton.setEnabled(false);
 		pluginListPanel.addComponent(selectButton);
@@ -115,7 +117,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 			selectButton.setEnabled(isBasePluginSelected);
 		});
 
-		backgroundPanel.addComponent(pluginListPanel.withBorder(Borders.singleLine("Plugin list")));
+		backgroundPanel.addComponent(pluginListPanel.withBorder(Borders.singleLine(getTranslationFor("selectPluginWindow.pluginList.title",Locale.ENGLISH))));
 	}
 
 	private void buildPluginInfoPanel(Panel backgroundPanel) {
@@ -124,7 +126,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginInfoPanel.setLayoutData(BorderLayout.Location.RIGHT);
 		pluginInfoPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
-		var headerLabel = new Label(DEFAULT_DESCRIPTION);
+		var headerLabel = new Label(getTranslationFor("selectPluginWindow.pluginInfoPanel.description",Locale.ENGLISH));
 		headerLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginInfoPanel.addComponent(headerLabel);
 
@@ -149,15 +151,15 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		messagePanel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		infoPanel.addComponent(messagePanel);
 
-		messagePanel.addMessage(DEFAULT_INFO, INFO);
-		messagePanel.addMessage(NEEDS_BASE_PLUGIN_SELECTED,ERROR);
+		messagePanel.addMessage(getTranslationFor("selectPluginWindow.messagePanel.defaultMessage",Locale.ENGLISH), INFO);
+		messagePanel.addMessage(getTranslationFor("selectPluginWindow.messagePanel.needBasePlugin",Locale.ENGLISH),ERROR);
 
 		registerEventListener(SelectedPluginsListUpdatedEvent.class,(event)->{
 			var needsBasePluginSelected = !event.getSelectedPlugins().exists(PluginSpec::isBasePlugin);
 			if(needsBasePluginSelected) {
-				messagePanel.addMessageIfNotExists(NEEDS_BASE_PLUGIN_SELECTED,ERROR);
+				messagePanel.addMessageIfNotExists(getTranslationFor("selectPluginWindow.messagePanel.needBasePlugin",Locale.ENGLISH),ERROR);
 			} else {
-				messagePanel.removeMessage(NEEDS_BASE_PLUGIN_SELECTED);
+				messagePanel.removeMessage(getTranslationFor("selectPluginWindow.messagePanel.needBasePlugin",Locale.ENGLISH));
 			}
 		});
 

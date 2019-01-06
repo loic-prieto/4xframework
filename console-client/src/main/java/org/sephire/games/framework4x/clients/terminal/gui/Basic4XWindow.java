@@ -4,6 +4,10 @@ import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
 import org.sephire.games.framework4x.clients.terminal.api.events.WindowEventBus;
 
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 /**
@@ -22,6 +26,19 @@ public abstract class Basic4XWindow extends BasicWindow {
 		super(title);
 		this.eventBus = new WindowEventBus();
 		this.textGUI = textGUI;
+	}
+
+	/**
+	 * Gets the i18n resource value from the UI bundle of the console client.
+	 * @param key
+	 * @param locale
+	 * @param params
+	 * @return
+	 */
+	protected String getTranslationFor(String key, Locale locale,Object... params) {
+		ResourceBundle bundle = PropertyResourceBundle.getBundle("i18n.BasicUI",locale);
+		var rawValue = bundle.getString(key);
+		return MessageFormat.format(rawValue,params);
 	}
 
 	/**
