@@ -8,6 +8,7 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
 import org.sephire.games.framework4x.core.utils.TreeNode;
@@ -34,6 +35,8 @@ public class PluginManager {
 
 	private Map<String,PluginSpec> availablePlugins;
 	private Map<String,Plugin> plugins;
+	@Getter
+	private Option<Configuration> loadedConfiguration;
 
 	/**
 	 * Use fromFolder static method to build
@@ -43,6 +46,7 @@ public class PluginManager {
 		  .map((pluginSpec -> Tuple(pluginSpec.getPluginName(),pluginSpec)))
 		  .collect(HashMap.collector());
 		this.plugins = HashMap.empty();
+		this.loadedConfiguration = Option.none();
 	}
 
 	/**
@@ -80,7 +84,10 @@ public class PluginManager {
 			  .map(plugin->Tuple(plugin.getSpecification().getPluginName(),plugin))
 			  .collect(HashMap.collector());
 
-			return configuration.build();
+			var finalConfiguration = configuration.build();
+			this.loadedConfiguration = Option.of(finalConfiguration);
+
+			return finalConfiguration;
 		});
 	}
 
