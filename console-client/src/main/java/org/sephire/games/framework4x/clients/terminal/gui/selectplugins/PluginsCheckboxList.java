@@ -36,7 +36,7 @@ public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSp
 		  .map((plugin)-> Tuple.of(plugin.getWrappedObject().getPluginName(),plugin))
 		  .collect(HashMap.collector());
 
-		this.pluginCache.values().forEach(this::addItem);
+		this.pluginCache.values().toSortedSet().forEach(this::addItem);
 
 		setupListeners();
 	}
@@ -82,7 +82,7 @@ public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSp
 		return superReturn;
 	}
 
-	public Object fireMoveEvent() {
+	private Object fireMoveEvent() {
 		var selectedPlugin = this.getSelectedItem().getWrappedObject();
 		((Basic4XWindow)getBasePane()).fireEvent(new PluginTraversedEvent(selectedPlugin));
 		return null;

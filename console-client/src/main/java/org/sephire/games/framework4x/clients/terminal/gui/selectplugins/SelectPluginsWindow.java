@@ -5,6 +5,7 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel;
@@ -102,7 +103,6 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginCheckBoxList.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginListPanel.addComponent(pluginCheckBoxList);
 
-
 		var selectButton = new Button(getTranslationFor("selectPluginWindow.pluginList.startButton",Locale.ENGLISH));
 		selectButton.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.End));
 		selectButton.setEnabled(false);
@@ -129,6 +129,11 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		pluginInfoLabel.setLabelWidth(pluginInfoPanel.getPreferredSize().getColumns()-3);
 		pluginInfoLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 		pluginInfoPanel.addComponent(pluginInfoLabel);
+
+		var firstSelectedPlugin = Option.of(this.pluginManager.getAvailablePlugins().toSortedSet().getOrElse((PluginSpec)null));
+		if(firstSelectedPlugin.isDefined()) {
+			pluginInfoLabel.setText("\n"+firstSelectedPlugin.get().getDescription(Locale.ENGLISH).get());
+		}
 
 		registerEventListener(PluginTraversedEvent.class,(event)->{
 			pluginInfoLabel.setText("\n"+event.getSelectedPlugin().getDescription(Locale.ENGLISH).get());
