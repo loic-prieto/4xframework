@@ -1,6 +1,9 @@
 package org.sephire.games.framework4x.core.model.map;
 
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Try;
 import lombok.Getter;
@@ -61,6 +64,15 @@ public class MapZone {
 		}
 
 		@Override
+		public MapZoneBuilderBuild withCells(MapCell... cells) {
+			this.cells = List.of(cells)
+			  .map((cell)-> Tuple.of(cell.getLocation(), cell))
+			  .collect(HashMap.collector());
+
+			return this;
+		}
+
+		@Override
 		public MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType) {
 			java.util.Map<Location,MapCell> mutableMap = new java.util.HashMap<>();
 
@@ -82,6 +94,10 @@ public class MapZone {
 					throw new IllegalArgumentException("Name field cannot be null or blank");
 				}
 
+				if(cells == null || cells.length() < 1) {
+					throw new IllegalArgumentException("The map must have cells");
+				}
+
 				return new MapZone(name,cells);
 			});
 		}
@@ -93,6 +109,7 @@ public class MapZone {
 
 	public interface MapZoneBuilderCellsField {
 		MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType);
+		MapZoneBuilderBuild withCells(MapCell... cells);
 	}
 
 	public interface MapZoneBuilderBuild {
