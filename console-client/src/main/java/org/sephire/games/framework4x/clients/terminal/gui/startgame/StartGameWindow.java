@@ -1,4 +1,4 @@
-package org.sephire.games.framework4x.clients.terminal.gui;
+package org.sephire.games.framework4x.clients.terminal.gui.startgame;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
@@ -113,17 +113,5 @@ public class StartGameWindow extends BasicWindow {
 		backgroundPanel.addComponent(statusPanel.withBorder(doubleLine()));
 
 		setComponent(backgroundPanel);
-	}
-
-	private GameMap buildFakeMap(){
-		return GameMap.builder()
-		  .addZone(MapZone.builder()
-			.withName("level0")
-		  	.withDefaultCells(new Size(20,20), FakeTerrainType.FAKE)
-		  	.build()
-			.get())
-		  .withDefaultZone("level0")
-		  .build()
-		  .get();
 	}
 }
