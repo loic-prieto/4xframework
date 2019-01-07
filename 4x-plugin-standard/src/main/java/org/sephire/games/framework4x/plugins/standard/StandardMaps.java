@@ -1,7 +1,6 @@
 package org.sephire.games.framework4x.plugins.standard;
 
 import io.vavr.Tuple;
-import io.vavr.collection.List;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.map.*;

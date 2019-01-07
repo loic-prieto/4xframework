@@ -1,6 +1,8 @@
 package org.sephire.games.framework4x.clients.terminal.gui.selectplugins;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import io.vavr.collection.HashSet;
@@ -9,6 +11,7 @@ import io.vavr.control.Option;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel;
+import org.sephire.games.framework4x.clients.terminal.gui.startgame.StartGameWindow;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
@@ -106,6 +109,19 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		var selectButton = new Button(getTranslationFor("selectPluginWindow.pluginList.startButton",Locale.ENGLISH));
 		selectButton.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.End));
 		selectButton.setEnabled(false);
+		selectButton.addListener((button)->{
+			var loadingTry = pluginManager.loadPlugins(selectedPlugins.map((p)->p.getPluginName()));
+			if(loadingTry.isFailure()){
+				var errorMessage = "Could not load the selected plugins, a game cannot be created. Check logs to see detailed error";
+				MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",errorMessage, MessageDialogButton.OK);
+				log.error("The plugin manager could not load plugins: ",loadingTry.getCause().getMessage());
+				return;
+			}
+
+			var startGameWindow = new StartGameWindow(pluginManager,getOverridenTextGui());
+			this.getTextGUI().addWindow(startGameWindow);
+			this.getTextGUI().setActiveWindow(startGameWindow);
+		});
 		pluginListPanel.addComponent(selectButton);
 		registerEventListener(SelectedPluginsListUpdatedEvent.class,(event)->{
 			var isBasePluginSelected = event.getSelectedPlugins().exists(PluginSpec::isBasePlugin);
