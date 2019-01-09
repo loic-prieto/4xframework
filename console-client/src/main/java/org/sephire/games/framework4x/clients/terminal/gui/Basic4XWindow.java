@@ -29,6 +29,18 @@ public abstract class Basic4XWindow extends BasicWindow {
 	}
 
 	/**
+	 * Return the default english translation for the given i18n key, based on the
+	 * console client UI bundle (not the same as the plugins i18n inside the configuration
+	 * object)
+	 *
+	 * @param key
+	 * @param params
+	 * @return
+	 */
+	protected String getTranslationFor(String key,Object... params) {
+		return getTranslationFor(key,Locale.ENGLISH,params);
+	}
+	/**
 	 * Gets the i18n resource value from the UI bundle of the console client.
 	 * @param key
 	 * @param locale
