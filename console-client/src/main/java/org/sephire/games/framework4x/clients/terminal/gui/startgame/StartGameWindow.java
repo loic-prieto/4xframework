@@ -34,12 +34,30 @@ import static com.googlecode.lanterna.gui2.Borders.doubleLine;
 public class StartGameWindow extends Basic4XWindow {
 
 	private PluginManager pluginManager;
+	private Configuration configuration;
 
 	public StartGameWindow(PluginManager pluginManager,WindowBasedTextGUI textGUI) {
 		super(textGUI);
 		this.pluginManager = pluginManager;
+		checkPreconditions();
+
+		this.configuration = pluginManager.getLoadedConfiguration().get();
+
 		setupFrameConfig();
 		setupComponents();
+	}
+
+	/**
+	 * Check all needed objects of the window are available, so that we cannot be in an incorrect
+	 * state when showing this window (and also so that we  don't need to check them every time, which
+	 * gets burdensome very fast with options and tries)
+	 */
+	private void checkPreconditions() {
+		if(pluginManager.getLoadedConfiguration().isEmpty()) {
+			MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",getTranslationFor("startGameWindow.configurationNotFound"),MessageDialogButton.OK);
+			log.error("The configuration object was not found when creating the start game window");
+			close();
+		}
 	}
 
 	private void setupComponents(){
@@ -58,7 +76,7 @@ public class StartGameWindow extends Basic4XWindow {
 
 	private Panel createMapOption(){
 		Panel mapOptionPanel = new Panel();
-		mapOptionPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+		mapOptionPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
 
 		var mapGenerators = pluginManager.getLoadedConfiguration().map((config)->config.getConfiguration(CoreConfigKeyEnum.MAPS, Set.class));
 		if(mapGenerators.isDefined() && mapGenerators.get().isSuccess() && mapGenerators.get().get().isDefined()){
@@ -85,7 +103,9 @@ public class StartGameWindow extends Basic4XWindow {
 	}
 
 	private ToStringDecorator<MapGeneratorWrapper> stringifyMapGenerator(MapGeneratorWrapper mapGenerator){
-		return new ToStringDecorator<>(mapGenerator,(m)->getTranslationFor(m.getDisplayKey()));
+		return new ToStringDecorator<>(mapGenerator,(m)->
+		  configuration.getTranslationFor(Locale.ENGLISH,m.getDisplayKey())
+			.getOrElse(getTranslationFor("startGameWindow.mapGeneratorWithInvalidI18N.title")));
 	}
 
 
