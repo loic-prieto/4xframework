@@ -35,5 +35,6 @@ public interface TerrainMapping {
 	 * The color to use to paint the character.
 	 * @return
 	 */
-	String getColor();
+	TerrainMappingColor getColor();
+
 }

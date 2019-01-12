@@ -21,6 +21,7 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
+import org.sephire.games.framework4x.clients.terminal.api.config.TerrainMappingColor;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
@@ -64,11 +65,15 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 				  .toString().toLowerCase();
 
 				var cellMapping = mappings.getMappings().get(terrainType);
-				String cellChar = cellMapping != null? cellMapping.getCharacter() : " ";
-				TextColor cellColor = cellMapping != null? TextColor.Factory.fromString(cellMapping.getColor()) : TextColor.ANSI.BLACK;
+				String cellChar = cellMapping != null ? cellMapping.getCharacter() : " ";
+				TextColor cellColor = cellMapping != null ? fromCellMapping(cellMapping.getColor()) : TextColor.ANSI.BLACK;
 				graphics.setForegroundColor(cellColor);
 				graphics.putString(x,y,cellChar);
 			});
 		});
+	}
+
+	private static TextColor fromCellMapping(TerrainMappingColor mappingColor) {
+		return new TextColor.RGB(mappingColor.getRed(),mappingColor.getGreen(),mappingColor.getBlue());
 	}
 }
