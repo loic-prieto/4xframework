@@ -82,11 +82,16 @@ public class MapZone {
 
 		@Override
 		public MapZoneBuilderBuild withCells(MapCell... cells) {
-			this.cells = List.of(cells)
-			  .map((cell)-> Tuple.of(cell.getLocation(), cell))
+			return this.withCells(List.of(cells));
+		}
+
+		@Override
+		public MapZoneBuilderBuild withCells(List<MapCell> cells) {
+			 this.cells = cells
+			   .map((cell)-> Tuple.of(cell.getLocation(), cell))
 			  .collect(HashMap.collector());
 
-			return this;
+			 return this;
 		}
 
 		@Override
@@ -127,6 +132,7 @@ public class MapZone {
 	public interface MapZoneBuilderCellsField {
 		MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType);
 		MapZoneBuilderBuild withCells(MapCell... cells);
+		MapZoneBuilderBuild withCells(List<MapCell> cells);
 	}
 
 	public interface MapZoneBuilderBuild {
