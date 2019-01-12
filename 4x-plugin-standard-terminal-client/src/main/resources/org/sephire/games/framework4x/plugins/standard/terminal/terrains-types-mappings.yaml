@@ -1,12 +1,12 @@
 mappings:
   mountain:
-    character: "\u25B2"
+    character: "\u005E"
     color:
       red: 255
       green: 255
       blue: 255
   hill:
-    character: "\u25B4"
+    character: "\u005E"
     color:
       red: 154
       green: 205
@@ -18,25 +18,25 @@ mappings:
       green: 142
       blue: 35
   plain:
-    character: "\u268F"
+    character: "\u00B7"
     color:
       red: 238
       green: 232
       blue: 170
   ocean:
-    character: "\u2652"
+    character: "\u02F7"
     color:
       red: 70
       green: 130
       blue: 180
   desert:
-    character: "\u1F335"
+    character: "\u00B7"
     color:
       red: 255
       green: 250
       blue: 205
   glacier:
-    character: "\u1F5FB"
+    character: "\u02F7"
     color:
       red: 240
       green: 248
