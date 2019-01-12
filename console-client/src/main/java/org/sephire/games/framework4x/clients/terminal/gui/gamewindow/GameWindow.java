@@ -1,3 +1,20 @@
+/**
+ * 4X Framework - Console client - A terminal-based client for the 4X framework
+ * Copyright © 2018 Loïc Prieto Dehennault (loic.sephiroth@gmail.com)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 
 import com.googlecode.lanterna.gui2.*;
@@ -31,19 +48,13 @@ public class GameWindow extends Basic4XWindow {
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
 
-		backgroundPanel.addComponent(buildMapView(),BorderLayout.Location.CENTER);
+		var mapComponentTry = MapComponent.of(game);
+		if(mapComponentTry.isFailure()) {
+			throw mapComponentTry.getCause();
+		}
+		backgroundPanel.addComponent(mapComponentTry.get(),BorderLayout.Location.CENTER);
 
 		setComponent(backgroundPanel);
-	}
-
-	private MapComponent buildMapView() {
-		var mapComponentTry = MapComponent.of(game);
-		if(mapComponentTry.isFailure()){
-			MessageDialog.showMessageDialog(getOverridenTextGui(),"Error","gameWindow.couldNotCreateMapView", MessageDialogButton.OK);
-			close();
-		}
-
-		return mapComponentTry.get();
 	}
 
 	public static Try<GameWindow> of(Game game,WindowBasedTextGUI textGUI) {

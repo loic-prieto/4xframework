@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    4X Framework - A framework to develop turn based strategy games
+    Copyright © 2018 Loïc Prieto Dehennault (loic.sephiroth@gmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -7,8 +26,11 @@
     <groupId>org.sephire.games.strategy-framework</groupId>
     <artifactId>parent</artifactId>
     <version>0.1.0</version>
+    <name>4X Framework</name>
     <description>A framework to develop turn based strategy games</description>
     <packaging>pom</packaging>
+    <inceptionYear>2018</inceptionYear>
+    <url>https://github.com/loic-prieto/4xframework</url>
 
     <developers>
         <developer>
@@ -79,6 +101,39 @@
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
+
+                <!-- License plugin configuration for all modules under the GPL3-only -->
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>3.0.rc1</version>
+                    <configuration>
+                        <header>com/mycila/maven/plugin/license/templates/LGPL-3.txt</header>
+                        <properties>
+                            <owner>Loïc Prieto Dehennault</owner>
+                            <email>loic.sephiroth@gmail.com</email>
+                        </properties>
+                        <excludes>
+                            <exclude>**/README</exclude>
+                            <exclude>src/test/resources/**</exclude>
+                            <exclude>src/main/resources/**</exclude>
+                            <exclude>target/**</exclude>
+                            <exclude>Makefile</exclude>
+                            <exclude>.dockerignore</exclude>
+                            <exclude>Dockerfile-build-dependencies</exclude>
+                            <exclude>Jenkinsfile</exclude>
+                            <exclude>COPYING</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
             </plugins>
         </pluginManagement>
         <plugins>
