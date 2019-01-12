@@ -25,6 +25,8 @@ import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLoadingHook;
+import org.sephire.games.framework4x.core.utils.FunctionalUtils;
+import org.sephire.games.framework4x.core.utils.FunctionalUtils.Functions;
 
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
@@ -42,8 +44,7 @@ public class Main {
 		return loadTerrainMappings(configuration)
 		  .onFailure((error) -> log.error(String.format("Could not load successfully the plugin %s : %s", getPackageName(), error)))
 		  .onSuccess((result) -> log.info(String.format("Plugin %s loaded successfully", getPackageName())))
-		  // We don't care about the content inside the try, just if it is successful or isn't
-		  .map((result) -> null);
+		  .map(Functions::toVoid);
 	}
 
 	private Try<TerrainsMapping> loadTerrainMappings(Configuration.Builder configuration) {

@@ -36,6 +36,8 @@ import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProvider;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrappingException;
+import org.sephire.games.framework4x.core.utils.FunctionalUtils;
+import org.sephire.games.framework4x.core.utils.FunctionalUtils.Functions;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.Locale;
@@ -224,7 +226,7 @@ public class Plugin {
 			  }
 			  configuration.putConfig(TERRAIN_TYPES, newTerrainSet);
 		  })
-		  .map((discardedResult) -> (Void) null)
+		  .map(Functions::toVoid)
 		  // The terrain file is not mandatory for a plugin
 		  .recover((e) -> Match(e).of(
 			Case($(instanceOf(ConfigFileNotFoundException.class)), (Void) null)

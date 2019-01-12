@@ -17,6 +17,7 @@
  */
 package org.sephire.games.framework4x.core.utils;
 
+import io.vavr.Function1;
 import io.vavr.Function2;
 
 /**
@@ -42,5 +43,22 @@ public class FunctionalUtils {
 		public static Function2<String,String,String> stringsWithSeparator(String separator) {
 			return (a,b) -> String.format("%s%s%s",a,separator,b);
 		}
+	}
+
+	/**
+	 * Generic functions to use
+	 */
+	public static class Functions {
+
+		/**
+		 * <p>Due to the way the Function vavr API is defined, functions that are parameterized with Void must return null.
+		 * This is an inconvenience when you want to avoid using non vavr functions (for example, Consumer from the java
+		 * lang api).</p>
+		 * <p>This function allows to map to void value, by discarding the object it is being given and returning null</p>
+		 * @param item
+		 * @param <T>
+		 * @return
+		 */
+		public static <T> Void toVoid(T item) { return null; }
 	}
 }
