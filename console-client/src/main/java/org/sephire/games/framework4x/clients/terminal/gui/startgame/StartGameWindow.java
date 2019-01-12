@@ -5,24 +5,15 @@ import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
-import io.vavr.collection.List;
 import io.vavr.collection.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
-import org.sephire.games.framework4x.clients.terminal.gui.GameWindow;
-import org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.GameWindow;
 import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
-import org.sephire.games.framework4x.core.Game;
-import org.sephire.games.framework4x.core.model.ai.AIDifficultyLevel;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
-import org.sephire.games.framework4x.core.model.gameplay.VictoryCondition;
-import org.sephire.games.framework4x.core.model.map.GameMap;
-import org.sephire.games.framework4x.core.model.map.MapZone;
-import org.sephire.games.framework4x.core.model.map.Size;
-import org.sephire.games.framework4x.core.model.research.ResearchCostMultiplier;
+import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
-import org.sephire.games.framework4x.core.plugins.map.MapGenerator;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils;
 
@@ -37,6 +28,7 @@ public class StartGameWindow extends Basic4XWindow {
 
 	private PluginManager pluginManager;
 	private Configuration configuration;
+	private MapGeneratorWrapper selectedMapGenerator;
 
 	public StartGameWindow(PluginManager pluginManager,WindowBasedTextGUI textGUI) {
 		super(textGUI);
@@ -73,7 +65,16 @@ public class StartGameWindow extends Basic4XWindow {
 		optionsPanel.addComponent(createMapOption());
 
 		var startGameButton = new Button(getTranslationFor("startGameWindow.OptionsPane.startGamebutton.label"),()->{
-			var gameWindowTry = GameWindow.of(pluginManager,getOverridenTextGui());
+			var gameTry = Game.builder()
+			  .withConfiguration(configuration)
+			  .withMapGenerator(selectedMapGenerator)
+			  .build();
+			if(gameTry.isFailure()){
+				MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",
+				  getTranslationFor("gameWindow.couldNotCreateGame",gameTry.getCause().getMessage()),
+				  MessageDialogButton.OK);
+			}
+			var gameWindowTry = GameWindow.of(gameTry.get(),getOverridenTextGui());
 			if(gameWindowTry.isFailure()) {
 				MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",
 				  getTranslationFor("gameWindow.couldNotCreateWindow",gameWindowTry.getCause().getMessage()),
@@ -103,6 +104,9 @@ public class StartGameWindow extends Basic4XWindow {
 			  .map(s->(Set<MapGeneratorWrapper>)s).get()
 			  .map(this::stringifyMapGenerator)
 			  .forEach(mapSelection::addItem);
+			mapSelection.addListener((selectedIndex,previousSelection)->{
+				this.selectedMapGenerator = mapSelection.getItem(selectedIndex).getWrappedObject();
+			});
 
 			mapOptionPanel.addComponent(mapLabel);
 			mapOptionPanel.addComponent(mapSelection);
