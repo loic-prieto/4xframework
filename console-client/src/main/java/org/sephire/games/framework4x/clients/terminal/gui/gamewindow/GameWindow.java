@@ -18,16 +18,15 @@
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
+import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
-import org.sephire.games.framework4x.clients.terminal.gui.components.map.MapComponent;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapComponent;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
-import org.sephire.games.framework4x.core.plugins.PluginManager;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents the window of a game. Holds the map, the information/actions side panel, the top menu and the bottom
@@ -45,16 +44,47 @@ public class GameWindow extends Basic4XWindow {
 		this.game = game;
 		this.configuration = game.getConfiguration();
 
+		setupFrame();
+
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
 
-		var mapComponentTry = MapComponent.of(game);
+		var mapComponentTry = buildMapComponent();
 		if(mapComponentTry.isFailure()) {
 			throw mapComponentTry.getCause();
 		}
 		backgroundPanel.addComponent(mapComponentTry.get(),BorderLayout.Location.CENTER);
 
 		setComponent(backgroundPanel);
+	}
+
+	private Try<MapComponent> buildMapComponent() {
+		return Try.of(()->{
+			var mapComponentTry = MapComponent.of(game);
+			if(mapComponentTry.isFailure()) {
+				throw mapComponentTry.getCause();
+			}
+			var mapComponent = mapComponentTry.get();
+			registerEventListener(MapScrollEvent.class,(event)->{
+				mapComponent.handleMapScrollEvent(event);
+			});
+
+			return mapComponent;
+		});
+	}
+
+	private void setupFrame(){
+
+		addWindowListener(new WindowListenerAdapter() {
+			@Override
+			public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+				// React to map scroll events
+				var potentialMapScrollEvent = MapScrollEvent.fromKeyStroke(keyStroke);
+				if(potentialMapScrollEvent.isDefined()){
+					fireEvent(potentialMapScrollEvent.get());
+				}
+			}
+		});
 	}
 
 	public static Try<GameWindow> of(Game game,WindowBasedTextGUI textGUI) {

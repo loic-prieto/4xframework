@@ -51,7 +51,7 @@ public class Location {
 		return new Location(this.x - location.x, this.y - location.y);
 	}
 
-	public Location substract(int x, int y, int z) {
+	public Location substract(int x, int y) {
 		return this.substract(new Location(x, y));
 	}
 

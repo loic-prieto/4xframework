@@ -15,27 +15,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sephire.games.framework4x.clients.terminal.gui.components.map;
+package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.sephire.games.framework4x.core.model.map.Location;
-import org.sephire.games.framework4x.core.model.map.Size;
+import org.sephire.games.framework4x.clients.terminal.FourXFrameworkClientException;
 
 /**
- * Represents the camera viewport of the map panel. That is, what zone of the map
- * is visible, so as not to render not visible cells.
+ * This exception is thrown when a terrain-tyle mapping is not found when loading
+ * a map component view.
  */
-@AllArgsConstructor
-public class MapViewport {
-
-	@Getter
-	private Location cameraOffset;
-	@Getter
-	private Size size;
-
-	public MapViewport() {
-		this.cameraOffset = Location.of(0,0);
-		this.size = new Size(0,0);
-	}
+public class NoTerrainMappingFoundException extends FourXFrameworkClientException {
 }

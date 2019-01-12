@@ -32,8 +32,8 @@ public class StandardMaps {
 	@MapGenerator(name = "standard.random",displayKey = "org.sephire.games.framework4x.plugins.standard.map-generators.random.title")
 	public Try<GameMap> randomMapGenerator(Configuration configuration){
 		return Try.of(()->{
-			var cells = range(0,100)
-			  .flatMap((x)->range(0,40).map((y)-> Tuple.of(x,y)))
+			var cells = range(0,500)
+			  .flatMap((x)->range(0,500).map((y)-> Tuple.of(x,y)))
 			  .map((xyTuple)-> new MapCell(Location.of(xyTuple._1,xyTuple._2),getRandomTerrainType()));
 
 			return GameMap.builder()
@@ -59,7 +59,7 @@ public class StandardMaps {
 			return GameMap.builder()
 			  .addZone(MapZone.builder()
 				.withName("level0")
-				.withDefaultCells(new Size(100,40), StandardTerrainTypes.HILL)
+				.withDefaultCells(new Size(300,300), StandardTerrainTypes.HILL)
 				.build()
 				.get())
 			  .withDefaultZone("level0")

@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sephire.games.framework4x.clients.terminal.gui.components.map;
+package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
 import com.googlecode.lanterna.gui2.AbstractComponent;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
-import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.MapScrollEvent;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 
@@ -40,6 +40,11 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 		this.viewport = new MapViewport();
 		this.map = map;
 		this.mappings = mappings;
+	}
+
+	public void handleMapScrollEvent(MapScrollEvent mapScrollEvent) {
+		viewport.moveCamera(mapScrollEvent.getDirection(),mapScrollEvent.getDistance());
+		invalidate();
 	}
 
 	public static Try<MapComponent> of(Game game) {

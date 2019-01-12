@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sephire.games.framework4x.clients.terminal.gui.components.map;
+package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
@@ -28,7 +28,7 @@ import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.MapCell;
 
 import static io.vavr.collection.List.range;
-import static org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType.FAKE;
+import static org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.FakeTerrainType.FAKE;
 
 /**
  * Is in charge of rendering the visible part of a game map.
@@ -59,7 +59,9 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 
 		range(0,viewportSize.getColumns()).forEach((x)->{
 			range(0,viewportSize.getRows()).forEach((y)->{
-				var terrainType =  map.getCurrentZone().getCells().get(Location.of(x,y))
+				var cellLocation = Location.of(x,y).add(viewport.getCameraOffset());
+				var mapCell = map.getCurrentZone().getCells().get(cellLocation);
+				var terrainType =  mapCell
 				  .getOrElse(new MapCell(Location.of(x,y), FAKE))
 				  .getTerrainType()
 				  .toString().toLowerCase();
