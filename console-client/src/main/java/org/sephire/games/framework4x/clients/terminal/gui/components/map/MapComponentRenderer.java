@@ -18,16 +18,16 @@
 package org.sephire.games.framework4x.clients.terminal.gui.components.map;
 
 import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
-import io.vavr.collection.List;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.MapCell;
 
 import static io.vavr.collection.List.range;
-import static org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType.*;
+import static org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType.FAKE;
 
 /**
  * Is in charge of rendering the visible part of a game map.
@@ -60,10 +60,13 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 			range(0,viewportSize.getRows()).forEach((y)->{
 				var terrainType =  map.getCurrentZone().getCells().get(Location.of(x,y))
 				  .getOrElse(new MapCell(Location.of(x,y), FAKE))
-				  .getTerrainType();
+				  .getTerrainType()
+				  .toString().toLowerCase();
 
-				String cellChar = mappings.getMappings().get(terrainType).getCharacter();
-
+				var cellMapping = mappings.getMappings().get(terrainType);
+				String cellChar = cellMapping != null? cellMapping.getCharacter() : " ";
+				TextColor cellColor = cellMapping != null? TextColor.Factory.fromString(cellMapping.getColor()) : TextColor.ANSI.BLACK;
+				graphics.setForegroundColor(cellColor);
 				graphics.putString(x,y,cellChar);
 			});
 		});
