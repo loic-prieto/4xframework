@@ -126,6 +126,7 @@ public class StartGameWindow extends Basic4XWindow {
 			mapSelection.addListener((selectedIndex,previousSelection)->{
 				this.selectedMapGenerator = mapSelection.getItem(selectedIndex).getWrappedObject();
 			});
+			this.selectedMapGenerator = mapSelection.getItem(0).getWrappedObject();
 
 			mapOptionPanel.addComponent(mapLabel);
 			mapOptionPanel.addComponent(mapSelection);
