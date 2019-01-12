@@ -7,6 +7,7 @@ import io.vavr.control.Try;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.clients.terminal.gui.components.map.MapComponent;
 import org.sephire.games.framework4x.core.Game;
+import org.sephire.games.framework4x.core.plugins.PluginManager;
 
 import java.util.List;
 
@@ -16,17 +17,15 @@ import static org.sephire.games.framework4x.clients.terminal.api.config.ConsoleC
  * Represents the window of a game. Holds the map, the information/actions side panel, the top menu and the bottom
  * status bar.
  */
-public class GameWindow extends BasicWindow {
+public class GameWindow extends Basic4XWindow {
 
-	private MapComponent mapComponent;
-	private Game game;
+	private PluginManager pluginManager;
 
-
-	private GameWindow(Game game) throws Throwable {
-		super("Game Window");
+	private GameWindow(PluginManager pluginManager,WindowBasedTextGUI textGUI) throws Throwable {
+		super("Game Window",textGUI);
 		setHints(List.of(Window.Hint.FULL_SCREEN));
 
-		this.game = game;
+		this.pluginManager = pluginManager;
 
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
@@ -39,12 +38,12 @@ public class GameWindow extends BasicWindow {
 
 		this.mapComponent = new MapComponent(game.getMap(),mappingsTry.get());
 		this.mapComponent.setLayoutData(BorderLayout.Location.CENTER);
-		backgroundPanel.addComponent(mapComponent);
+		backgroundPanel.addComponent(mapComponent);*/
 
-		setComponent(backgroundPanel);*/
+		setComponent(backgroundPanel);
 	}
 
-	public static Try<GameWindow> of(Game game) {
-		return Try.of(()->new GameWindow(game));
+	public static Try<GameWindow> of(PluginManager pluginManager,WindowBasedTextGUI textGUI) {
+		return Try.of(()->new GameWindow(pluginManager,textGUI));
 	}
 }

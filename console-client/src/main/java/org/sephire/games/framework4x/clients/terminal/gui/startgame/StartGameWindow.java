@@ -9,6 +9,7 @@ import io.vavr.collection.List;
 import io.vavr.collection.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
+import org.sephire.games.framework4x.clients.terminal.gui.GameWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.components.map.FakeTerrainType;
 import org.sephire.games.framework4x.clients.terminal.utils.ToStringDecorator;
 import org.sephire.games.framework4x.core.Game;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
+import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.End;
 
 @Slf4j
 public class StartGameWindow extends Basic4XWindow {
@@ -68,8 +70,23 @@ public class StartGameWindow extends Basic4XWindow {
 		var optionsPanel = new Panel();
 		optionsPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 		backgroundPanel.addComponent(optionsPanel.withBorder(doubleLine(getTranslationFor("startGameWindow.optionsPane.label"))));
-
 		optionsPanel.addComponent(createMapOption());
+
+		var startGameButton = new Button(getTranslationFor("startGameWindow.OptionsPane.startGamebutton.label"),()->{
+			var gameWindowTry = GameWindow.of(pluginManager,getOverridenTextGui());
+			if(gameWindowTry.isFailure()) {
+				MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",
+				  getTranslationFor("gameWindow.couldNotCreateWindow",gameWindowTry.getCause().getMessage()),
+				  MessageDialogButton.OK);
+			} else {
+				var gameWindow = gameWindowTry.get();
+				getOverridenTextGui().addWindow(gameWindow);
+				getOverridenTextGui().setActiveWindow(gameWindow);
+				close();
+			}
+
+		});
+		optionsPanel.addComponent(startGameButton,LinearLayout.createLayoutData(End));
 
 		setComponent(backgroundPanel);
 	}
