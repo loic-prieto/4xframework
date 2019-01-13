@@ -17,8 +17,12 @@
  */
 package org.sephire.games.framework4x.clients.terminal.utils;
 
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
-import org.sephire.games.framework4x.core.model.map.Size;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapDirection;
+import org.sephire.games.framework4x.core.model.map.Location;
+
+import static io.vavr.API.*;
 
 public class Terminal {
 
@@ -48,6 +52,35 @@ public class Terminal {
 		public static TerminalSize sizeWithHeightToPercent(TerminalSize size, float percentage) {
 			var newRows = (int) Math.floor(size.getRows() * percentage);
 			return size.withRows(newRows);
+		}
+	}
+
+	public static class Position {
+
+		/**
+		 * Given a fixed location, apply direction and distance to it to obtain a new location.
+		 * @param location
+		 * @param direction
+		 * @param distance
+		 * @return
+		 */
+		public static Location applyDirection(Location location, MapDirection direction,int distance) {
+
+			return Match(direction).of(
+			  Case($(MapDirection.UP),()->location.substract(0,distance)),
+			  Case($(MapDirection.DOWN),()->location.add(0,distance)),
+			  Case($(MapDirection.LEFT),()->location.substract(distance,0)),
+			  Case($(MapDirection.RIGHT),()->location.add(distance,0))
+			);
+		}
+
+		/**
+		 * Transform a Location object into a TerminalPosition object
+		 * @param location
+		 * @return
+		 */
+		public static TerminalPosition terminalPositionFrom(Location location) {
+			return new TerminalPosition(location.getX(),location.getY());
 		}
 	}
 

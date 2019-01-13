@@ -49,28 +49,13 @@ public class GameWindow extends Basic4XWindow {
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
 
-		var mapComponentTry = buildMapComponent();
+		var mapComponentTry = MapComponent.of(game,this);
 		if(mapComponentTry.isFailure()) {
 			throw mapComponentTry.getCause();
 		}
 		backgroundPanel.addComponent(mapComponentTry.get(),BorderLayout.Location.CENTER);
 
 		setComponent(backgroundPanel);
-	}
-
-	private Try<MapComponent> buildMapComponent() {
-		return Try.of(()->{
-			var mapComponentTry = MapComponent.of(game);
-			if(mapComponentTry.isFailure()) {
-				throw mapComponentTry.getCause();
-			}
-			var mapComponent = mapComponentTry.get();
-			registerEventListener(MapScrollEvent.class,(event)->{
-				mapComponent.handleMapScrollEvent(event);
-			});
-
-			return mapComponent;
-		});
 	}
 
 	private void setupFrame(){
@@ -82,6 +67,12 @@ public class GameWindow extends Basic4XWindow {
 				var potentialMapScrollEvent = MapScrollEvent.fromKeyStroke(keyStroke);
 				if(potentialMapScrollEvent.isDefined()){
 					fireEvent(potentialMapScrollEvent.get());
+				}
+
+				// React to cursor movement
+				var potentialCursorMovement = CursorMoveEvent.fromKeyStroke(keyStroke);
+				if(potentialCursorMovement.isDefined()){
+					fireEvent(potentialCursorMovement.get());
 				}
 			}
 		});

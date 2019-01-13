@@ -20,11 +20,17 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 import com.googlecode.lanterna.gui2.AbstractComponent;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import io.vavr.control.Try;
+import lombok.Getter;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
+import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.CursorMoveEvent;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.MapScrollEvent;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.model.map.GameMap;
+import org.sephire.games.framework4x.core.model.map.Location;
+
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.applyDirection;
 
 /**
  * A component that draws the current zone of the game map,
@@ -32,22 +38,38 @@ import org.sephire.games.framework4x.core.model.map.GameMap;
  */
 public class MapComponent extends AbstractComponent<MapComponent> {
 
+	@Getter
 	private MapViewport viewport;
+	@Getter
 	private GameMap map;
+	@Getter
 	private TerrainsMapping mappings;
+	@Getter
+	private Location cursorPosition;
+	private Basic4XWindow parentContainer;
 
-	private MapComponent(GameMap map,TerrainsMapping mappings) {
+	private MapComponent(GameMap map,TerrainsMapping mappings,Basic4XWindow parentContainer) {
 		this.viewport = new MapViewport();
 		this.map = map;
 		this.mappings = mappings;
+		this.cursorPosition = Location.of(0,0);
+		this.parentContainer = parentContainer;
+
+		setupEventHandling();
 	}
 
-	public void handleMapScrollEvent(MapScrollEvent mapScrollEvent) {
-		viewport.moveCamera(mapScrollEvent.getDirection(),mapScrollEvent.getDistance());
-		invalidate();
+	private void setupEventHandling(){
+		parentContainer.registerEventListener(MapScrollEvent.class,(event)->{
+			viewport.moveCamera(event.getDirection(),event.getDistance());
+			invalidate();
+		});
+		parentContainer.registerEventListener(CursorMoveEvent.class,(event)->{
+			cursorPosition = applyDirection(cursorPosition,event.getDirection(),event.getDistance());
+			invalidate();
+		});
 	}
 
-	public static Try<MapComponent> of(Game game) {
+	public static Try<MapComponent> of(Game game, Basic4XWindow parent) {
 		return Try.of(()->{
 			var configuration = game.getConfiguration();
 			var mappings = configuration.getConfiguration(ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING,TerrainsMapping.class);
@@ -55,13 +77,13 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 				throw new NoTerrainMappingFoundException();
 			}
 
-			return new MapComponent(game.getMap(),mappings.get().get());
+			return new MapComponent(game.getMap(),mappings.get().get(),parent);
 		});
 
 	}
 
 	@Override
 	protected ComponentRenderer<MapComponent> createDefaultRenderer() {
-		return new MapComponentRenderer(viewport,map,mappings);
+		return new MapComponentRenderer();
 	}
 }

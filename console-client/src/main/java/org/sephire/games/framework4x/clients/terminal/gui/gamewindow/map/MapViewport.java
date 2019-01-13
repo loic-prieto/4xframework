@@ -23,9 +23,7 @@ import lombok.Setter;
 import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.Size;
 
-import static io.vavr.API.$;
-import static io.vavr.API.Case;
-import static io.vavr.API.Match;
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.applyDirection;
 
 /**
  * Represents the camera viewport of the map panel. That is, what zone of the map
@@ -45,11 +43,6 @@ public class MapViewport {
 	}
 
 	public void moveCamera(MapDirection direction,int distance) {
-		this.cameraOffset = Match(direction).of(
-		  Case($(MapDirection.UP),()->cameraOffset.substract(0,distance)),
-		  Case($(MapDirection.DOWN),()->cameraOffset.add(0,distance)),
-		  Case($(MapDirection.LEFT),()->cameraOffset.substract(distance,0)),
-		  Case($(MapDirection.RIGHT),()->cameraOffset.add(distance,0))
-		);
+		this.cameraOffset = applyDirection(cameraOffset,direction,distance);
 	}
 }

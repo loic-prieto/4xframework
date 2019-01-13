@@ -17,37 +17,34 @@
  */
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
+import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainMappingColor;
-import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
-import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.MapCell;
 
 import static io.vavr.collection.List.range;
 import static org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.FakeTerrainType.FAKE;
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.terminalPositionFrom;
 
 /**
  * Is in charge of rendering the visible part of a game map.
  */
 public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 
-	private MapViewport viewport;
-	private GameMap map;
-	private TerrainsMapping mappings;
 	private TerminalSize viewportSize;
 
-	public MapComponentRenderer(MapViewport viewport, GameMap map, TerrainsMapping mappings) {
-		this.viewport = viewport;
-		this.map = map;
-		this.mappings = mappings;
+	private static final String CURSOR_CHAR = "\u2316";
+
+	public MapComponentRenderer() {
 	}
 
 	@Override
 	public TerminalSize getPreferredSize(MapComponent component) {
+		var viewport = component.getViewport();
 		return new TerminalSize(viewport.getSize().getWidth(),viewport.getSize().getHeight());
 	}
 
@@ -57,6 +54,11 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 			this.viewportSize = graphics.getSize();
 		}
 
+		var viewport = component.getViewport();
+		var map = component.getMap();
+		var mappings = component.getMappings();
+
+		// Draw cells
 		range(0,viewportSize.getColumns()).forEach((x)->{
 			range(0,viewportSize.getRows()).forEach((y)->{
 				var cellLocation = Location.of(x,y).add(viewport.getCameraOffset());
@@ -73,6 +75,10 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 				graphics.putString(x,y,cellChar);
 			});
 		});
+
+		// Draw cursor
+		graphics.setForegroundColor(TextColor.ANSI.RED);
+		graphics.putString(terminalPositionFrom(component.getCursorPosition()), CURSOR_CHAR, SGR.BLINK,SGR.BOLD);
 	}
 
 	private static TextColor fromCellMapping(TerrainMappingColor mappingColor) {
