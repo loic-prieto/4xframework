@@ -21,12 +21,17 @@ import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapDirection;
 import org.sephire.games.framework4x.core.model.map.Location;
+import org.sephire.games.framework4x.core.model.map.Size;
 
 import static io.vavr.API.*;
 
 public class Terminal {
 
-	public static class Size {
+	public static class Dimensions {
+
+		public static Size fromTerminalSize(TerminalSize size) {
+			return new Size(size.getColumns(),size.getRows());
+		}
 
 		/**
 		 * Given a terminal size, returns a new terminal size where the columns have been reduced to the

@@ -19,6 +19,8 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
 import com.googlecode.lanterna.gui2.AbstractComponent;
 import com.googlecode.lanterna.gui2.ComponentRenderer;
+import com.googlecode.lanterna.gui2.TextGUIGraphics;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
@@ -30,6 +32,7 @@ import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
 
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.fromTerminalSize;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.applyDirection;
 
 /**
@@ -64,9 +67,46 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 			invalidate();
 		});
 		parentContainer.registerEventListener(CursorMoveEvent.class,(event)->{
-			cursorPosition = applyDirection(cursorPosition,event.getDirection(),event.getDistance());
+			var newPosition = applyDirection(cursorPosition,event.getDirection(),event.getDistance());
+			var xn = newPosition.getX(); var yn = newPosition.getY();
+
+			if(xn < 0 || xn > viewport.getSize().getWidth()-1) {
+				var xDelta = xn < 0 ? xn : (xn - (viewport.getSize().getWidth() - 1));
+				parentContainer.fireEvent(mapScrollEventFromDeltas(xDelta,0).get());
+				return;
+			}
+
+			if(yn < 0 || yn > viewport.getSize().getHeight()-1) {
+				var yDelta = yn < 0 ? yn : (yn - (viewport.getSize().getHeight() - 1));
+				parentContainer.fireEvent(mapScrollEventFromDeltas(0,yDelta).get());
+				return;
+			}
+
+			cursorPosition = newPosition;
 			invalidate();
 		});
+	}
+
+	@Override
+	protected void onAfterDrawing(TextGUIGraphics graphics) {
+		super.onAfterDrawing(graphics);
+		this.viewport.setSize(fromTerminalSize(getSize()));
+	}
+
+	private static Option<MapScrollEvent> mapScrollEventFromDeltas(int x, int y) {
+		Option<MapScrollEvent> result = Option.none();
+
+		if(x != 0) {
+			var mapDirection = x > 0 ? MapDirection.RIGHT : MapDirection.LEFT;
+			var distance = Math.abs(x);
+			result = Option.of(new MapScrollEvent(mapDirection,distance));
+		} else if(y != 0) {
+			var mapDirection = y > 0 ? MapDirection.DOWN : MapDirection.UP;
+			var distance = Math.abs(y);
+			result = Option.of(new MapScrollEvent(mapDirection,distance));
+		}
+
+		return result;
 	}
 
 	public static Try<MapComponent> of(Game game, Basic4XWindow parent) {

@@ -51,7 +51,7 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 	@Override
 	public void drawComponent(TextGUIGraphics graphics, MapComponent component) {
 		if(this.viewportSize == null){
-			this.viewportSize = graphics.getSize();
+			this.viewportSize = component.getSize();
 		}
 
 		var viewport = component.getViewport();

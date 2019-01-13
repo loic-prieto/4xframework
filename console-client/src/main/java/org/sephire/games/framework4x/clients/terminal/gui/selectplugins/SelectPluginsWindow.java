@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.Fill;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.ERROR;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.INFO;
-import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Size.sizeWithWidthToPercent;
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.sizeWithWidthToPercent;
 
 /**
  * This window is shown when starting a game, to select which plugins will be active for
