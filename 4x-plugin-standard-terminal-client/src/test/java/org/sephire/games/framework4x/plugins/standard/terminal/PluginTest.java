@@ -31,7 +31,7 @@ public class PluginTest {
 	@DisplayName("Should load terrain mappings for the terminal client when loading the plugin")
 	public void should_load_terrain_mappings_when_loading_plugin() {
 
-		var gameTry = new Game.Builder()
+		var gameTry = new GameTest.Builder()
 		  .withPlugins(STANDARD_PLUGIN_NAME, STANDARD_TERMINAL_EXTENSION_PLUGIN_NAME)
 		  .withMap(buildMap())
 		  .build();

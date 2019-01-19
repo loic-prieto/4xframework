@@ -32,6 +32,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
+import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProvider;
@@ -63,9 +64,11 @@ public class Plugin {
 
 	@Getter
 	private PluginSpec specification;
+	private Option<PluginLifecycleHandlerWrapper> lifecycleHandler;
 
-	private Plugin(PluginSpec spec) {
+	private Plugin(PluginSpec spec) throws Throwable {
 		this.specification = spec;
+		this.lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow(e->e);
 	}
 
 	/**
@@ -93,6 +96,13 @@ public class Plugin {
 		});
 	}
 
+	public Try<Void> callGameStartHook(Game game) {
+		return Try.of(()->{
+			if(lifecycleHandler.isDefined()){
+				lifecycleHandler.get().callGameLoadingHook()
+			}
+		});
+	}
 	private static void updateConfigWithBundleEntry(Configuration.Builder configuration, Tuple3<Locale, String, String> bundleEntry) {
 		var i18nMap = configuration.getConfig(CoreConfigKeyEnum.I18N).map((v) -> (Map<Locale, Map<String, String>>) v)
 		  .getOrElse(HashMap.empty());
@@ -157,7 +167,6 @@ public class Plugin {
 	 */
 	private Try<Void> callPluginLoadingHooks(Configuration.Builder configuration) {
 		return Try.of(()->{
-			var lifecycleHandler = fetchLifeCycleHandler().getOrElseThrow((t)->t);
 			if(lifecycleHandler.isDefined()){
 				lifecycleHandler.get().callPluginLoadingHook(configuration).getOrElseThrow((t)->t);
 			}

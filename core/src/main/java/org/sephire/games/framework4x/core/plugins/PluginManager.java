@@ -30,11 +30,12 @@ import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
 import org.sephire.games.framework4x.core.utils.RootlessTree;
-import org.sephire.games.framework4x.core.utils.TreeNode;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.jar.JarFile;
 
 import static io.vavr.API.*;
@@ -116,18 +117,22 @@ public class PluginManager {
 	 * @return
 	 */
 	public Try<Void> callGameStartHooks(Game game){
-		// Build the dependency tree
-		var baseNodes = plugins.values().filter(plugin -> plugin.getSpecification().isBasePlugin())
-		  .map((plugin)->new TreeNode<Plugin>(plugin));
-		baseNodes.forEach((node)->{
+		return Try.of(()->{
+			// Build the dependency tree
+			var pluginsTree = RootlessTree.fromItemSet(plugins.values().toSet(),
+			  (plugin,potentialParent)->plugin.getSpecification().getParentPlugin().get().equals(potentialParent.getSpecification().getPluginName()),
+			  (plugin)->plugin.getSpecification().isBasePlugin())
+			  .getOrElseThrow((e)->e);
 
+			ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+			pluginsTree.getTopologicallyOrderedBranches().forEach((pluginsBranch)->{
+				threadExecutor.submit(()->{
+
+				});
+			});
+
+			return null;
 		});
-
-		plugins.values().filter(p->!p.getSpecification().isBasePlugin())
-		  .forEach(childPlugin->{
-		  	baseNodes.find(node->node.getValue().getSpecification().getPluginName().equals(childPlugin.getSpecification().getParentPlugin().get()))
-			  .get().addChildren();
-		  });
 	}
 
 	/**

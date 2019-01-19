@@ -38,5 +38,10 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 * The value is a Map of key-value I18N resources.
 	 * By convention, the key should be: packageOfPlugin.restOfTheKey
 	 */
-	I18N;
+	I18N,
+	/**
+	 * Key under which to store all game start hook observers to be called when the game is starting.
+	 * Plugins define game start hook observers.
+	 */
+	GAME_START_HOOKS;
 }

@@ -20,6 +20,7 @@ package org.sephire.games.framework4x.core.plugins.configuration;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.game.Game;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -103,7 +104,7 @@ public class PluginLifecycleHandlerWrapper {
 	}
 
 	/**
-	 * Call the game load hook with the current configuration object loaded.
+	 * Call the game load hook with the current game object loaded.
 	 *
 	 * This method should be called only after parent plugins have been called.
 	 *
@@ -114,10 +115,10 @@ public class PluginLifecycleHandlerWrapper {
 	 * - InvocationTargetException
 	 * Both wrapped in a RuntimeException (inside the Try object)
 	 *
-	 * @param configuration
+	 * @param game
 	 * @return
 	 */
-	public Try<Void> callGameLoadingHook(Configuration.Builder configuration) {
+	public Try<Void> callGameLoadingHook(Game game) {
 		return callHook(gameLoadingHook,configuration);
 	}
 
