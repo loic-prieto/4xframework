@@ -85,12 +85,10 @@ public class RootlessTree<T> {
 			if(isBaseItemPredicate.apply(item)) {
 				rootNode.addChildren(new TreeNode<>(item));
 			} else {
-				var parentNodeSearch = rootNode.findFirstNode(i->isParentPredicate.apply(item,i));
-				if(parentNodeSearch.isEmpty()){
-					throw new IllegalArgumentException("Tried to add an item whose parent has not been added yet to the tree");
-				}
+				var parentNodeSearch = rootNode.findFirstNode(i->isParentPredicate.apply(item,i),true)
+				  .getOrElseThrow(()->new IllegalArgumentException("Tried to add an item whose parent has not been added yet to the tree"));
 
-				parentNodeSearch.get().addChildren(new TreeNode<>(item));
+				parentNodeSearch.addChildren(new TreeNode<>(item));
 			}
 
 			return null;

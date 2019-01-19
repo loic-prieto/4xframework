@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
 import static io.vavr.API.*;
@@ -126,10 +127,13 @@ public class PluginManager {
 
 			ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			pluginsTree.getTopologicallyOrderedBranches().forEach((pluginsBranch)->{
-				threadExecutor.submit(()->{
-					pluginsBranch.forEach((plugin)->plugin.callGameStartHook(game));
-				});
+				threadExecutor.execute(()->pluginsBranch.forEach((plugin)->plugin.callGameStartHook(game)));
 			});
+			threadExecutor.shutdown();
+			var timedOut = !threadExecutor.awaitTermination(3, TimeUnit.MINUTES);
+			if(timedOut) {
+				throw new GameHooksExecutionTimedoutException();
+			}
 
 			return null;
 		});
@@ -156,7 +160,9 @@ public class PluginManager {
 
 			// We use a tree to order plugins by dependency parentage
 			var pluginsTree = RootlessTree.fromItemSet(completePluginList,
-			  (PluginSpec item,PluginSpec potentialParentItem)->potentialParentItem.getPluginName().equals(item.getParentPlugin().get()),
+			  (PluginSpec item,PluginSpec potentialParentItem)-> {
+				return potentialParentItem.getPluginName().equals(item.getParentPlugin().get());
+			  },
 			  PluginSpec::isBasePlugin)
 			  .getOrElseThrow(e->e);
 

@@ -117,7 +117,6 @@ public class Game {
 		}
 	}
 
-	public interface BuilderConfiguration { BuilderMapGenerator withConfiguration(Configuration configuration);}
 	public interface BuilderMapGenerator { BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator);}
 	public interface BuilderPluginManager { BuilderBuilder withPluginManager(PluginManager pluginManager);}
 	public interface BuilderBuilder { Try<Game> build();}

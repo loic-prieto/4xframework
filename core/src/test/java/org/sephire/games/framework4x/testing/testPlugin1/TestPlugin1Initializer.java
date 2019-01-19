@@ -19,10 +19,13 @@ package org.sephire.games.framework4x.testing.testPlugin1;
 
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.game.Game;
+import org.sephire.games.framework4x.core.plugins.configuration.GameLoadingHook;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLoadingHook;
 
 import static org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1ConfigKeys.TEST_VALUE;
+import static org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1GameStateKeys.KEY1;
 
 @PluginLifecycleHandler
 public class TestPlugin1Initializer {
@@ -32,5 +35,13 @@ public class TestPlugin1Initializer {
 		configuration.putConfig(TEST_VALUE,"someValue");
 
 		return Try.success(null);
+	}
+
+	@GameLoadingHook
+	public Try<Void> handleGameStartHook(Game game) {
+		return Try.of(()->{
+			game.putState(KEY1,"test");
+			return null;
+		});
 	}
 }
