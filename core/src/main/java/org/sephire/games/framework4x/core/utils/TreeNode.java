@@ -18,16 +18,16 @@
 package org.sephire.games.framework4x.core.utils;
 
 import io.vavr.Function1;
-import io.vavr.collection.*;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.List;
+import io.vavr.collection.Set;
 import io.vavr.control.Option;
 
 /**
- * This is a quick and dirty mutable tree implementation whose sole purpose is to
- * provide a list of items ordered by parentage, parents starting first.
- *
- * I didn't find a Tree implementation that did simply what I needed.
- *
- * Only the children are linked, no way to get the parent node.
+ * <p>This is a quick and dirty mutable tree implementation whose sole purpose is to
+ * provide a list of items ordered by parentage, parents starting first.</p>
+ * <p>I didn't find a Tree implementation that did simply what I needed.</p>
+ * <p>Only the children are linked, no way to get the parent node.</p>
  *
  * @param <NODE_TYPE> the type of the value contained in the tree nodes.
  */
@@ -54,39 +54,55 @@ public class TreeNode<NODE_TYPE> {
 		this.children = this.children.union(HashSet.ofAll(children));
 	}
 
+	public Set<TreeNode<NODE_TYPE>> getChildren() { return children; }
+
 	public NODE_TYPE getValue() {
 		return this.value;
 	}
 
 	/**
-	 * Starting from this node, provide a list of items contained
-	 * in this tree, ordered by a breadth-first traversal.
-	 * This means that the order is: parent -> siblings -> children
+	 * <p>Starting from this node, provide a list of items contained
+	 * in this tree, ordered by a breadth-first traversal.<br/>
+	 * This means that the order is: parent -> siblings -> children</p>
 	 *
-	 * This is useful for cases in which we want a list of items ordered
-	 * by descendant parentage hierarchy.
+	 * <p>This is useful for cases in which we want a list of items ordered
+	 * by descendant parentage hierarchy.</p>
 	 *
-	 * The values of the nodes are returned, not the nodes themselves.
+	 * <p>The values of the nodes are returned, not the nodes themselves.</p>
+	 *
+	 * <p>The root node may be excluded from the set if its just a
+	 * container for its children without value itself</p>
 	 * @return
 	 */
-	public List<NODE_TYPE> toOrderedListByBreadthFirstTraversal() {
+	public List<NODE_TYPE> toOrderedListByBreadthFirstTraversal(boolean excludeRootNode) {
 
-		List<NODE_TYPE> result = List.of(value);
+		List<NODE_TYPE> result = excludeRootNode? List.empty() : List.of(value);
+
 		result = result.appendAll(
 		  children.flatMap(TreeNode::toOrderedListByBreadthFirstTraversal)
 		);
 
 		return result;
 	}
+	public List<NODE_TYPE> toOrderedListByBreadthFirstTraversal() {
+		return toOrderedListByBreadthFirstTraversal(false);
+	}
+
 
 	/**
-	 * Starting from this node, find the first node that matches the predicate.
-	 * The search is performed breadth-first.
-	 * @param predicate
+	 * <p>Starting from this node, find the first node that matches the predicate.
+	 * The search is performed breadth-first.</p>
+	 * <p>The initial node may be excluded from the search, if, for example, the root node
+	 * of the tree is a fake container for the rest of the nodes</p>
+	 *
+	 * @param predicate the predicate to search by
+	 * @param excludeFirstNode whether to exclude the first node on the search
 	 * @return
 	 */
-	public Option<TreeNode<NODE_TYPE>> findFirstNode(Function1<NODE_TYPE,Boolean> predicate) {
-		Option<TreeNode<NODE_TYPE>> result = predicate.apply(value) ? Option.of(this) : Option.none();
+	public Option<TreeNode<NODE_TYPE>> findFirstNode(Function1<NODE_TYPE,Boolean> predicate,boolean excludeFirstNode) {
+		Option<TreeNode<NODE_TYPE>> result = excludeFirstNode? Option.none() :
+		  predicate.apply(value) ? Option.of(this) :
+			Option.none();
 
 		if(!result.isDefined()) {
 			result = children.find((node)->predicate.apply(node.value));
@@ -101,6 +117,9 @@ public class TreeNode<NODE_TYPE> {
 		}
 
 		return result;
+	}
+	public Option<TreeNode<NODE_TYPE>> findFirstNode(Function1<NODE_TYPE,Boolean> predicate) {
+		return findFirstNode(predicate,false);
 	}
 
 }

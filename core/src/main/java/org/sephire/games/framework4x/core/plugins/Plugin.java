@@ -26,6 +26,7 @@ import io.vavr.collection.Set;
 import io.vavr.collection.*;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -36,7 +37,6 @@ import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProvider;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrappingException;
-import org.sephire.games.framework4x.core.utils.FunctionalUtils;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Functions;
 
 import javax.naming.OperationNotSupportedException;
@@ -58,6 +58,7 @@ import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageTo
  * <p>A plugin may define model entities as declared in the core framework, if it is a base plugin, or may
  * override and extend the configuration of a base plugin.</p>
  */
+@EqualsAndHashCode(of = {"specification"})
 public class Plugin {
 
 	@Getter

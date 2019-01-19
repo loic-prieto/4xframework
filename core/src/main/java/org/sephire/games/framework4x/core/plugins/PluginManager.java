@@ -19,7 +19,7 @@ package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.collection.*;
+import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
@@ -27,7 +27,9 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
+import org.sephire.games.framework4x.core.utils.RootlessTree;
 import org.sephire.games.framework4x.core.utils.TreeNode;
 
 import java.io.File;
@@ -109,6 +111,26 @@ public class PluginManager {
 	}
 
 	/**
+	 * Given the set of loaded plugins, call their game start hooks with an initialized game and loaded configuration.
+	 * @param game
+	 * @return
+	 */
+	public Try<Void> callGameStartHooks(Game game){
+		// Build the dependency tree
+		var baseNodes = plugins.values().filter(plugin -> plugin.getSpecification().isBasePlugin())
+		  .map((plugin)->new TreeNode<Plugin>(plugin));
+		baseNodes.forEach((node)->{
+
+		});
+
+		plugins.values().filter(p->!p.getSpecification().isBasePlugin())
+		  .forEach(childPlugin->{
+		  	baseNodes.find(node->node.getValue().getSpecification().getPluginName().equals(childPlugin.getSpecification().getParentPlugin().get()))
+			  .get().addChildren();
+		  });
+	}
+
+	/**
 	 * Given a list of plugins to load, build a list that orders the plugins by load order, meaning
 	 * that dependent plugins are loaded before the plugins that need them.
 	 *
@@ -124,39 +146,16 @@ public class PluginManager {
 		return Try.of(()->{
 
 			// Check we have all needed dependencies
-			var completePluginList = completeNeededPlugins(pluginsToLoad);
-			if(completePluginList.isFailure()){
-				throw completePluginList.getCause();
-			}
+			var completePluginList = completeNeededPlugins(pluginsToLoad)
+			  .getOrElseThrow(e->e);
 
 			// We use a tree to order plugins by dependency parentage
+			var pluginsTree = RootlessTree.fromItemSet(completePluginList,
+			  (PluginSpec item,PluginSpec potentialParentItem)->potentialParentItem.getPluginName().equals(item.getParentPlugin().get()),
+			  PluginSpec::isBasePlugin)
+			  .getOrElseThrow(e->e);
 
-			// Create a root node to be the base for the base plugins to load
-			PluginSpec rootPlugin = new PluginSpec("rootPlugin","",Option.none());
-			TreeNode<PluginSpec> rootNode = new TreeNode<>(rootPlugin);
-
-			// Put the base plugins as first siblings of the tree
-			Set<TreeNode<PluginSpec>> basePluginsNodes = completePluginList.get()
-			  .filter(PluginSpec::isBasePlugin)
-			  .map(TreeNode::new);
-			rootNode.addChildren(basePluginsNodes);
-
-			// Now, for all non base plugins, put them into each appropriate tree node
-			// This solution scales very badly for large amounts of items in the tree. If this ever
-			// happens to be a problem, we could cache base plugin tree nodes so that we don't have
-			// to find them every time.
-			completePluginList.get().filter(not(PluginSpec::isBasePlugin))
-			  .map(TreeNode::new).map((n)->(TreeNode<PluginSpec>)n)
-			  .forEach((nonBasePluginNode)-> {
-				  String parentNodeName = nonBasePluginNode.getValue().getParentPlugin().get();
-
-				  rootNode.findFirstNode((node) -> node.getPluginName().equals(parentNodeName) )
-					.peek((parentNode)->parentNode.addChildren(nonBasePluginNode));
-			  });
-
-			return rootNode.toOrderedListByBreadthFirstTraversal()
-			  // We included a root plugin only to be able to build a tree, so we now remove it
-			  .filter((pluginSpec -> !pluginSpec.getPluginName().equals("rootPlugin")));
+			return pluginsTree.getItemsOrderedTopologically();
 		});
 	}
 
