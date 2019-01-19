@@ -104,28 +104,30 @@ public class PluginLifecycleHandlerWrapper {
 	}
 
 	/**
-	 * Call the game load hook with the current game object loaded.
+	 * <p>Call the game load hook with the current game object loaded.</p>
 	 *
-	 * This method should be called only after parent plugins have been called.
+	 * <p>This method should be called only after parent plugins have been called.</p>
 	 *
-	 * Won't do anything if no game loading hook has been defined for this plugin.
+	 * <p>Won't do anything if no game loading hook has been defined for this plugin.</p>
 	 *
-	 * May return standard java errors when dynamically calling methods with reflection:
-	 * - IllegalAccessException
-	 * - InvocationTargetException
-	 * Both wrapped in a RuntimeException (inside the Try object)
+	 * <p>May return standard java errors when dynamically calling methods with reflection:
+	 * <ul>
+	 *     <li>IllegalAccessException</li>
+	 *     <li>InvocationTargetException</li>
+	 * </ul>
+	 * Both wrapped in a RuntimeException (inside the Try object)</p>
 	 *
 	 * @param game
 	 * @return
 	 */
 	public Try<Void> callGameLoadingHook(Game game) {
-		return callHook(gameLoadingHook,configuration);
+		return callHook(gameLoadingHook,game);
 	}
 
-	private Try<Void> callHook(Option<Method> hookMethod, Configuration.Builder configuration) {
+	private Try<Void> callHook(Option<Method> hookMethod, Object param) {
 		return Try.of(()->{
 			hookMethod.peek((hook)->{
-				try { hook.invoke(pluginLifecycleHandlerInstance,configuration); }
+				try { hook.invoke(pluginLifecycleHandlerInstance,param); }
 				catch(IllegalAccessException | InvocationTargetException e) { throw new RuntimeException(e); }
 			});
 
@@ -144,7 +146,7 @@ public class PluginLifecycleHandlerWrapper {
 	 * @return
 	 */
 	private static Try<Option<Method>> fetchPluginLoadingHookMethod(Class<?> pluginLifecycleHandlerClass) {
-		return fetchMethodWithAnnotation(pluginLifecycleHandlerClass,PluginLoadingHook.class);
+		return fetchMethodWithAnnotation(pluginLifecycleHandlerClass,PluginLoadingHook.class,Configuration.Builder.class);
 	}
 
 	/**
@@ -158,7 +160,7 @@ public class PluginLifecycleHandlerWrapper {
 	 * @return
 	 */
 	private static Try<Option<Method>> fetchGameLoadingHookMethod(Class<?> pluginLifecycleHandlerClass) {
-		return fetchMethodWithAnnotation(pluginLifecycleHandlerClass,GameLoadingHook.class);
+		return fetchMethodWithAnnotation(pluginLifecycleHandlerClass,GameLoadingHook.class,Game.class);
 	}
 
 	/**
@@ -172,7 +174,10 @@ public class PluginLifecycleHandlerWrapper {
 	 * @param annotation
 	 * @return
 	 */
-	private static Try<Option<Method>> fetchMethodWithAnnotation(Class<?> pluginLifecycleHandlerClass, Class<? extends Annotation> annotation) {
+	private static Try<Option<Method>> fetchMethodWithAnnotation(
+	  Class<?> pluginLifecycleHandlerClass,
+	  Class<? extends Annotation> annotation,
+	  Class<? extends Object> parameterType) {
 		return Try.of(()->{
 			var methods = getAllMethods(pluginLifecycleHandlerClass,withAnnotation(annotation));
 
@@ -185,9 +190,9 @@ public class PluginLifecycleHandlerWrapper {
 			}
 
 			var method = methods.iterator().next();
-			if(method.getParameterCount() != 1 && !method.getParameters()[0].getType().isAssignableFrom(Configuration.Builder.class)){
+			if(method.getParameterCount() != 1 && !method.getParameters()[0].getType().isAssignableFrom(parameterType)){
 				throw new InvalidPluginLifecycleHandlerException(pluginLifecycleHandlerClass,
-				  format("The hook %s must have one parameter, and must be of type Configuration.Builder",annotation.getName()));
+				  format("The hook %s must have one parameter, and must be of type %s",annotation.getName(),parameterType));
 			}
 			if(!method.getReturnType().isAssignableFrom(Try.class)) {
 				throw new InvalidPluginLifecycleHandlerException(pluginLifecycleHandlerClass,

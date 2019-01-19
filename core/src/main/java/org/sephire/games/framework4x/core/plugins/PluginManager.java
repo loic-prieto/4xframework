@@ -127,7 +127,7 @@ public class PluginManager {
 			ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			pluginsTree.getTopologicallyOrderedBranches().forEach((pluginsBranch)->{
 				threadExecutor.submit(()->{
-
+					pluginsBranch.forEach((plugin)->plugin.callGameStartHook(game));
 				});
 			});
 

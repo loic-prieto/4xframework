@@ -72,14 +72,17 @@ public class Plugin {
 	}
 
 	/**
-	 * Given a plugin spec, it will try to load it from the classpath.
-	 * A plugin has a root package, from which it will scan all automatic
+	 * <p>Given a plugin spec, it will try to load it from the classpath.</p>
+	 * <p>A plugin has a root package, from which it will scan all automatic
 	 * resources and the configuration classes and initialize all those
-	 * resources.
+	 * resources.</p>
 	 *
-	 * May return the following exceptions as errors:
-	 *  - InvalidPluginLifecycleHandlerException
-	 *  - PluginLoadingException
+	 * <p>May return the following exceptions as errors:
+	 * <ul>
+	 *     <li>InvalidPluginLifecycleHandlerException</li>
+	 *     <li>PluginLoadingException</li>
+	 * </ul>
+	 *  </p>
 	 *
 	 * @param pluginSpec
 	 * @return
@@ -96,13 +99,18 @@ public class Plugin {
 		});
 	}
 
+	/**
+	 * <p>Call the game start hook of the plugin if it exists</p>
+	 * @param game
+	 * @return
+	 */
 	public Try<Void> callGameStartHook(Game game) {
 		return Try.of(()->{
-			if(lifecycleHandler.isDefined()){
-				lifecycleHandler.get().callGameLoadingHook()
-			}
+			lifecycleHandler.map((handler)->handler.callGameLoadingHook(game));
+			return null;
 		});
 	}
+
 	private static void updateConfigWithBundleEntry(Configuration.Builder configuration, Tuple3<Locale, String, String> bundleEntry) {
 		var i18nMap = configuration.getConfig(CoreConfigKeyEnum.I18N).map((v) -> (Map<Locale, Map<String, String>>) v)
 		  .getOrElse(HashMap.empty());
