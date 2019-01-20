@@ -55,7 +55,15 @@ public class GameWindow extends Basic4XWindow {
 		}
 		backgroundPanel.addComponent(mapComponentTry.get(),BorderLayout.Location.CENTER);
 
+		setupBottomBar(backgroundPanel);
+
 		setComponent(backgroundPanel);
+	}
+
+	private void setupBottomBar(Panel container) {
+		var bottomBar = new BottomBarComponent(game,this);
+		bottomBar.setLayoutData(BorderLayout.Location.BOTTOM);
+		container.addComponent(bottomBar);
 	}
 
 	private void setupFrame(){

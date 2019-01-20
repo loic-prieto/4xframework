@@ -34,7 +34,6 @@ public class BottomBarComponent extends Panel {
 
 		setLayoutManager(new BorderLayout());
 
-
 		buildElements();
 	}
 
@@ -49,13 +48,15 @@ public class BottomBarComponent extends Panel {
 			  .map((element)->new BottomBarLabel(element,game))
 			  .forEach(this::addComponent);
 
+			return null;
 		});
-
-
 	}
 
 	public void updateElements() {
-
+		List.of(getChildren())
+		  .filter((child)->child.getClass().equals(BottomBarLabel.class))
+		  .map((child)->(BottomBarLabel)child)
+		  .peek(label->label.updateValue(game));
 	}
 
 	private static class BottomBarLabel extends Label {
