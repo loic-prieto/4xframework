@@ -25,6 +25,11 @@ import org.sephire.games.framework4x.core.model.config.ConfigKeyEnum;
  */
 public enum ConsoleClientConfigKeyEnum implements ConfigKeyEnum {
 	/**
+	 * <p>Holds a list of elements to be positioned in the bottom bar.</p>
+	 * <p>Signature: Map&lt;BottomBarPosition,List&lt;BottomBarElement&gt;&gt;</p>
+	 */
+	BOTTOM_BAR_ELEMENTS,
+	/**
 	 * Holds the configuration for the terrain->character mapping for the terminal client.
 	 */
 	TERRAIN_CHARACTER_MAPPING;
