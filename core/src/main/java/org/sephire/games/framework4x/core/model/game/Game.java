@@ -27,6 +27,7 @@ import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
 import static java.lang.String.format;
+import static org.sephire.games.framework4x.core.model.game.CoreGameStateKeys.CURRENT_TURN;
 
 /**
  * This is the main framework 4x component, it hold the data needed to run a game. Mainly the loaded configuration
@@ -47,6 +48,14 @@ public class Game {
 		this.pluginManager = pluginManager;
 		this.map = map;
 		this.gameState = new GameState();
+	}
+
+	private Try<Void> initializeCoreState() {
+		return Try.of(()->{
+			gameState.put(CURRENT_TURN,0);
+
+			return null;
+		});
 	}
 
 	public void putState(GameStateEnumKey key,Object value) {
@@ -106,11 +115,12 @@ public class Game {
 				}
 
 				var game = new Game(mapTry.get(),pluginManager);
-				var startHooks = game.executeGameStartHooks();
-				if(startHooks.isFailure()){
-					log.error(format("Error while calling game start hooks: %s",startHooks.getCause().getMessage()));
-					throw startHooks.getCause();
-				}
+				game.executeGameStartHooks()
+				  .onFailure((e)->log.error(format("Error while calling game start hooks: %s",e.getMessage())))
+				  .getOrElseThrow(e->e);
+				game.initializeCoreState()
+				  .onFailure((e)->log.error(format("Error while loading initial game state: %s",e.getMessage())))
+				  .getOrElseThrow(e->e);
 
 				return game;
 			});

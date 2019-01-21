@@ -34,8 +34,8 @@ import org.sephire.games.framework4x.core.utils.FunctionalUtils.Functions;
 
 import java.util.Locale;
 
+import static org.sephire.games.framework4x.core.model.game.CoreGameStateKeys.CURRENT_TURN;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
-import static org.sephire.games.framework4x.plugins.standard.StandardStateKeys.CURRENT_TURN;
 
 @Slf4j
 @PluginLifecycleHandler
@@ -68,7 +68,7 @@ public class Main {
 
 	/**
 	 * <p>Load the specific bottom bar elements for the game window for the console client from the interesting
-	 * game state variables of the standard plugin.</p>
+	 * game state variables of the standard plugin or core framework.</p>
 	 * @param configurationBuilder
 	 * @return
 	 */
