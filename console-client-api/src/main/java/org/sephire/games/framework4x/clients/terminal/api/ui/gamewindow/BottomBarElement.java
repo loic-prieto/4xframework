@@ -18,7 +18,7 @@ import org.sephire.games.framework4x.core.model.game.Game;
 @Getter
 public class BottomBarElement {
 	private BottomBarPosition position;
-	private Function2<Configuration, Game,String> valueGenerator;
+	private Function2<Configuration, Game,Try<String>> valueGenerator;
 
 	public static BuilderElement builder(){
 		return new Builder();
@@ -26,9 +26,9 @@ public class BottomBarElement {
 
 	public static class Builder implements BuilderElement,BuilderPosition,BuilderBuilder {
 		private BottomBarPosition position;
-		private Function2<Configuration, Game,String> valueGenerator;
+		private Function2<Configuration, Game,Try<String>> valueGenerator;
 
-		public BuilderPosition from(Function2<Configuration, Game,String> valueGenerator) { this.valueGenerator = valueGenerator; return this;}
+		public BuilderPosition from(Function2<Configuration, Game,Try<String>> valueGenerator) { this.valueGenerator = valueGenerator; return this;}
 		public BuilderBuilder inPosition(BottomBarPosition position) {this.position = position;return this;}
 		public Try<BottomBarElement> build() {
 			return Try.of(()->{
@@ -41,6 +41,6 @@ public class BottomBarElement {
 		}
 	}
 	public interface BuilderPosition { BuilderBuilder inPosition(BottomBarPosition position); }
-	public interface BuilderElement { BuilderPosition from(Function2<Configuration, Game,String> valueGenerator); }
+	public interface BuilderElement { BuilderPosition from(Function2<Configuration, Game,Try<String>> valueGenerator); }
 	public interface BuilderBuilder { Try<BottomBarElement> build(); }
 }

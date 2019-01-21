@@ -40,12 +40,13 @@ public class BottomBarComponent extends Panel {
 	private Try<Void> buildElements() {
 		return Try.of(()->{
 
-			configuration.getConfiguration(ConsoleClientConfigKeyEnum.BOTTOM_BAR_ELEMENTS, Map.class)
+			Try.sequence(configuration.getConfiguration(ConsoleClientConfigKeyEnum.BOTTOM_BAR_ELEMENTS, Map.class)
 			  .getOrElseThrow(e->e)
 			  .map(m-> (Map<BottomBarPosition, List<BottomBarElement>>)m)
 			  .getOrElse(HashMap.empty())
 			  .values().flatMap((list)->list)
-			  .map((element)->new BottomBarLabel(element,game))
+			  .map((element)->BottomBarLabel.of(element,game)))
+			  .getOrElseThrow(e->e)
 			  .forEach(this::addComponent);
 
 			return null;
@@ -62,8 +63,11 @@ public class BottomBarComponent extends Panel {
 	private static class BottomBarLabel extends Label {
 		private BottomBarElement element;
 
-		public BottomBarLabel(BottomBarElement element,Game game) {
-			super(element.getValueGenerator().apply(game.getConfiguration(),game));
+		private BottomBarLabel(BottomBarElement element,Game game) throws Throwable {
+			super(element.getValueGenerator()
+			  .apply(game.getConfiguration(),game)
+			  .getOrElseThrow((e)->e));
+
 			this.element = element;
 			var labelLocation = Match(element.getPosition()).of(
 			  Case($(BottomBarPosition.Left),BorderLayout.Location.LEFT),
@@ -73,8 +77,15 @@ public class BottomBarComponent extends Panel {
 			this.setLayoutData(labelLocation);
 		}
 
-		public void updateValue(Game game) {
-			this.setText(element.getValueGenerator().apply(game.getConfiguration(),game));
+		public static Try<BottomBarLabel> of(BottomBarElement element,Game game) {
+			return Try.of(()->new BottomBarLabel(element,game));
+		}
+
+		public Try<Void> updateValue(Game game) {
+			return Try.of(()->{
+				this.setText(element.getValueGenerator().apply(game.getConfiguration(),game).getOrElseThrow(e->e));
+				return null;
+			});
 		}
 	}
 
