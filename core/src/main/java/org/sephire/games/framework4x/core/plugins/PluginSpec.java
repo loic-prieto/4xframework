@@ -27,7 +27,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.sephire.games.framework4x.core.plugins.configuration.InvalidPluginLifecycleHandlerException;
 
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -37,18 +36,19 @@ import static org.sephire.games.framework4x.core.utils.ResourceLoading.normalize
 
 @Getter
 @AllArgsConstructor
-@EqualsAndHashCode(of={"pluginName"})
+@EqualsAndHashCode(of = {"pluginName"})
 public class PluginSpec implements Comparable<PluginSpec> {
 	private String pluginName;
 	private String rootPackage;
 	private Option<String> parentPlugin;
+	private final static Pattern PROPERTIES_BUNDLE_FORMAT = Pattern.compile("^(?<package>.*)/(?<bundleName>[^_]*)(_.*){0,2}\\.properties$");
 
 	/**
 	 * Check whether the plugin is a base plugin or not.
 	 * It boils down to whether it has a defined parent plugin.
 	 * @return
 	 */
-	public boolean isBasePlugin(){
+	public boolean isBasePlugin() {
 		return parentPlugin.isEmpty();
 	}
 
@@ -113,8 +113,11 @@ public class PluginSpec implements Comparable<PluginSpec> {
 		  new ResourcesScanner());
 
 		return HashSet.ofAll(reflections.getResources(Pattern.compile(".*\\.properties")))
-		  .map((name) -> name.replaceAll("\\.properties", ""))
-		  .map((name) -> name.replaceAll("(.*)_.*$", "$1"));
+		  .map((name) -> {
+			  var matcher = PROPERTIES_BUNDLE_FORMAT.matcher(name);
+			  matcher.find();
+			  return matcher.group("package") + "/" + matcher.group("bundleName");
+		  });
 	}
 
 	public static Builder builder() {
@@ -130,40 +133,43 @@ public class PluginSpec implements Comparable<PluginSpec> {
 			this.rootPackage = rootPackage;
 			return this;
 		}
+
 		public Builder withPluginName(String pluginName) {
 			this.pluginName = pluginName;
 			return this;
 		}
+
 		public Builder withParent(String parentPlugin) {
 			this.parentPlugin = Option.of(parentPlugin);
 			return this;
 		}
+
 		public Builder withParent(Option<String> parentPlugin) {
 			this.parentPlugin = parentPlugin;
 			return this;
 		}
 
 		public Try<PluginSpec> build() {
-			return Try.of(()->{
-				if(parentPlugin == null) {
+			return Try.of(() -> {
+				if (parentPlugin == null) {
 					parentPlugin = Option.none();
 				}
 
-				if(rootPackage == null || pluginName == null) {
-					pluginName = pluginName == null? "unspecified" : pluginName;
-					throw new InvalidPluginSpecException(pluginName,"rootPackage and pluginName are mandatory parameters");
+				if (rootPackage == null || pluginName == null) {
+					pluginName = pluginName == null ? "unspecified" : pluginName;
+					throw new InvalidPluginSpecException(pluginName, "rootPackage and pluginName are mandatory parameters");
 				}
 
-				var pluginSpec = new PluginSpec(pluginName,rootPackage,parentPlugin);
+				var pluginSpec = new PluginSpec(pluginName, rootPackage, parentPlugin);
 
-				if(!doesRootPackageExist(pluginSpec)) {
-					throw new InvalidPluginSpecException(pluginName,"the root package hasn't been found in the classpath");
+				if (!doesRootPackageExist(pluginSpec)) {
+					throw new InvalidPluginSpecException(pluginName, "the root package hasn't been found in the classpath");
 				}
 
 				// This checks the availability of basic i18n metadata inside the plugin
 				pluginSpec.getTitle(Locale.ENGLISH)
-				  .andThen(()->pluginSpec.getDescription(Locale.ENGLISH))
-				  .getOrElseThrow((t)->t);
+				  .andThen(() -> pluginSpec.getDescription(Locale.ENGLISH))
+				  .getOrElseThrow((t) -> t);
 
 				return pluginSpec;
 			});
@@ -175,7 +181,7 @@ public class PluginSpec implements Comparable<PluginSpec> {
 		 * @return
 		 */
 		private static boolean doesRootPackageExist(PluginSpec pluginSpec) {
-			var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.","/");
+			var packageFolder = pluginSpec.getRootPackage().replaceAll("\\.", "/");
 			var i18nFolder = "i18n/".concat(pluginSpec.getPluginName());
 			var standardResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(packageFolder) != null;
 			var i18nResourcesFolderExists = ClassLoader.getSystemClassLoader().getResource(i18nFolder) != null;

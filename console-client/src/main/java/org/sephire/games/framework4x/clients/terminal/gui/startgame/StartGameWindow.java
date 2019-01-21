@@ -83,8 +83,8 @@ public class StartGameWindow extends Basic4XWindow {
 
 		var startGameButton = new Button(getTranslationFor("startGameWindow.OptionsPane.startGamebutton.label"),()->{
 			var gameTry = Game.builder()
-			  .withConfiguration(configuration)
 			  .withMapGenerator(selectedMapGenerator)
+			  .withPluginManager(pluginManager)
 			  .build();
 			if(gameTry.isFailure()){
 				MessageDialog.showMessageDialog(getOverridenTextGui(),"Error",

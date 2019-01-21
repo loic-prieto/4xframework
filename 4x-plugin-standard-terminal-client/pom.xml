@@ -81,8 +81,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <X-4XPlugin-Name>org.sephire.games.framework4x.plugins.standard.terminal</X-4XPlugin-Name>
-                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard.terminal</X-4XPlugin-RootPackage>
+                            <X-4XPlugin-Name>org.sephire.games.framework4x.plugins.standard_terminal</X-4XPlugin-Name>
+                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard_terminal</X-4XPlugin-RootPackage>
                             <X-4XPlugin-ParentPlugin>org.sephire.games.framework4x.plugins.standard</X-4XPlugin-ParentPlugin>
                         </manifestEntries>
                     </archive>

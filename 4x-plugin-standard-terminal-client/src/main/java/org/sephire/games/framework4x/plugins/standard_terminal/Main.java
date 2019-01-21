@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sephire.games.framework4x.plugins.standard.terminal;
+package org.sephire.games.framework4x.plugins.standard_terminal;
 
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
@@ -82,9 +82,9 @@ public class Main {
 					.getOrElseThrow(()->new GameStateNotFoundException(CURRENT_TURN));
 
 				  var label = configuration.getTranslationFor(Locale.ENGLISH,
-					"framework4x.standard.terminal.ui.gamewindow.bottombar.current_turn.label",
+					"framework4x.standard_terminal.ui.gamewindow.bottombar.current_turn.label",
 					currentTurn)
-					.getOrElseThrow(()->new I18NKeyNotFoundException("framework4x.standard.terminal.ui.gamewindow.bottombar.current_turn.label"));
+					.getOrElseThrow(()->new I18NKeyNotFoundException("framework4x.standard_terminal.ui.gamewindow.bottombar.current_turn.label"));
 
 				  return label;
 				}))
