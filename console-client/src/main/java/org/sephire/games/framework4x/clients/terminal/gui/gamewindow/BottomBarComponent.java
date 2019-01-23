@@ -3,10 +3,13 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 import com.googlecode.lanterna.gui2.BorderLayout;
 import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.collection.HashMap;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.control.Try;
+import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.BottomBarElement;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.BottomBarPosition;
@@ -15,11 +18,13 @@ import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
 
 import static io.vavr.API.*;
+import static java.lang.String.format;
 
 /**
  * <p>Represents a bottom bar component inside the game window.</p>
  * <p>It takes its configuration from the game object</p>
  */
+@Slf4j
 public class BottomBarComponent extends Panel {
 
 	private Game game;
@@ -34,7 +39,12 @@ public class BottomBarComponent extends Panel {
 
 		setLayoutManager(new BorderLayout());
 
-		buildElements();
+		var buildTry = buildElements();
+		if(buildTry.isFailure()){
+			var errorMessage = format("Could not load elements in bottom bar component: %s",buildTry.getCause().getMessage());
+			MessageDialog.showMessageDialog(parentContainer.getOverridenTextGui(),"Error",errorMessage, MessageDialogButton.OK);
+			log.error(errorMessage);
+		}
 	}
 
 	private Try<Void> buildElements() {

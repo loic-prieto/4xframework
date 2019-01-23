@@ -62,6 +62,9 @@ import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageTo
 @EqualsAndHashCode(of = {"specification"})
 public class Plugin {
 
+	private final static Pattern PROPERTIES_BUNDLE_FORMAT =
+	  Pattern.compile("^(?<filename>(?<package>.*)/(?<bundleName>[^_]*))_?(?<locale>.*)?$");
+
 	@Getter
 	private PluginSpec specification;
 	private Option<PluginLifecycleHandlerWrapper> lifecycleHandler;
@@ -124,25 +127,21 @@ public class Plugin {
 	}
 
 	private static Option<ResourceBundle> bundleFromFileName(String filename) {
-		var bundleInfo = filename.split("_");
-		if (bundleInfo.length < 2 || bundleInfo.length > 3) {
-			return Option.none();
-		} else {
-			if (bundleInfo.length == 2) {
-				return Option.of(PropertyResourceBundle.getBundle(
-				  bundleInfo[0],
-				  Locale.forLanguageTag(
-					bundleInfo[1])));
-			} else {
-				return Option.of(
-				  PropertyResourceBundle.getBundle(
-					bundleInfo[0],
-					Locale.forLanguageTag(
-					  bundleInfo[1]
-						.concat("-")
-						.concat(bundleInfo[2]))));
-			}
+		var matcher = PROPERTIES_BUNDLE_FORMAT.matcher(filename);
+		var matched = matcher.find();
+
+		var result = Option.<ResourceBundle>none();
+
+		if(matched) {
+			var bundleBaseFilename = matcher.group("filename");
+			var locale = matcher.group("locale");
+
+			result = matcher.group("locale") != null ?
+			  Option.of(PropertyResourceBundle.getBundle(bundleBaseFilename,Locale.forLanguageTag(locale))) :
+			  Option.of(PropertyResourceBundle.getBundle(bundleBaseFilename));
 		}
+
+		return result;
 	}
 
 	private static Set<Tuple3<Locale, String, String>> entriesFromBundle(ResourceBundle bundle) {
