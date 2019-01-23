@@ -17,6 +17,7 @@
  */
 package org.sephire.games.framework4x.plugins.standard_terminal;
 
+import io.vavr.collection.Map;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientConfigKeyEnum;
@@ -26,6 +27,7 @@ import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.BottomBa
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.BottomBarPosition;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.I18NKeyNotFoundException;
+import org.sephire.games.framework4x.core.model.game.GameStateEnumKey;
 import org.sephire.games.framework4x.core.model.game.GameStateNotFoundException;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
@@ -36,6 +38,7 @@ import java.util.Locale;
 
 import static org.sephire.games.framework4x.core.model.game.CoreGameStateKeys.CURRENT_TURN;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
+import static org.sephire.games.framework4x.plugins.standard.StandardStateKey.*;
 
 @Slf4j
 @PluginLifecycleHandler
@@ -75,26 +78,69 @@ public class Main {
 	private Try<Void> loadBottomBarElements(Configuration.Builder configurationBuilder) {
 
 		return Try.of(()->{
-			var currentTurnElement = BottomBarElement.builder()
-			  .from((configuration,game)-> Try.of(()->{
-				  var currentTurn = game.getState(CURRENT_TURN, Integer.class)
-					.getOrElseThrow((e)->e)
-					.getOrElseThrow(()->new GameStateNotFoundException(CURRENT_TURN));
+			var currentTurnElement = buildBottomBarElement(configurationBuilder,
+			  CURRENT_TURN,
+			  "framework4x.standard_terminal.ui.gamewindow.bottombar.current_turn.label",
+			  BottomBarPosition.Left).getOrElseThrow(e->e);
 
-				  var label = configuration.getTranslationFor(Locale.ENGLISH,
-					"framework4x.standard_terminal.ui.gamewindow.bottombar.current_turn.label",
-					currentTurn)
-					.getOrElseThrow(()->new I18NKeyNotFoundException("framework4x.standard_terminal.ui.gamewindow.bottombar.current_turn.label"));
+			var moneyElement = buildBottomBarElement(configurationBuilder,
+			  MONEY,
+			  "framework4x.standard_terminal.ui.gamewindow.bottombar.money.label",
+			  BottomBarPosition.Right).getOrElseThrow(e->e);
+
+			var currentResearch = BottomBarElement.builder()
+			  .from((configuration,game)-> Try.of(()->{
+				  var currentResearchState = game.getState(CURRENT_RESEARCH, String.class)
+					.getOrElseThrow((e)->e);
+
+				  var label = "";
+
+				  if(currentResearchState.isDefined()) {
+					  var currentResearchProgress = game.getState(RESEARCH, Map.class)
+						.getOrElseThrow((e)->e)
+						.map(m->(Map<String,Integer>)m)
+						.getOrElseThrow(()->new GameStateNotFoundException(RESEARCH))
+						.get(currentResearchState.get())
+						.get();
+
+					  label = configuration.getTranslationFor(Locale.ENGLISH,
+						"framework4x.standard_terminal.ui.gamewindow.bottombar.current_research.label",
+						currentResearchState.get(),currentResearchProgress)
+						.getOrElseThrow(()->new I18NKeyNotFoundException("framework4x.standard_terminal.ui.gamewindow.bottombar.current_research.label"));
+				  }
 
 				  return label;
-				}))
-			  .inPosition(BottomBarPosition.Left)
+			  }))
+			  .inPosition(BottomBarPosition.Center)
 			  .build()
 			  .getOrElseThrow(e->e);
 
-			BottomBar.addElementToBottomBar(currentTurnElement,configurationBuilder).getOrElseThrow(e->e);
+			BottomBar.addElementToBottomBar(currentTurnElement,configurationBuilder)
+			  .andThen(()->BottomBar.addElementToBottomBar(moneyElement,configurationBuilder))
+			  .andThen(()->BottomBar.addElementToBottomBar(currentResearch,configurationBuilder))
+			  .getOrElseThrow(e->e);
+
 			return null;
 		});
+	}
+
+	private Try<BottomBarElement> buildBottomBarElement(Configuration.Builder configurationBuilder,
+														GameStateEnumKey stateKey,
+														String i18nLabel,
+														BottomBarPosition position) {
+		return BottomBarElement.builder()
+		  .from((configuration,game)-> Try.of(()->{
+			  var currentTurn = game.getState(stateKey, Integer.class)
+				.getOrElseThrow((e)->e)
+				.getOrElseThrow(()->new GameStateNotFoundException(stateKey));
+
+			  var label = configuration.getTranslationFor(Locale.ENGLISH,i18nLabel, currentTurn)
+				.getOrElseThrow(()->new I18NKeyNotFoundException(i18nLabel));
+
+			  return label;
+		  }))
+		  .inPosition(position)
+		  .build();
 	}
 
 }

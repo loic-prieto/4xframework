@@ -17,11 +17,16 @@
  */
 package org.sephire.games.framework4x.plugins.standard;
 
+import io.vavr.collection.HashMap;
 import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.game.Game;
+import org.sephire.games.framework4x.core.plugins.configuration.GameLoadingHook;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLoadingHook;
+
+import static org.sephire.games.framework4x.plugins.standard.StandardStateKey.*;
 
 @Slf4j
 @PluginLifecycleHandler
@@ -31,5 +36,16 @@ public class Main {
 	public Try<Void> pluginLoad(Configuration.Builder configuration) {
 		return Try.of(() -> (Void) null)
 		  .onSuccess((result) -> log.info("Plugin " + this.getClass().getPackageName() + " loaded"));
+	}
+
+	@GameLoadingHook
+	public Try<Void> gameLoad(Game game) {
+		return Try.of(()->{
+			game.putState(MONEY,0);
+			game.putState(RESEARCH, HashMap.of("Black magic basic",34));
+			game.putState(CURRENT_RESEARCH,"Black magic basic");
+
+			return null;
+		});
 	}
 }

@@ -1,8 +1,6 @@
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 
-import com.googlecode.lanterna.gui2.BorderLayout;
-import com.googlecode.lanterna.gui2.Label;
-import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.collection.HashMap;
@@ -30,6 +28,7 @@ public class BottomBarComponent extends Panel {
 	private Game game;
 	private Configuration configuration;
 	private Basic4XWindow parentContainer;
+	private Panel centerPanel;
 
 	public BottomBarComponent(Game game, Basic4XWindow parentContainer) {
 		super();
@@ -50,6 +49,11 @@ public class BottomBarComponent extends Panel {
 	private Try<Void> buildElements() {
 		return Try.of(()->{
 
+			centerPanel = new Panel();
+			centerPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+			centerPanel.setLayoutData(BorderLayout.Location.CENTER);
+			addComponent(centerPanel);
+
 			Try.sequence(configuration.getConfiguration(ConsoleClientConfigKeyEnum.BOTTOM_BAR_ELEMENTS, Map.class)
 			  .getOrElseThrow(e->e)
 			  .map(m-> (Map<BottomBarPosition, List<BottomBarElement>>)m)
@@ -57,7 +61,13 @@ public class BottomBarComponent extends Panel {
 			  .values().flatMap((list)->list)
 			  .map((element)->BottomBarLabel.of(element,game)))
 			  .getOrElseThrow(e->e)
-			  .forEach(this::addComponent);
+			  .forEach((element)->{
+			  	if(element.element.getPosition().equals(BottomBarPosition.Center)){
+			  		centerPanel.addComponent(element);
+				} else {
+			  		addComponent(element);
+				}
+			  });
 
 			return null;
 		});
@@ -82,7 +92,7 @@ public class BottomBarComponent extends Panel {
 			var labelLocation = Match(element.getPosition()).of(
 			  Case($(BottomBarPosition.Left),BorderLayout.Location.LEFT),
 			  Case($(BottomBarPosition.Right),BorderLayout.Location.RIGHT),
-			  Case($(BottomBarPosition.Center),BorderLayout.Location.CENTER)
+			  Case($(BottomBarPosition.Center),LinearLayout.createLayoutData(LinearLayout.Alignment.Center))
 			);
 			this.setLayoutData(labelLocation);
 		}
