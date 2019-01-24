@@ -1,6 +1,9 @@
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 
-import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.BorderLayout;
+import com.googlecode.lanterna.gui2.GridLayout;
+import com.googlecode.lanterna.gui2.Label;
+import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import io.vavr.collection.HashMap;
@@ -50,7 +53,7 @@ public class BottomBarComponent extends Panel {
 		return Try.of(()->{
 
 			centerPanel = new Panel();
-			centerPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+			centerPanel.setLayoutManager(new GridLayout(1));
 			centerPanel.setLayoutData(BorderLayout.Location.CENTER);
 			addComponent(centerPanel);
 
@@ -92,7 +95,12 @@ public class BottomBarComponent extends Panel {
 			var labelLocation = Match(element.getPosition()).of(
 			  Case($(BottomBarPosition.Left),BorderLayout.Location.LEFT),
 			  Case($(BottomBarPosition.Right),BorderLayout.Location.RIGHT),
-			  Case($(BottomBarPosition.Center),LinearLayout.createLayoutData(LinearLayout.Alignment.Center))
+			  Case($(BottomBarPosition.Center),GridLayout.createLayoutData(
+			    GridLayout.Alignment.CENTER,
+				GridLayout.Alignment.CENTER,
+				true,
+				false)
+			  )
 			);
 			this.setLayoutData(labelLocation);
 		}
