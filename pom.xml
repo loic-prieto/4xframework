@@ -5,16 +5,16 @@
     Copyright © 2018 Loïc Prieto Dehennault (loic.sephiroth@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
+    it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+    GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
+    You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
@@ -108,7 +108,7 @@
                     <artifactId>license-maven-plugin</artifactId>
                     <version>3.0.rc1</version>
                     <configuration>
-                        <header>com/mycila/maven/plugin/license/templates/LGPL-3.txt</header>
+                        <header>com/mycila/maven/plugin/license/templates/AGPL-3.txt</header>
                         <properties>
                             <owner>Loïc Prieto Dehennault</owner>
                             <email>loic.sephiroth@gmail.com</email>
