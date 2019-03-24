@@ -15,14 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
+package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
 import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.Tuple;
 import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapDirection;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.CursorMoveEvent;
 
 /**
  * <p>This event is fired when the game window detects the arrow keys pressing,and will understand that as

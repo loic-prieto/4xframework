@@ -18,6 +18,18 @@
 package org.sephire.games.framework4x.core.utils;
 
 import io.vavr.Function2;
+import io.vavr.collection.Seq;
+import io.vavr.control.Try;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 /**
  * Set of functions related with functional manipulation of data structures.
@@ -33,7 +45,7 @@ public class FunctionalUtils {
 		 * Reduce a set of strings by concatenating them with a new line each.
 		 */
 		public static Function2<String,String,String> strings() {
-			return FunctionalUtils.Reduce.stringsWithSeparator("\n");
+			return stringsWithSeparator("\n");
 		}
 
 		/**
@@ -41,6 +53,51 @@ public class FunctionalUtils {
 		 */
 		public static Function2<String,String,String> stringsWithSeparator(String separator) {
 			return (a,b) -> String.format("%s%s%s",a,separator,b);
+		}
+	}
+
+	public static class Collectors {
+
+		/**
+		 * Given a stream of tries, collects it into a single try, in the same manner that Try.sequence does,
+		 * but in a chainable manner.
+		 *
+		 * @param <T>
+		 */
+		public static class TryCollector<T> implements Collector<Try<T>, List<Try<T>>,Try<Seq<T>>> {
+			@Override
+			public Supplier<List<Try<T>>> supplier() {
+				return ArrayList::new;
+			}
+
+			@Override
+			public BiConsumer<List<Try<T>>, Try<T>> accumulator() {
+				return List::add;
+			}
+
+			@Override
+			public BinaryOperator<List<Try<T>>> combiner() {
+				return (left,right)-> { left.addAll(right); return left; };
+			}
+
+			@Override
+			public Function<List<Try<T>>, Try<Seq<T>>> finisher() {
+				return Try::sequence;
+			}
+
+			@Override
+			public Set<Characteristics> characteristics() {
+				return EnumSet.of(Characteristics.UNORDERED);
+			}
+		}
+
+		/**
+		 * See {@link TryCollector}
+		 * @param <T>
+		 * @return
+		 */
+		public static <T> TryCollector<T> toTry() {
+			return new TryCollector<>();
 		}
 	}
 

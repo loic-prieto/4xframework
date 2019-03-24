@@ -20,8 +20,12 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.control.Try;
+import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowAPI;
+import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowUtils;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapComponent;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapScrollEvent;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.topmenu.TopMenuComponent;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
 
@@ -32,13 +36,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Represents the window of a game. Holds the map, the information/actions side panel, the top menu and the bottom
  * status bar.
  */
-public class GameWindow extends Basic4XWindow {
+public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 
 	private Game game;
 	private Configuration configuration;
 
 	private GameWindow(Game game, WindowBasedTextGUI textGUI) throws Throwable {
-		super("Game Window",textGUI);
+		super("Game Window", textGUI);
 		setHints(List.of(Window.Hint.FULL_SCREEN));
 
 		this.game = game;
@@ -49,46 +53,79 @@ public class GameWindow extends Basic4XWindow {
 		var backgroundPanel = new Panel();
 		backgroundPanel.setLayoutManager(new BorderLayout());
 
-		var mapComponentTry = MapComponent.of(game,this);
-		if(mapComponentTry.isFailure()) {
-			throw mapComponentTry.getCause();
-		}
-		backgroundPanel.addComponent(mapComponentTry.get(),BorderLayout.Location.CENTER);
+		var mapComponent = MapComponent.of(game, this).getOrElseThrow(t->t);
+		backgroundPanel.addComponent(mapComponent, BorderLayout.Location.CENTER);
 
 		setupBottomBar(backgroundPanel);
+		setupTopBar(backgroundPanel).getOrElseThrow(t->t);
 
 		setComponent(backgroundPanel);
+
+		GameWindowUtils.setCurrentGameWindow(this);
 	}
 
 	private void setupBottomBar(Panel container) {
-		var bottomBar = new BottomBarComponent(game,this);
+		var bottomBar = new BottomBarComponent(game, this);
 		bottomBar.setLayoutData(BorderLayout.Location.BOTTOM);
 		container.addComponent(bottomBar);
 	}
 
-	private void setupFrame(){
+	private Try<Void> setupTopBar(Panel container) {
+		return Try.of(()->{
+			var topMenuBar = TopMenuComponent.builder()
+			  .withParent(this)
+			  .withConfiguration(game.getConfiguration())
+			  .build().getOrElseThrow(t -> t);
+
+			topMenuBar.setLayoutData(BorderLayout.Location.TOP);
+			container.addComponent(topMenuBar);
+
+			return null;
+		});
+	}
+
+	private void setupFrame() {
 
 		addWindowListener(new WindowListenerAdapter() {
 			@Override
 			public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+
+				// React to top menu activations
+				var potentialMenuActivationEvent = MenuActivationRequestedEvent.from(keyStroke);
+				if (potentialMenuActivationEvent.isDefined()) {
+					fireEvent(potentialMenuActivationEvent.get());
+					return;
+				}
+
 				// React to map scroll events
 				var potentialMapScrollEvent = MapScrollEvent.fromKeyStroke(keyStroke);
-				if(potentialMapScrollEvent.isDefined()){
+				if (potentialMapScrollEvent.isDefined()) {
 					fireEvent(potentialMapScrollEvent.get());
+					return;
 				}
 
 				// React to cursor movement
 				var potentialCursorMovement = CursorMoveEvent.fromKeyStroke(keyStroke);
-				if(potentialCursorMovement.isDefined()){
+				if (potentialCursorMovement.isDefined()) {
 					fireEvent(potentialCursorMovement.get());
+					return;
 				}
 			}
 		});
 	}
 
-	public static Try<GameWindow> of(Game game,WindowBasedTextGUI textGUI) {
-		return Try.of(()->
-		  new GameWindow(game,textGUI)
+
+	public static Try<GameWindow> of(Game game, WindowBasedTextGUI textGUI) {
+		return Try.of(() ->
+		  new GameWindow(game, textGUI)
 		);
+	}
+
+	@Override
+	public Try<Void> closeWindow() {
+		return Try.of(() -> {
+			this.close();
+			return null;
+		});
 	}
 }

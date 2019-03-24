@@ -20,6 +20,10 @@ package org.sephire.games.framework4x.core.model.config;
 import io.vavr.collection.*;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import org.sephire.games.framework4x.core.model.game.GameCommand;
+import org.sephire.games.framework4x.core.model.game.GameCommandCategory;
+import org.sephire.games.framework4x.core.model.game.GameCommands;
+import org.sephire.games.framework4x.core.model.game.ParentCategoryDoesntExistException;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -199,6 +203,46 @@ public class Configuration {
 				return this;
 			});
 
+		}
+
+		/**
+		 * <p>Adds a game command to the configuration.</p>
+		 * <p>This method will verify that the category the command belongs to exists</p>
+		 * @param gameCommand
+		 * @return
+		 */
+		public Try<Builder> addGameCommand(GameCommand<?> gameCommand) {
+			return Try.of(()->{
+				var gameCommands = configParam.get(CoreConfigKeyEnum.GAME_COMMANDS)
+				  .map((config)->(GameCommands)config)
+				  .getOrElseThrow(()->new ParentCategoryDoesntExistException(gameCommand));
+
+				gameCommands.addGameCommand(gameCommand).getOrElseThrow(t->t);
+
+				configParam = configParam.put(CoreConfigKeyEnum.GAME_COMMANDS,gameCommands);
+
+				return this;
+			});
+		}
+
+		/**
+		 * <p>Adds a game command category to the configuration.</p>
+		 * <p>This method will verify that the category this category belongs to exists</p>
+		 * @param gameCommandCategory
+		 * @return
+		 */
+		public Try<Builder> addGameCommandCategory(GameCommandCategory gameCommandCategory) {
+			return Try.of(()->{
+				var gameCommands = configParam.get(CoreConfigKeyEnum.GAME_COMMANDS)
+				  .map((config)->(GameCommands)config)
+				  .getOrElse(new GameCommands());
+
+				gameCommands.addGameCommandCategory(gameCommandCategory).getOrElseThrow(t->t);
+
+				configParam = configParam.put(CoreConfigKeyEnum.GAME_COMMANDS,gameCommands);
+
+				return this;
+			});
 		}
 
 

@@ -40,6 +40,11 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 */
 	I18N,
 	/**
+	 * <p>The key under which to store all game commands as provided by plugins</p>
+	 * <p>The stored type is {@link org.sephire.games.framework4x.core.model.game.GameCommands}</p>
+	 */
+	GAME_COMMANDS,
+	/**
 	 * Key under which to store all game start hook observers to be called when the game is starting.
 	 * Plugins define game start hook observers.
 	 */

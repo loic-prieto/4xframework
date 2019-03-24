@@ -87,7 +87,8 @@
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
-        <!-- JUnit 5 -->
+        <!-- Testing -->
+        <!-- Junit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -99,6 +100,11 @@
         <dependency>
             <groupId>org.apiguardian</groupId>
             <artifactId>apiguardian-api</artifactId>
+        </dependency>
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
 
         <!-- Terminal graphics -->

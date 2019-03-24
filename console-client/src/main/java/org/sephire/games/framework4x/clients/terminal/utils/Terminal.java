@@ -19,9 +19,15 @@ package org.sephire.games.framework4x.clients.terminal.utils;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TerminalSize;
+import io.vavr.control.Option;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapDirection;
 import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.Size;
+
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 
 import static io.vavr.API.*;
 
@@ -86,6 +92,26 @@ public class Terminal {
 		 */
 		public static TerminalPosition terminalPositionFrom(Location location) {
 			return new TerminalPosition(location.getX(),location.getY());
+		}
+	}
+
+	public static class Translation {
+
+		/**
+		 * <p>Gets the translation for a given locale of a string resource identidied by key and parameterized
+		 * with the provided values if any</p>
+		 * <p>Uses the translation bundles from the terminal client vs the plugin i18n resources <br/>
+		 * So this is mainly a utility for the terminal client of the 4XFramework for resources that are not
+		 * defined in any plugin belonging to the UI</p>
+		 * @param locale
+		 * @param labelKey
+		 * @param params
+		 * @return
+		 */
+		public static Option<String> getTranslationFor(Locale locale, String labelKey, Object... params) {
+			ResourceBundle bundle = PropertyResourceBundle.getBundle("i18n.BasicUI", locale);
+			return Option.of(bundle.getString(labelKey))
+			  .map(t -> MessageFormat.format(t, params));
 		}
 	}
 

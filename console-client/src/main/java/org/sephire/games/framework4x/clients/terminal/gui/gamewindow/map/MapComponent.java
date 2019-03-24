@@ -27,7 +27,6 @@ import org.sephire.games.framework4x.clients.terminal.api.config.ConsoleClientCo
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainsMapping;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.CursorMoveEvent;
-import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.MapScrollEvent;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;

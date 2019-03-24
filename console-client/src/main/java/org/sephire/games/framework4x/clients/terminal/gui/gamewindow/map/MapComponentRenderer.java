@@ -37,7 +37,7 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 
 	private TerminalSize viewportSize;
 
-	private static final String CURSOR_CHAR = "\u2316";
+	private static final String CURSOR_CHAR = "\u02DF";
 
 	public MapComponentRenderer() {
 	}

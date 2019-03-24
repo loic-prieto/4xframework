@@ -29,10 +29,13 @@ import io.vavr.control.Try;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.ResourcesScanner;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.model.game.Game;
+import org.sephire.games.framework4x.core.plugins.commands.GameCommandGenerator;
+import org.sephire.games.framework4x.core.plugins.commands.GameCommandGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProvider;
@@ -40,7 +43,8 @@ import org.sephire.games.framework4x.core.plugins.map.MapProviderWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrappingException;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Functions;
 
-import javax.naming.OperationNotSupportedException;
+import java.lang.reflect.Method;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -51,6 +55,7 @@ import static io.vavr.Predicates.instanceOf;
 import static java.lang.String.format;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.I18N;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
+import static org.sephire.games.framework4x.core.utils.FunctionalUtils.Collectors.toTry;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.normalizePackageNameForReflection;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
 
@@ -163,6 +168,7 @@ public class Plugin {
 		return loadTerrainResources(configuration)
 		  .andThen(() -> loadMapGenerators(configuration))
 		  .andThen(() -> loadI18NResources(configuration))
+		  .andThen(() -> loadGameCommands(configuration))
 		  .andThen(() -> callPluginLoadingHooks(configuration));
 	}
 
@@ -251,6 +257,37 @@ public class Plugin {
 	}
 
 	/**
+	 * <p>Loads all game command generators from the plugin.</p>
+	 * <p>May return the following errors:<ul>
+	 *     <li>{@link org.sephire.games.framework4x.core.model.game.ParentCategoryDoesntExistException} if a parent
+	 *     category used for a category o command doesn't exist previously</li>
+	 * </ul></p>
+	 * <p>Methods are loaded by name order<br/>
+	 * In general, the plugin shouldn't rely on a loading order inside the plugin, that's what the different method
+	 * signatures are for (if there is a dependency between categories and plugins, better to return the category with
+	 * the command inside, than to rely on method load order.<br/>
+	 * But if for some reason the load order is important, then it is useful to know that the methods will be loaded by
+	 * method name order.
+	 * </p>
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> loadGameCommands(Configuration.Builder configuration) {
+		return Try.of(()->{
+			var reflections = new Reflections(normalizePackageNameForReflection(this.specification.getRootPackage()),
+			  new MethodAnnotationsScanner());
+
+			List.ofAll(reflections.getMethodsAnnotatedWith(GameCommandGenerator.class))
+			  .sortBy(Comparator.comparing(Method::getName),(method)->method)
+			  .map(GameCommandGeneratorWrapper::from)
+			  .collect(toTry()).getOrElseThrow(t->t)
+			  .map(generator->generator.execute(configuration)).collect(toTry()).getOrElseThrow(t->t);
+
+			return null;
+		});
+	}
+
+	/**
 	 * Retrieve the plugin lifecycle hooks if any have been defined.
 	 * @return
 	 */
@@ -275,10 +312,6 @@ public class Plugin {
 
 			return pluginLifecycleHandler;
 		});
-	}
-
-	private Try<Option<Object>> fetchGameParameterProviders() {
-		return Try.failure(new OperationNotSupportedException());
 	}
 
 	/**
