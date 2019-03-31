@@ -18,5 +18,10 @@
 package org.sephire.games.framework4x.core.model.game;
 
 public enum CoreGameStateKeys implements GameStateEnumKey {
+	/**
+	 * <p>The current civilizations in the game.</p>
+	 * <p>Map&lt;String,Civilization&gt; where the key is the name of the civilization</p>
+	 */
+	CIVILIZATIONS,
 	CURRENT_TURN;
 }

@@ -45,6 +45,11 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 */
 	GAME_COMMANDS,
 	/**
+	 * <p>The list of civilizations available to be selected by the player when creating a game</p>
+	 * <p>Map&lt;String,Civilization&gt;</p>
+	 */
+	CIVILIZATIONS,
+	/**
 	 * Key under which to store all game start hook observers to be called when the game is starting.
 	 * Plugins define game start hook observers.
 	 */
