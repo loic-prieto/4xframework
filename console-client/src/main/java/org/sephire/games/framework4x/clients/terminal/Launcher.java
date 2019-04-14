@@ -17,64 +17,29 @@
  */
 package org.sephire.games.framework4x.clients.terminal;
 
-import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
-import com.googlecode.lanterna.gui2.Window;
-import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
-import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.screen.TerminalScreen;
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
-import com.googlecode.lanterna.terminal.Terminal;
-import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
-import org.sephire.games.framework4x.clients.terminal.gui.MenuWindow;
-import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.TranslationNotFoundException;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-
-import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Translation.getTranslationFor;
+import org.sephire.games.framework4x.clients.terminal.config.di.DaggerConsoleClientWindowsFactory;
+import org.sephire.games.framework4x.clients.terminal.config.di.DaggerLanternaFactory;
 
 @Slf4j
 public class Launcher {
 
 	public static void main(String[] args) {
 
-		Terminal terminal = null;
-		Screen screen = null;
 		try {
+			var lanternaFactory = DaggerLanternaFactory.create();
+			var screen = lanternaFactory.buildScreen();
+			var gui = lanternaFactory.buildGUI();
 
-			terminal = new DefaultTerminalFactory().createTerminal();
-			screen = new TerminalScreen(terminal);
+			var menuWindow = DaggerConsoleClientWindowsFactory.create()
+			  .buildMenuWindow();
 
-			WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
 			screen.startScreen();
+			gui.addWindowAndWait(menuWindow);
 
-			var menuWindow = MenuWindow.of(gui);
-
-			if(menuWindow.isFailure()){
-				var errorMessage = getTranslationFor(Locale.ENGLISH,"launcher.menuWindowFail")
-				  .getOrElseThrow(()->new TranslationNotFoundException("launcher.menuWindowFail"));
-				System.out.println(errorMessage);
-				log.error("Could not load menu window: ",menuWindow.getCause().getMessage());
-				throw menuWindow.getCause();
-			}
-
-			gui.addWindowAndWait(menuWindow.get());
-
-		} catch (IOException ioe) {
-			log.error("Error at the highest level: %s",ioe.getMessage());
-		} catch (Throwable throwable) {
-			log.error("General error produced while executing 4XFramework application: ",throwable.getMessage());
-		} finally {
-			if(screen != null) {
-				try {
-					screen.stopScreen();
-				} catch(IOException ioe){
-					log.error("Could not close the screen successfully %s",ioe.getMessage());
-				}
-			}
-
+		} catch(Throwable e) {
+			System.out.println(String.format("There was an error while launching the application: %s",e.getMessage()));
+			System.exit(1);
 		}
 
 	}
