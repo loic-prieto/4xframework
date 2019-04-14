@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="common-types.config.4xframework"
+           xmlns="common-types.config.4xframework"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="1.0"
+           elementFormDefault="qualified">
+
+    <xs:complexType name="i18nString">
+        <xs:sequence>
+            <xs:element name="i18n-string" maxOccurs="unbounded" type="locale-entry"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="locale-entry">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="language" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Serialization / Deserialization config -->
+    <xs:annotation>
+        <xs:appinfo>
+            <jxb:schemaBindings>
+                <jxb:package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.common">
+                    <jxb:javadoc>
+                        <![CDATA[<body>Common types to reuse between different schemas</body>]]>
+                    </jxb:javadoc>
+                </jxb:package>
+            </jxb:schemaBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
+
+</xs:schema>

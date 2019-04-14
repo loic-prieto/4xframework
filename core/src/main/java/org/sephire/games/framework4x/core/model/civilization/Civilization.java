@@ -1,7 +1,9 @@
 package org.sephire.games.framework4x.core.model.civilization;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.sephire.games.framework4x.core.utils.I18NString;
 
 /**
  * <p>The top entity to represent the civilization that the player is using in a game.</p>
@@ -11,11 +13,12 @@ import lombok.Getter;
  */
 @Getter
 @AllArgsConstructor
+@EqualsAndHashCode
 public class Civilization {
-	private String name;
-	private String demonymSingular;
-	private String demonymPlural;
-	private String description;
-
+	private String identifier;
+	private I18NString name;
+	private I18NString demonymSingular;
+	private I18NString demonymPlural;
+	private I18NString description;
 
 }

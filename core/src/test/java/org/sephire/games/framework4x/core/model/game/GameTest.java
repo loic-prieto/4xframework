@@ -22,6 +22,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.map.DynamicMapGeneratorWrapper;
 import org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1GameStateKeys;
@@ -43,18 +44,21 @@ public class GameTest {
 		var pluginTempFolder = Files.createTempDirectory("PluginManagerTest-");
 		buildPluginJar(pluginTempFolder,PLUGIN1_NAME, Option.none());
 
+		var configuration = Configuration.builder();
+
 		var pluginManagerTry = PluginManager.fromFolder(pluginTempFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 		var pluginManager = pluginManagerTry.get();
-		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(PLUGIN1_NAME));
+		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(PLUGIN1_NAME), configuration);
 		assertTrue(pluginLoadingTry.isSuccess());
 
 		var gameTry = Game.builder()
 		  .withMapGenerator(new DynamicMapGeneratorWrapper(
 			"testMapGenerator",
 			"testMapGenerator",
-			(configuration)-> Try.success(null)))
+			(config) -> Try.success(null)))
 		  .withPluginManager(pluginManager)
+		  .withConfiguration(configuration.build())
 		  .build();
 
 		assertTrue(gameTry.isSuccess());

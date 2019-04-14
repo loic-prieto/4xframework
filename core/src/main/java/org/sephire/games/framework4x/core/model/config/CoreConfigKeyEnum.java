@@ -17,6 +17,8 @@
  */
 package org.sephire.games.framework4x.core.model.config;
 
+import org.sephire.games.framework4x.core.model.config.userpreferences.UserPreferences;
+
 public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	/**
 	 * This key holds the value for the configuration of terrain types.
@@ -49,6 +51,11 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 * <p>Map&lt;String,Civilization&gt;</p>
 	 */
 	CIVILIZATIONS,
+	/**
+	 * <p>Holds all configuration related to user preferences</p>
+	 * <p>The stored type is {@link UserPreferences}</p>
+	 */
+	USER_PREFERENCES,
 	/**
 	 * Key under which to store all game start hook observers to be called when the game is starting.
 	 * Plugins define game start hook observers.

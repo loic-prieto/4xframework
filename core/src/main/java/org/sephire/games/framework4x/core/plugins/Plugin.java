@@ -37,6 +37,7 @@ import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.plugins.commands.GameCommandGenerator;
 import org.sephire.games.framework4x.core.plugins.commands.GameCommandGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.configuration.*;
+import org.sephire.games.framework4x.core.plugins.configuration.resources.civilizations.CivilizationsConfigurationLoader;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 import org.sephire.games.framework4x.core.plugins.map.MapProvider;
 import org.sephire.games.framework4x.core.plugins.map.MapProviderWrapper;
@@ -169,6 +170,7 @@ public class Plugin {
 		  .andThen(() -> loadMapGenerators(configuration))
 		  .andThen(() -> loadI18NResources(configuration))
 		  .andThen(() -> loadGameCommands(configuration))
+		  .andThen(() -> loadCivilizations(configuration))
 		  .andThen(() -> callPluginLoadingHooks(configuration));
 	}
 
@@ -224,6 +226,22 @@ public class Plugin {
 				throw new PluginLoadingException(addOperation.getCause());
 			}
 
+			return null;
+		});
+	}
+
+	/**
+	 * <p>Loads the civilizations from the civilizations defined in pluginPackage/civilizations.xml optional file of the
+	 * plugin.</p>
+	 * <p>There is currently no other way to define civilizations, although user defined civilizations should be
+	 * retrievable from the user's home directory in a later iteration of this application</p>
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> loadCivilizations(Configuration.Builder configuration) {
+		return Try.of(() -> {
+			var civLoader = new CivilizationsConfigurationLoader(getSpecification().getRootPackage());
+			civLoader.load(configuration).getOrElseThrow(t -> t);
 			return null;
 		});
 	}

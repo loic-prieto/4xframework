@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<civilizations xmlns="civilizations.config.4xframework"
+               xmlns:ct="common-types.config.4xframework">
+    <civilization>
+        <identifier>test.civilization1</identifier>
+        <name>
+            <ct:i18n-string language="en">Civilization 1</ct:i18n-string>
+            <ct:i18n-string language="es">Civilización 1</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A test civilization</ct:i18n-string>
+            <ct:i18n-string language="es">Una civilización de test</ct:i18n-string>
+        </description>
+        <demonymSingular>
+            <ct:i18n-string language="en">tester</ct:i18n-string>
+            <ct:i18n-string language="es">testeador</ct:i18n-string>
+        </demonymSingular>
+        <demonymPlural>
+            <ct:i18n-string language="en">testers</ct:i18n-string>
+            <ct:i18n-string language="es">testeadores</ct:i18n-string>
+        </demonymPlural>
+    </civilization>
+</civilizations>

@@ -24,11 +24,16 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.MenuWindow;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.TranslationNotFoundException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
+
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Translation.getTranslationFor;
 
 @Slf4j
 public class Launcher {
@@ -45,12 +50,22 @@ public class Launcher {
 			WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
 			screen.startScreen();
 
-			Window menuWindow = new MenuWindow(gui);
-			menuWindow.setHints(List.of(Window.Hint.FULL_SCREEN));
-			gui.addWindowAndWait(menuWindow);
+			var menuWindow = MenuWindow.of(gui);
+
+			if(menuWindow.isFailure()){
+				var errorMessage = getTranslationFor(Locale.ENGLISH,"launcher.menuWindowFail")
+				  .getOrElseThrow(()->new TranslationNotFoundException("launcher.menuWindowFail"));
+				System.out.println(errorMessage);
+				log.error("Could not load menu window: ",menuWindow.getCause().getMessage());
+				throw menuWindow.getCause();
+			}
+
+			gui.addWindowAndWait(menuWindow.get());
 
 		} catch (IOException ioe) {
 			log.error("Error at the highest level: %s",ioe.getMessage());
+		} catch (Throwable throwable) {
+			log.error("General error produced while executing 4XFramework application: ",throwable.getMessage());
 		} finally {
 			if(screen != null) {
 				try {

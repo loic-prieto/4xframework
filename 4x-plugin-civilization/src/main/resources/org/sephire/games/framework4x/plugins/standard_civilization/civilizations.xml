@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<civilizations xmlns="civilizations.config.4xframework"
+               xmlns:ct="common-types.config.4xframework">
+    <civilization>
+        <identifier>civilization.spain</identifier>
+        <name>
+            <ct:i18n-string language="es">España</ct:i18n-string>
+            <ct:i18n-string language="en">Spain</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="es">España va bien</ct:i18n-string>
+            <ct:i18n-string language="en">A corrupt and hopeless country</ct:i18n-string>
+        </description>
+        <demonymSingular>
+            <ct:i18n-string language="es">Español</ct:i18n-string>
+            <ct:i18n-string language="en">Spaniard</ct:i18n-string>
+        </demonymSingular>
+        <demonymPlural>
+            <ct:i18n-string language="es">Españoles</ct:i18n-string>
+            <ct:i18n-string language="en">Spaniards</ct:i18n-string>
+        </demonymPlural>
+    </civilization>
+    <civilization>
+        <identifier>civilization.france</identifier>
+        <name>
+            <ct:i18n-string language="es">Francia</ct:i18n-string>
+            <ct:i18n-string language="en">France</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="es">Baguets, cruasans y fresas volcadas, ese es el espíritu nacional francés
+            </ct:i18n-string>
+            <ct:i18n-string language="en">They do not like the yellow color anymore...much like in Spain
+            </ct:i18n-string>
+        </description>
+        <demonymSingular>
+            <ct:i18n-string language="es">francés</ct:i18n-string>
+            <ct:i18n-string language="en">french</ct:i18n-string>
+        </demonymSingular>
+        <demonymPlural>
+            <ct:i18n-string language="es">franceses</ct:i18n-string>
+            <ct:i18n-string language="en">french</ct:i18n-string>
+        </demonymPlural>
+    </civilization>
+</civilizations>

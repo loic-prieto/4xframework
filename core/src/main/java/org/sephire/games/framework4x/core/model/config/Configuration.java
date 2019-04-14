@@ -20,6 +20,7 @@ package org.sephire.games.framework4x.core.model.config;
 import io.vavr.collection.*;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import org.sephire.games.framework4x.core.model.config.userpreferences.UserPreferences;
 import org.sephire.games.framework4x.core.model.game.GameCommand;
 import org.sephire.games.framework4x.core.model.game.GameCommandCategory;
 import org.sephire.games.framework4x.core.model.game.GameCommands;
@@ -111,6 +112,16 @@ public class Configuration {
 
 		public Builder() {
 			this.configParam = HashMap.empty();
+			configParam = configParam.put(CoreConfigKeyEnum.USER_PREFERENCES,new UserPreferences());
+		}
+
+		/**
+		 * Fetches the user preferences from the configuration.
+		 * This object is always present.
+		 * @return
+		 */
+		public UserPreferences getUserPreferences() {
+			return configParam.get(CoreConfigKeyEnum.USER_PREFERENCES).map(up->(UserPreferences)up).get();
 		}
 
 		/**
@@ -265,6 +276,35 @@ public class Configuration {
 			  .mapFailure(
 				Case($(instanceOf(ClassCastException.class)),(e)->new InvalidConfigurationObjectCast(key,valueClass))
 			  );
+		}
+
+		/**
+		 * <p>The I18N data loaded from each plugin is stored in the configuration object under the
+		 * CoreConfigKeyEnum.I18N enum value, with type signature Map&lt;Locale,Map&lt;String,String&gt;&gt;</p>
+		 *<p>The usual key for a plugin i18n resource is: pluginRootPackage.key
+		 * Where pluginRootPackage is the full root package of the plugin and the key is the normal properties key wich
+		 * may include any valid character</p>
+		 *<p>The I18N resource may be parameterized and this parametrization follows the java MessageFormat standard conventions:
+		 *	<pre><code>
+		 *	   // the resource bundle key "some.plugin.some.key" has the value "Your civilization is {0}"
+		 *	   var civilizationName = "Sumeria";
+		 *	   var userLanguage = Locale.ENGLISH;
+		 *	   var civilizationLabel = configuration.getTranslationFor(userLanguage,"some.plugin.some.key",civilizationName);
+		 *
+		 *	   assert civilizationLabel.get().equals("Your civilization is Sumeria")
+		 *	</code></pre>
+		 * </p>
+		 *
+		 * @param key
+		 * @param params
+		 * @return
+		 */
+		public Option<String> getTranslationFor(Locale locale, String key, Object... params) {
+			return configParam.get(CoreConfigKeyEnum.I18N)
+			  .map(rawMap -> (Map<Locale, Map<String, String>>) rawMap)
+			  .flatMap(i18nMap -> i18nMap.get(locale))
+			  .flatMap(localeMap -> localeMap.get(key))
+			  .map(value -> MessageFormat.format(value, params));
 		}
 
 		public Configuration build() {

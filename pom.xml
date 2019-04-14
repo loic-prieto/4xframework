@@ -44,6 +44,7 @@
         <module>core</module>
         <module>4x-plugin-standard</module>
         <module>4x-plugin-standard-terminal-client</module>
+        <module>4x-plugin-civilization</module>
         <module>console-client-api</module>
     </modules>
 
@@ -60,6 +61,8 @@
         <jar-plugin.version>3.1.1</jar-plugin.version>
         <reflections.version>0.9.11</reflections.version>
         <mockito.version>2.25.1</mockito.version>
+        <jaxb.version>2.3.1</jaxb.version>
+        <jaxb-moxy.version>2.7.4</jaxb-moxy.version>
     </properties>
 
     <repositories>
@@ -222,6 +225,16 @@
                 <groupId>com.github.fabriziocucci</groupId>
                 <artifactId>yacl4j-core</artifactId>
                 <version>${yacl4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.moxy</artifactId>
+                <version>${jaxb-moxy.version}</version>
             </dependency>
 
             <!-- Runtime reflection on annotations -->

@@ -28,6 +28,7 @@ import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
 import static java.lang.String.format;
 import static org.sephire.games.framework4x.core.model.game.CoreGameStateKeys.CURRENT_TURN;
+import static org.sephire.games.framework4x.core.utils.Validations.areArgumentsNotNull;
 
 /**
  * This is the main framework 4x component, it hold the data needed to run a game. Mainly the loaded configuration
@@ -43,8 +44,8 @@ public class Game {
 	private PluginManager pluginManager;
 	private GameState gameState;
 
-	private Game(GameMap map,PluginManager pluginManager) {
-		this.configuration = pluginManager.getLoadedConfiguration().get();
+	private Game(GameMap map, PluginManager pluginManager, Configuration configuration) {
+		this.configuration = configuration;
 		this.pluginManager = pluginManager;
 		this.map = map;
 		this.gameState = new GameState();
@@ -78,9 +79,22 @@ public class Game {
 		return new Builder();
 	}
 
-	public static class Builder implements BuilderBuilder,BuilderMapGenerator,BuilderPluginManager{
+	public interface BuilderPluginManager {
+		BuilderConfiguration withPluginManager(PluginManager pluginManager);
+	}
+
+	public interface BuilderMapGenerator {
+		BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator);
+	}
+
+	public interface BuilderConfiguration {
+		BuilderBuilder withConfiguration(Configuration configuration);
+	}
+
+	public static class Builder implements BuilderBuilder, BuilderMapGenerator, BuilderPluginManager, BuilderConfiguration {
 		private MapGeneratorWrapper mapGenerator;
 		private PluginManager pluginManager;
+		private Configuration configuration;
 
 		@Override
 		public BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator) {
@@ -89,32 +103,29 @@ public class Game {
 		}
 
 		@Override
-		public BuilderBuilder withPluginManager(PluginManager pluginManager) {
+		public BuilderConfiguration withPluginManager(PluginManager pluginManager) {
 			this.pluginManager = pluginManager;
+			return this;
+		}
+
+		@Override
+		public BuilderBuilder withConfiguration(Configuration configuration) {
+			this.configuration = configuration;
 			return this;
 		}
 
 		@Override
 		public Try<Game> build() {
 			return Try.of(()->{
-				if(mapGenerator == null) {
-					throw new IllegalArgumentException("The map generator cannot be null");
-				}
-				if (pluginManager == null) {
-					throw new IllegalArgumentException("The plugin manager cannot be null");
-				}
-				if(pluginManager.getLoadedConfiguration().isEmpty()) {
-					throw new IllegalArgumentException("The configuration must have been loaded");
-				}
+				areArgumentsNotNull(mapGenerator, pluginManager, configuration).getOrElseThrow(t -> t);
 
-				var configuration = pluginManager.getLoadedConfiguration().get();
 				Try<GameMap> mapTry = mapGenerator.buildMap(configuration);
 				if(mapTry.isFailure()) {
 					log.error(format("Error while calling generating map: %s",mapTry.getCause().getMessage()));
 					throw mapTry.getCause();
 				}
 
-				var game = new Game(mapTry.get(),pluginManager);
+				var game = new Game(mapTry.get(), pluginManager, configuration);
 				game.executeGameStartHooks()
 				  .onFailure((e)->log.error(format("Error while calling game start hooks: %s",e.getMessage())))
 				  .getOrElseThrow(e->e);
@@ -126,8 +137,5 @@ public class Game {
 			});
 		}
 	}
-
-	public interface BuilderMapGenerator { BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator);}
-	public interface BuilderPluginManager { BuilderBuilder withPluginManager(PluginManager pluginManager);}
 	public interface BuilderBuilder { Try<Game> build();}
 }

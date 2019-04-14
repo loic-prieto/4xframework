@@ -25,9 +25,9 @@ import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
-import lombok.Getter;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
+import org.sephire.games.framework4x.core.plugins.configuration.resources.civilizations.UserPreferencesCivilizationLoader;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
 import org.sephire.games.framework4x.core.utils.RootlessTree;
 
@@ -56,8 +56,6 @@ public class PluginManager {
 
 	private Map<String,PluginSpec> availablePlugins;
 	private Map<String,Plugin> plugins;
-	@Getter
-	private Option<Configuration> loadedConfiguration;
 
 	/**
 	 * Use fromFolder static method to build
@@ -67,7 +65,6 @@ public class PluginManager {
 		  .map((pluginSpec -> Tuple(pluginSpec.getPluginName(),pluginSpec)))
 		  .collect(HashMap.collector());
 		this.plugins = HashMap.empty();
-		this.loadedConfiguration = Option.none();
 	}
 
 	/**
@@ -87,10 +84,31 @@ public class PluginManager {
 		return availablePlugins.values().toSet();
 	}
 
-	public Try<Configuration> loadPlugins(Set<String> plugins) {
-		return Try.of(()->{
-			Configuration.Builder configuration = Configuration.builder();
+	/**
+	 * <p>Executes the loading method for each plugin, loading every configuration and resource to prepare for a
+	 * game creation into the given configuration builder.</p>
+	 * <p>Will also load all user-stored configuration afterwards, to overwrite the configuration loaded by the
+	 * plugins with what the user has stored in it's home folder</p>
+	 * @param plugins
+	 * @return
+	 */
+	public Try<Void> loadPlugins(Set<String> plugins, Configuration.Builder configuration) {
+		return Try.of(() -> {
+			invokeLoadingOperation(plugins, configuration)
+			  .andThen(() -> loadUserStoredConfiguration(configuration))
+			  .getOrElseThrow(t -> t);
 
+			return null;
+		});
+	}
+
+	/**
+	 * <p>Fills the configuration object with everything the requested set of plugins have loaded.</p>
+	 * @param plugins
+	 * @return
+	 */
+	private Try<Void> invokeLoadingOperation(Set<String> plugins, Configuration.Builder configuration) {
+		return Try.of(()->{
 			// First build the dependency list and load each plugin
 			var sortedPluginsOperation = buildPluginToLoadList(plugins);
 			if(sortedPluginsOperation.isFailure()) {
@@ -105,11 +123,17 @@ public class PluginManager {
 			  .map(plugin->Tuple(plugin.getSpecification().getPluginName(),plugin))
 			  .collect(HashMap.collector());
 
-			var finalConfiguration = configuration.build();
-			this.loadedConfiguration = Option.of(finalConfiguration);
-
-			return finalConfiguration;
+			return null;
 		});
+	}
+
+	/**
+	 * <p>Overwrite the plugins configuration with user stored config files on their user preferences folder.</p>
+	 * @param configuration
+	 * @return
+	 */
+	private Try<Void> loadUserStoredConfiguration(Configuration.Builder configuration) {
+		return new UserPreferencesCivilizationLoader().load(configuration);
 	}
 
 	/**

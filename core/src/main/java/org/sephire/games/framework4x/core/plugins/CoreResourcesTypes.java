@@ -25,10 +25,8 @@ import lombok.Getter;
  **/
 public enum CoreResourcesTypes {
 
-	/**
-	 * Data related to the terrain types
-	 **/
-	TERRAIN_TYPES("terrains-types.yaml");
+	TERRAIN_TYPES("terrains-types.yaml"),
+	CIVILIZATIONS("civilizations.xml");
 
 	@Getter
 	private String fileName;

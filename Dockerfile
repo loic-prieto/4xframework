@@ -35,6 +35,7 @@ WORKDIR /tmp/project
 COPY --from=0 /tmp/project/console-client/target/classpath ./classpath
 COPY --from=0 /tmp/project/4x-plugin-standard/target/4x-plugin-standard*.jar ./plugins/
 COPY --from=0 /tmp/project/4x-plugin-standard-terminal-client/target/4x-plugin*.jar ./plugins/
+COPY --from=0 /tmp/project/4x-plugin-civilization/target/4x-plugin*.jar ./plugins/
 
 # Launch the client with the standard plugin loaded on debug mode
 CMD java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000 \

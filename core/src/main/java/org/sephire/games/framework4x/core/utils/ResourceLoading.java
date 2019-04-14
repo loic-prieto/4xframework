@@ -44,4 +44,16 @@ public class ResourceLoading {
 		  packageName.concat(".");
 	}
 
+
+	/**
+	 * Checks whether a classpath resource exists for the given file name
+	 * @param filename
+	 * @return
+	 */
+	public static boolean fileDoesExist(String filename) {
+		return ResourceLoading.class.getClassLoader()
+		  .getResourceAsStream(filename) != null;
+	}
+
+
 }

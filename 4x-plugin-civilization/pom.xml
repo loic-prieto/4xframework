@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    4X Framework - Core library - The core library on which to base the game
+    4X Framework - Standard plugin - The standard base plugin for a game with a civ-like approach
     Copyright © 2018 Loïc Prieto Dehennault (loic.sephiroth@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -28,17 +28,18 @@
         <artifactId>parent</artifactId>
         <version>0.1.0</version>
     </parent>
-    <artifactId>core</artifactId>
-    <name>4X Framework - Core library</name>
-    <description>The core library on which to base the game</description>
+
+    <artifactId>4x-plugin-civilization</artifactId>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
+    <name>4X Framework - Civilization plugin</name>
+    <description>A Civilization flavoured extension for the 4X Framework Standard plugin</description>
 
     <dependencies>
-
-        <!-- Functional goodness -->
         <dependency>
-            <groupId>io.vavr</groupId>
-            <artifactId>vavr</artifactId>
+            <groupId>org.sephire.games.strategy-framework</groupId>
+            <artifactId>4x-plugin-standard</artifactId>
+            <version>0.1.0</version>
         </dependency>
 
         <!-- Lombok -->
@@ -61,57 +62,27 @@
             <artifactId>apiguardian-api</artifactId>
         </dependency>
 
-        <!-- Config parsing -->
-        <dependency>
-            <groupId>com.github.fabriziocucci</groupId>
-            <artifactId>yacl4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-        </dependency>
-
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
-        <!-- Scan for classes with annotations -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-
-            <!-- Generate xml deserialized classes for config models (Civilizations, techs, etc) -->
             <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb23-plugin</artifactId>
-                <version>0.14.0</version>
-                <executions>
-                    <execution>
-                        <id>civilizations</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaDirectory>src/main/resources/resources/schemas</schemaDirectory>
-                            <schemaIncludes>
-                                <include>*.xsd</include>
-                            </schemaIncludes>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <X-4XPlugin-Name>org.sephire.games.framework4x.plugins.standard_civilization</X-4XPlugin-Name>
+                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard_civilization</X-4XPlugin-RootPackage>
+                            <X-4XPlugin-ParentPlugin>org.sephire.games.framework4x.plugins.standard</X-4XPlugin-ParentPlugin>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>

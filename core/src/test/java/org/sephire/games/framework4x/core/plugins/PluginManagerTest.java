@@ -23,6 +23,7 @@ import io.vavr.control.Option;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1ConfigKeys;
 
 import java.io.IOException;
@@ -105,10 +106,12 @@ public class PluginManagerTest {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
+		var configuration = Configuration.builder();
+
 		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
-		  "org.sephire.games.framework4x.testing.testPlugin2"));
+		  "org.sephire.games.framework4x.testing.testPlugin2"), configuration);
 
 		assertTrue(loadedPluginsTry.isSuccess());
 	}
@@ -119,10 +122,12 @@ public class PluginManagerTest {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
+		var configuration = Configuration.builder();
+
 		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin2",
-		  "org.sephire.games.framework4x.testing.testPlugin11"));
+		  "org.sephire.games.framework4x.testing.testPlugin11"), configuration);
 
 		assertTrue(loadedPluginsTry.isSuccess());
 		var expectedLoadedPlugins = HashSet.of(
@@ -138,10 +143,12 @@ public class PluginManagerTest {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
+		var configuration = Configuration.builder();
+
 		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
-		  "org.sephire.games.framework4x.testing.testPlugin4"));
+		  "org.sephire.games.framework4x.testing.testPlugin4"), configuration);
 
 		assertTrue(loadedPluginsTry.isFailure());
 		assertEquals(ParentPluginsNotFoundException.class,loadedPluginsTry.getCause().getClass());
@@ -164,10 +171,12 @@ public class PluginManagerTest {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
+		var configuration = Configuration.builder();
+
 		var pluginLoadingTry = pluginManagerTry.get().loadPlugins(
 		  HashSet.of(
 		    "org.sephire.games.framework4x.testing.testPlugin1"
-			,"nonExistentPlugin"));
+			, "nonExistentPlugin"), configuration);
 
 		assertTrue(pluginLoadingTry.isFailure());
 		assertEquals(PluginsNotFoundException.class,pluginLoadingTry.getCause().getClass());
@@ -189,17 +198,19 @@ public class PluginManagerTest {
 		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
 		assertTrue(pluginManagerTry.isSuccess());
 
+		var configuration = Configuration.builder();
+
 		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2",
-		  "org.sephire.games.framework4x.testing.testPlugin11"));
+		  "org.sephire.games.framework4x.testing.testPlugin11"), configuration);
 
 		assertTrue(loadedPluginsTry.isSuccess());
 
-		var configuration = loadedPluginsTry.get();
+		var finalConfig = configuration.build();
 		var expectedConfigValue = "overridenValue";
-		var actualConfigValueOperation = configuration.getConfiguration(TestPlugin1ConfigKeys.TEST_VALUE,String.class);
+		var actualConfigValueOperation = finalConfig.getConfiguration(TestPlugin1ConfigKeys.TEST_VALUE, String.class);
 
 		assertTrue(actualConfigValueOperation.isSuccess());
 		assertTrue(actualConfigValueOperation.get().isDefined());

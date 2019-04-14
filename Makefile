@@ -18,4 +18,4 @@ build:
 	docker build -t 4x-client .
 
 run:
-	docker run --name 4xclient -p 8000:8000 -it --rm 4x-client:latest
+	docker run -v $(HOME):/root --name 4xclient -p 8000:8000 -it --rm 4x-client:latest
