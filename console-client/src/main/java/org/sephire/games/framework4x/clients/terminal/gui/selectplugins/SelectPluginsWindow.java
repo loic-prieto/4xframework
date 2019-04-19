@@ -29,11 +29,12 @@ import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.TranslationNotFoundException;
 import org.sephire.games.framework4x.clients.terminal.gui.startgame.StartGameWindow;
-import org.sephire.games.framework4x.clients.terminal.utils.Terminal;
+import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.PluginSpec;
 
+import javax.inject.Provider;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,6 +44,7 @@ import static java.lang.String.format;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.ERROR;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.INFO;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.sizeWithWidthToPercent;
+import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Plugins.DEFAULT_PATH;
 
 /**
  * This window is shown when starting a game, to select which plugins will be active for
@@ -55,6 +57,8 @@ import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dime
 public class SelectPluginsWindow extends Basic4XWindow {
 
 	private PluginManager pluginManager;
+	private UITranslationService i18n;
+	private Provider<StartGameWindow> startGameWindow;
 
 	/**
 	 * The set of selected plugins by the user inside the plugins checkbox list.
@@ -62,26 +66,27 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	 * It is used to know if the create game button can be interacted with.
 	 */
 	private Set<PluginSpec> selectedPlugins;
+	private Set<PluginSpec> availablePlugins;
 
-	private SelectPluginsWindow(PluginManager pluginManager, WindowBasedTextGUI textGUI) throws Throwable {
+	public SelectPluginsWindow(PluginManager pluginManager,
+							   WindowBasedTextGUI textGUI,
+							   UITranslationService i18n,
+							   Provider<StartGameWindow> startGameWindow) {
 		super(textGUI);
 
 		this.pluginManager = pluginManager;
 		this.selectedPlugins = HashSet.empty();
+		this.i18n = i18n;
+		this.startGameWindow = startGameWindow;
+	}
 
-		setupWindowFrame()
+	public Try<SelectPluginsWindow> build() {
+		return setupWindowFrame()
 		  .andThen(this::setupComponents)
-		  .andThen(this::setupEvents)
-		  .getOrElseThrow(t -> t);
+		  .andThen(this::setupEvents);
 	}
 
-	public static Try<SelectPluginsWindow> of(PluginManager pluginManager, WindowBasedTextGUI textGUI) {
-		return Try.of(() -> {
-			return new SelectPluginsWindow(pluginManager, textGUI);
-		});
-	}
-
-	private Try<Void> setupEvents() {
+	private Try<SelectPluginsWindow> setupEvents() {
 		return Try.of(() -> {
 			registerEventListener(PluginInteractedEvent.class, (event) -> {
 				if (event.isSelected()) {
@@ -93,20 +98,20 @@ public class SelectPluginsWindow extends Basic4XWindow {
 				fireEvent(new SelectedPluginsListUpdatedEvent(selectedPlugins));
 			});
 
-			return null;
+			return this;
 		});
 	}
 
-	private Try<Void> setupWindowFrame() {
+	private Try<SelectPluginsWindow> setupWindowFrame() {
 		return Try.of(() -> {
 			setHints(List.of(Window.Hint.FULL_SCREEN));
 			setTitle(getTranslationFor("selectPluginWindow.title"));
 			setCloseWindowWithEscape(true);
-			return null;
+			return this;
 		});
 	}
 
-	private Try<Void> setupComponents() {
+	private Try<SelectPluginsWindow> setupComponents() {
 		return Try.of(() -> {
 			Panel backgroundPanel = new Panel();
 			backgroundPanel.setLayoutManager(new BorderLayout());
@@ -119,7 +124,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 
 			setComponent(backgroundPanel);
 
-			return null;
+			return this;
 		});
 	}
 
@@ -133,7 +138,8 @@ public class SelectPluginsWindow extends Basic4XWindow {
 			pluginsListLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 			pluginListPanel.addComponent(pluginsListLabel);
 
-			var pluginCheckBoxList = new PluginsCheckboxList(pluginManager.getAvailablePlugins());
+			availablePlugins = pluginManager.getAvailablePlugins(DEFAULT_PATH).getOrElseThrow(t -> t).toSortedSet();
+			var pluginCheckBoxList = new PluginsCheckboxList(availablePlugins);
 			pluginCheckBoxList.setLayoutData(LinearLayout.createLayoutData(Fill));
 			pluginListPanel.addComponent(pluginCheckBoxList);
 
@@ -152,7 +158,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 					return;
 				}
 
-				var startGameWindow = StartGameWindow.from(pluginManager, configuration, getOverridenTextGui());
+				var startGameWindowBuild = startGameWindow.get().build(configuration);
 				if (startGameWindow.isFailure()) {
 					var errorMessage = getTranslationFor("selectPluginWindow.errors.startWindowFail");
 
@@ -194,7 +200,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 			pluginInfoLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 			pluginInfoPanel.addComponent(pluginInfoLabel);
 
-			var firstSelectedPlugin = Option.of(this.pluginManager.getAvailablePlugins().toSortedSet().getOrElse((PluginSpec) null));
+			var firstSelectedPlugin = Option.of(availablePlugins.getOrNull());
 			if (firstSelectedPlugin.isDefined()) {
 				pluginInfoLabel.setText("\n" + firstSelectedPlugin.get().getDescription(Locale.ENGLISH).get());
 			}
@@ -241,8 +247,8 @@ public class SelectPluginsWindow extends Basic4XWindow {
 		});
 	}
 
-	private static String getTranslationFor(String labelKey) throws TranslationNotFoundException {
-		return Terminal.Translation.getTranslationFor(Locale.ENGLISH, labelKey)
+	private String getTranslationFor(String labelKey) throws TranslationNotFoundException {
+		return i18n.getTranslationFor(Locale.ENGLISH, labelKey)
 		  .getOrElseThrow(() -> new TranslationNotFoundException(labelKey));
 	}
 }

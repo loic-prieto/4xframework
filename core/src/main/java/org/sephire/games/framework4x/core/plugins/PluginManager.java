@@ -19,13 +19,14 @@ package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import io.vavr.collection.HashMap;
+import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.plugins.configuration.resources.civilizations.UserPreferencesCivilizationLoader;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
@@ -39,10 +40,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
-import static io.vavr.API.*;
+import static io.vavr.API.$;
+import static io.vavr.API.Case;
 import static io.vavr.Predicates.instanceOf;
 import static java.lang.String.format;
 import static java.util.function.Predicate.not;
+import static org.sephire.games.framework4x.core.utils.FunctionalUtils.Collectors.toTry;
 
 /**
  * This class provides for utility functions that can be used by clients to inspect what plugins are available,
@@ -58,30 +61,12 @@ public class PluginManager {
 	private Map<String,Plugin> plugins;
 
 	/**
-	 * Use fromFolder static method to build
-	 */
-	private PluginManager(List<PluginSpec> availablePlugins) {
-		this.availablePlugins = availablePlugins
-		  .map((pluginSpec -> Tuple(pluginSpec.getPluginName(),pluginSpec)))
-		  .collect(HashMap.collector());
-		this.plugins = HashMap.empty();
-	}
-
-	/**
 	 * Returns a set of plugins loaded inside the plugin manager.
 	 *
 	 * @return
 	 */
 	public Set<String> getLoadedPlugins() {
 		return this.plugins.keySet();
-	}
-
-	/**
-	 * Return a list of plugins available to load from the plugin folder.
-	 * @return
-	 */
-	public Set<PluginSpec> getAvailablePlugins(){
-		return availablePlugins.values().toSet();
 	}
 
 	/**
@@ -103,7 +88,8 @@ public class PluginManager {
 	}
 
 	/**
-	 * <p>Fills the configuration object with everything the requested set of plugins have loaded.</p>
+	 * <p>Fills the configuration object with everything the requested set of plugins have loaded and then
+	 * puts the loaded plugins themselves into the configuration.</p>
 	 * @param plugins
 	 * @return
 	 */
@@ -119,9 +105,9 @@ public class PluginManager {
 				var exceptions = pluginLoadingTry.filter(Try::isFailure).map(Try::getCause);
 				throw new PluginLoadingException("Error while loading plugins",exceptions.toJavaArray(Throwable.class));
 			}
-			this.plugins = pluginLoadingTry.map(Try::get)
-			  .map(plugin->Tuple(plugin.getSpecification().getPluginName(),plugin))
-			  .collect(HashMap.collector());
+
+			var loadedPlugins = pluginLoadingTry.map(Try::get).collect(HashSet.collector());
+			configuration.putConfig(CoreConfigKeyEnum.LOADED_PLUGINS, loadedPlugins);
 
 			return null;
 		});
@@ -230,15 +216,13 @@ public class PluginManager {
 	}
 
 	/**
-	 * Builder for the PluginManager. Creates a plugin manager for a given plugin folder.
+	 * Checks whether a folder is a valid 4x plugin folder.
 	 *
-	 * May return:
-	 *  - {@link PluginLoadingException}
 	 * @param folderPath
 	 * @return
 	 */
-	public static Try<PluginManager> fromFolder(Path folderPath) {
-		return Try.of(()->{
+	public boolean isPluginFolderValid(Path folderPath) {
+		var checks = Try.of(() -> {
 			if(!folderPath.toFile().exists() && !folderPath.toFile().isDirectory()) {
 				throw new IllegalArgumentException(format("The path %s is not a valid folder",folderPath));
 			}
@@ -247,21 +231,15 @@ public class PluginManager {
 			if(folderHasOnlyPlugins.isFailure()){
 				throw folderHasOnlyPlugins.getCause();
 			}
-
 			if(!folderHasOnlyPlugins.get()) {
 				throw new PluginLoadingException(
 				  format("The plugin folder %s contains jars that are not plugins, this is not valid",folderPath.toAbsolutePath()));
 			}
 
-			var availablePluginsTry = buildAvailablePlugins(folderPath.toFile());
-			if(availablePluginsTry.isFailure()){
-				throw new PluginLoadingException(
-				  format("While building the list of available plugins, there was an error: %s",availablePluginsTry.getCause()),
-				  availablePluginsTry.getCause());
-			}
-
-			return new PluginManager(availablePluginsTry.get());
+			return null;
 		});
+
+		return checks.isSuccess();
 	}
 
 
@@ -270,17 +248,15 @@ public class PluginManager {
 	 * From the jars in the folder, builds a list of available plugins.
 	 * @return
 	 */
-	private static Try<List<PluginSpec>> buildAvailablePlugins(File pluginFolder) {
+	public Try<Set<PluginSpec>> getAvailablePlugins(Path pluginFolder) {
 		return Try.of(()->{
-			var pluginsJars = List.of(pluginFolder.list((dir,name)-> name.endsWith("jar")))
-			  .map((jarFileName)->new File(pluginFolder.getAbsolutePath().concat(File.separator).concat(jarFileName)))
-			  .map(PluginManager::convertToJarFile);
+			var pluginsJars = HashSet.of(pluginFolder.toFile().list((dir, name) -> name.endsWith("jar")))
+			  .map((jarFileName) -> pluginFolder.resolve(jarFileName).toFile())
+			  .map(PluginManager::convertToJarFile)
+			  .collect(toTry()).getOrElseThrow(t -> new PluginLoadingException(t))
+			  .collect(HashSet.collector());
 
-			if(!pluginsJars.filter(Try::isFailure).isEmpty()) {
-				throw new PluginLoadingException(pluginsJars.filter(Try::isFailure).map(Try::getCause));
-			}
-
-			return pluginsJars.map(Try::get)
+			return pluginsJars
 			  .map(PluginManager::buildPluginSpecFrom)
 			  .map(Try::get);
 		});

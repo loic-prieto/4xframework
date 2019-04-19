@@ -26,10 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.GameWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.TranslationNotFoundException;
+import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
 import org.sephire.games.framework4x.core.model.civilization.Civilization;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
-import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
 import java.util.Locale;
@@ -37,7 +37,6 @@ import java.util.Locale;
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
 import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.End;
 import static java.lang.String.format;
-import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Translation.getTranslationFor;
 
 /**
  * <p>In the start game window,the player selects the options of a game, including the map and the civilization</p>
@@ -45,42 +44,29 @@ import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Tran
 @Slf4j
 public class StartGameWindow extends Basic4XWindow {
 
-	private PluginManager pluginManager;
 	private Configuration.Builder configuration;
 	private Option<MapGeneratorWrapper> selectedMapGenerator;
 	private Option<Civilization> selectedCivilization;
 	private Button startButton;
+	private UITranslationService i18n;
 
-	private StartGameWindow(PluginManager pluginManager,
-							Configuration.Builder configuration,
-							WindowBasedTextGUI textGUI) throws Throwable {
+	public StartGameWindow(UITranslationService i18n,
+						   WindowBasedTextGUI textGUI) {
 		super(textGUI);
-		this.pluginManager = pluginManager;
-		this.configuration = configuration;
+		this.i18n = i18n;
 		this.selectedCivilization = Option.none();
 		this.selectedMapGenerator = Option.none();
-
-		setupComponents().getOrElseThrow(t -> t);
-
-		setupFrameConfig();
-		setupEventHandling();
 	}
 
-	public static Try<StartGameWindow> from(PluginManager pluginManager,
-											Configuration.Builder configuration,
-											WindowBasedTextGUI textGUI) {
+	public Try<StartGameWindow> build(Configuration.Builder configuration) {
 		return Try.of(() -> {
-			return new StartGameWindow(pluginManager, configuration, textGUI);
+			this.configuration = configuration;
+			setupComponents().getOrElseThrow(t -> t);
+			setupFrameConfig();
+			setupEventHandling();
+
+			return this;
 		});
-	}
-
-	private void enableStartButtonIfPreconditionsSucceed() {
-		startButton.setEnabled(selectedCivilization.isDefined() && selectedMapGenerator.isDefined());
-	}
-
-	private void setupFrameConfig() {
-		setHints(java.util.List.of(Window.Hint.FULL_SCREEN));
-		setCloseWindowWithEscape(true);
 	}
 
 	private Try<Void> setupComponents() {
@@ -94,7 +80,7 @@ public class StartGameWindow extends Basic4XWindow {
 			backgroundPanel.addComponent(optionsPanel
 			  .withBorder(
 				doubleLine(
-				  getTranslationFor(
+				  i18n.getTranslationFor(
 					Locale.ENGLISH,
 					"startGameWindow.optionsPane.label")
 					.getOrElseThrow(() -> new TranslationNotFoundException("startGameWindow.optionsPane.label")))));
@@ -114,7 +100,7 @@ public class StartGameWindow extends Basic4XWindow {
 			  .getOrElseThrow(t -> t));
 
 			// Start game button
-			var startButtonText = getTranslationFor(
+			var startButtonText = i18n.getTranslationFor(
 			  Locale.ENGLISH,
 			  "startGameWindow.OptionsPane.startGamebutton.label")
 			  .getOrElseThrow(() -> new TranslationNotFoundException("startGameWindow.OptionsPane.startGamebutton.label"));
@@ -125,7 +111,7 @@ public class StartGameWindow extends Basic4XWindow {
 				  .withConfiguration(configuration.build())
 				  .build();
 				if (gameTry.isFailure()) {
-					var errorMessage = getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateGame")
+					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateGame")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateGame"));
 					MessageDialog.showMessageDialog(
 					  getOverridenTextGui(),
@@ -138,7 +124,7 @@ public class StartGameWindow extends Basic4XWindow {
 				}
 				var gameWindowTry = GameWindow.of(gameTry.get(), getOverridenTextGui());
 				if (gameWindowTry.isFailure()) {
-					var errorMessage = getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateWindow")
+					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateWindow")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateWindow"));
 					MessageDialog.showMessageDialog(
 					  getOverridenTextGui(),
@@ -164,6 +150,11 @@ public class StartGameWindow extends Basic4XWindow {
 		});
 	}
 
+	private void setupFrameConfig() {
+		setHints(java.util.List.of(Window.Hint.FULL_SCREEN));
+		setCloseWindowWithEscape(true);
+	}
+
 	private void setupEventHandling() {
 		registerEventListener(MapGeneratorSelectedEvent.class, (event) -> {
 			this.selectedMapGenerator = Option.of(event.getMapGenerator());
@@ -173,5 +164,9 @@ public class StartGameWindow extends Basic4XWindow {
 			this.selectedCivilization = Option.of(event.getCivilization());
 			enableStartButtonIfPreconditionsSucceed();
 		});
+	}
+
+	private void enableStartButtonIfPreconditionsSucceed() {
+		startButton.setEnabled(selectedCivilization.isDefined() && selectedMapGenerator.isDefined());
 	}
 }

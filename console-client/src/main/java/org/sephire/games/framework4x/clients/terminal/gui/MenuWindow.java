@@ -25,79 +25,92 @@ import io.vavr.control.Try;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.TranslationNotFoundException;
 import org.sephire.games.framework4x.clients.terminal.gui.selectplugins.SelectPluginsWindow;
+import org.sephire.games.framework4x.clients.terminal.utils.Terminal;
 import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 
-import java.nio.file.Path;
+import javax.inject.Provider;
 import java.util.List;
 import java.util.Locale;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
 import static java.lang.String.format;
 import static org.sephire.games.framework4x.clients.terminal.utils.Functions.wrap;
-import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Translation.getTranslationFor;
 
 @Slf4j
 public class MenuWindow extends BasicWindow {
 
-	private static final String DEFAULT_PLUGIN_FOLDER = "plugins";
-
 	private WindowBasedTextGUI textGUI;
-	private UITranslationService i18nUI;
+	private UITranslationService i18n;
+	private PluginManager pluginManager;
+	private Provider<SelectPluginsWindow> selectPluginsWindow;
 
-	public MenuWindow(WindowBasedTextGUI textGUI,UITranslationService i18nUIService) {
-		super(i18nUIService.getTranslationFor(Locale.ENGLISH,"menuwindow.title")
-		  .getOrElseThrow(()->new TranslationNotFoundException("menuwindow.title")));
-
+	public MenuWindow(WindowBasedTextGUI textGUI,
+					  UITranslationService i18nUIService,
+					  PluginManager pluginManager,
+					  Provider<SelectPluginsWindow> selectPluginsWindow) {
+		super();
 		this.textGUI = textGUI;
-		this.i18nUI = i18nUIService;
+		this.i18n = i18nUIService;
+		this.pluginManager = pluginManager;
+		this.selectPluginsWindow = selectPluginsWindow;
+	}
 
-		setHints(List.of(Window.Hint.FULL_SCREEN));
+	public Try<MenuWindow> build() {
+		return Try.of(() -> {
+			setTitle(i18n.getTranslationFor(Locale.ENGLISH, "menuwindow.title")
+			  .getOrElseThrow(() -> new TranslationNotFoundException("menuwindow.title")));
 
-		Panel backgroundPanel = new Panel();
-		backgroundPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
-		backgroundPanel.setPreferredSize(getSize());
+			setHints(List.of(Window.Hint.FULL_SCREEN));
 
-		Panel menuPanel = new Panel();
-		menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
+			Panel backgroundPanel = new Panel();
+			backgroundPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+			backgroundPanel.setPreferredSize(getSize());
 
-		menuPanel.addComponent(buttonFor("menuwindow.startGame", wrap((b) -> {
-			var pluginManagerBuilding = PluginManager.fromFolder(Path.of(".",DEFAULT_PLUGIN_FOLDER));
-			if(pluginManagerBuilding.isFailure()) {
-				var errorMessage = i18nUI.getTranslationFor(Locale.ENGLISH,"menuwindow.startGame.pluginManagerFail")
-				  .getOrElseThrow(()->new TranslationNotFoundException("menuwindow.startGame.pluginManagerFail"));
-				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
-				log.error(format("The plugin manager could not load: %s",pluginManagerBuilding.getCause().getMessage()));
-				return;
-			}
+			Panel menuPanel = new Panel();
+			menuPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Center));
 
-			var selectPluginsWindow = SelectPluginsWindow.of(pluginManagerBuilding.get(),this.textGUI);
-			if(selectPluginsWindow.isFailure()) {
-				var errorMessage = i18nUI.getTranslationFor(Locale.ENGLISH,"menuwindow.startGame.selectPluginsWindowFail")
-				  .getOrElseThrow(()->new TranslationNotFoundException("menuwindow.startGame.selectPluginsWindowFail"));
-				MessageDialog.showMessageDialog(this.getTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
-				log.error(format("The select plugins window could not be created: %s",pluginManagerBuilding.getCause().getMessage()));
-				return;
-			}
+			menuPanel.addComponent(buttonFor("menuwindow.startGame", wrap((b) -> {
+				var pluginFolderIsValid = pluginManager.isPluginFolderValid(Terminal.Plugins.DEFAULT_PATH);
 
-			this.getTextGUI().addWindow(selectPluginsWindow.get());
-			this.getTextGUI().setActiveWindow(selectPluginsWindow.get());
-		})).getOrElseThrow(t->(RuntimeException)t));
+				if (!pluginFolderIsValid) {
+					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "menuwindow.startGame.pluginManagerFail")
+					  .getOrElseThrow(() -> new TranslationNotFoundException("menuwindow.startGame.pluginManagerFail"));
+					MessageDialog.showMessageDialog(this.getTextGUI(), "Error", errorMessage, MessageDialogButton.OK);
+					log.error("The folder plugin is not valid");
+					return;
+				}
 
-		menuPanel.addComponent(buttonFor("menuwindow.exitGame", wrap((b) -> {
-			System.out.println(getTranslationFor(Locale.ENGLISH,"menuwindow.byeMessage"));
-			close();
+				var selectPluginsWindowBuild = selectPluginsWindow.get().build();
+				if (selectPluginsWindowBuild.isFailure()) {
+					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "menuwindow.startGame.selectPluginsWindowFail")
+					  .getOrElseThrow(() -> new TranslationNotFoundException("menuwindow.startGame.selectPluginsWindowFail"));
+					MessageDialog.showMessageDialog(this.getTextGUI(), "Error", errorMessage, MessageDialogButton.OK);
+					log.error(format("The select plugins window could not be created: %s", selectPluginsWindowBuild.getCause().getMessage()));
+					return;
+				}
 
-		})).getOrElseThrow(t->(RuntimeException)t));
+				this.getTextGUI().addWindow(selectPluginsWindowBuild.get());
+				this.getTextGUI().setActiveWindow(selectPluginsWindowBuild.get());
+			})).getOrElseThrow(t -> (RuntimeException) t));
 
-		backgroundPanel.addComponent(menuPanel.withBorder(doubleLine()));
+			menuPanel.addComponent(buttonFor("menuwindow.exitGame", wrap((b) -> {
+				System.out.println(i18n.getTranslationFor(Locale.ENGLISH, "menuwindow.byeMessage").getOrElse(""));
+				close();
 
-		setComponent(backgroundPanel.withBorder(doubleLine()));
+			})).getOrElseThrow(t -> (RuntimeException) t));
+
+			backgroundPanel.addComponent(menuPanel.withBorder(doubleLine()));
+
+			setComponent(backgroundPanel.withBorder(doubleLine()));
+
+			return this;
+		});
 	}
 
 	private Try<Button> buttonFor(String label, Function1<Button, Void> buttonAction) {
 		return Try.of(()->{
-			var labelText = i18nUI.getTranslationFor(Locale.ENGLISH,label)
+			var labelText = i18n.getTranslationFor(Locale.ENGLISH, label)
 			  .getOrElseThrow(()->new TranslationNotFoundException(label));
 
 			Button menuItem = new Button(labelText);

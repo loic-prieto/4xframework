@@ -32,7 +32,8 @@ public class Launcher {
 			var gui = lanternaFactory.buildGUI();
 
 			var menuWindow = DaggerConsoleClientWindowsFactory.create()
-			  .buildMenuWindow();
+			  .buildMenuWindow()
+			  .build().getOrElseThrow(t -> t);
 
 			screen.startScreen();
 			gui.addWindowAndWait(menuWindow);

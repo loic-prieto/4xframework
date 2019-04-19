@@ -24,6 +24,7 @@ import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapDire
 import org.sephire.games.framework4x.core.model.map.Location;
 import org.sephire.games.framework4x.core.model.map.Size;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
@@ -32,6 +33,14 @@ import java.util.ResourceBundle;
 import static io.vavr.API.*;
 
 public class Terminal {
+
+	public static class Plugins {
+
+		/**
+		 * Default folder to store plugins in the console client
+		 */
+		public static Path DEFAULT_PATH = Path.of(".", "plugins");
+	}
 
 	public static class Dimensions {
 
