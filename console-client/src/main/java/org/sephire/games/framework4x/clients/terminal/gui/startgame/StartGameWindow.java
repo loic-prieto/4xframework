@@ -32,6 +32,7 @@ import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
+import javax.inject.Provider;
 import java.util.Locale;
 
 import static com.googlecode.lanterna.gui2.Borders.doubleLine;
@@ -49,13 +50,16 @@ public class StartGameWindow extends Basic4XWindow {
 	private Option<Civilization> selectedCivilization;
 	private Button startButton;
 	private UITranslationService i18n;
+	private Provider<GameWindow> gameWindowProvider;
 
 	public StartGameWindow(UITranslationService i18n,
-						   WindowBasedTextGUI textGUI) {
+						   WindowBasedTextGUI textGUI,
+						   Provider<GameWindow> gameWindowProvider) {
 		super(textGUI);
 		this.i18n = i18n;
 		this.selectedCivilization = Option.none();
 		this.selectedMapGenerator = Option.none();
+		this.gameWindowProvider = gameWindowProvider;
 	}
 
 	public Try<StartGameWindow> build(Configuration.Builder configuration) {
@@ -107,9 +111,9 @@ public class StartGameWindow extends Basic4XWindow {
 			startButton = new Button(startButtonText, () -> {
 				var gameTry = Game.builder()
 				  .withMapGenerator(selectedMapGenerator.get())
-				  .withPluginManager(pluginManager)
 				  .withConfiguration(configuration.build())
 				  .build();
+
 				if (gameTry.isFailure()) {
 					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateGame")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateGame"));
@@ -122,7 +126,8 @@ public class StartGameWindow extends Basic4XWindow {
 
 					return;
 				}
-				var gameWindowTry = GameWindow.of(gameTry.get(), getOverridenTextGui());
+
+				var gameWindowTry = gameWindowProvider.get().build(gameTry.get());
 				if (gameWindowTry.isFailure()) {
 					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateWindow")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateWindow"));

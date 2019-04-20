@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import dagger.Module;
 import dagger.Provides;
 import org.sephire.games.framework4x.clients.terminal.gui.MenuWindow;
+import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.GameWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.selectplugins.SelectPluginsWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.startgame.StartGameWindow;
 import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
@@ -23,9 +24,16 @@ public class GuiModule {
 	}
 
 	@Provides
+	public GameWindow provideGameWindow(MultiWindowTextGUI textGUI,
+										UITranslationService i18n) {
+		return new GameWindow(textGUI,i18n);
+	}
+
+	@Provides
 	public StartGameWindow provideStartGameWindow(MultiWindowTextGUI textGUI,
-												  UITranslationService i18n) {
-		return new StartGameWindow(i18n,textGUI);
+												  UITranslationService i18n,
+												  Provider<GameWindow> gameWindowProvider) {
+		return new StartGameWindow(i18n,textGUI,gameWindowProvider);
 	}
 
 	@Provides

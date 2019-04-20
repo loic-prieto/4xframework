@@ -27,7 +27,9 @@ import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
+import org.sephire.games.framework4x.core.model.events.DomainEvents;
 import org.sephire.games.framework4x.core.model.game.Game;
+import org.sephire.games.framework4x.core.model.game.GameStartedEvent;
 import org.sephire.games.framework4x.core.plugins.configuration.resources.civilizations.UserPreferencesCivilizationLoader;
 import org.sephire.games.framework4x.core.utils.FunctionalUtils.Reduce;
 import org.sephire.games.framework4x.core.utils.RootlessTree;
@@ -56,18 +58,13 @@ public class PluginManager {
 	public static final String PLUGIN_NAME_MANIFEST_ENTRY_LABEL = "X-4XPlugin-Name";
 	public static final String PLUGIN_ROOT_PACKAGE_MANIFEST_ENTRY_LABEL = "X-4XPlugin-RootPackage";
 	public static final String PLUGIN_PARENT_ENTRY_LABEL = "X-4XPlugin-ParentPlugin";
-
-	private Map<String,PluginSpec> availablePlugins;
-	private Map<String,Plugin> plugins;
-
 	/**
-	 * Returns a set of plugins loaded inside the plugin manager.
-	 *
-	 * @return
+	 * This is the maximum number of minutes a game will take to load its plugins, just
+	 * for debugging purposes. In the final game, this shouldn't be bounded.
 	 */
-	public Set<String> getLoadedPlugins() {
-		return this.plugins.keySet();
-	}
+	private static final int PLUGIN_LOADING_TIMEOUT = 10;
+
+	public static final Path DEFAULT_PLUGINS_FOLDER = Path.of(".","plugins");
 
 	/**
 	 * <p>Executes the loading method for each plugin, loading every configuration and resource to prepare for a
@@ -78,13 +75,9 @@ public class PluginManager {
 	 * @return
 	 */
 	public Try<Void> loadPlugins(Set<String> plugins, Configuration.Builder configuration) {
-		return Try.of(() -> {
-			invokeLoadingOperation(plugins, configuration)
-			  .andThen(() -> loadUserStoredConfiguration(configuration))
-			  .getOrElseThrow(t -> t);
-
-			return null;
-		});
+		return invokeLoadingOperation(plugins, configuration)
+		  .andThen(() -> loadUserStoredConfiguration(configuration))
+		  .andThen(this::hookPluginsToGameStart);
 	}
 
 	/**
@@ -123,24 +116,47 @@ public class PluginManager {
 	}
 
 	/**
-	 * Given the set of loaded plugins, call their game start hooks with an initialized game and loaded configuration.
+	 * Make sure that when the game starts the loaded plugins are notified of it
+	 */
+	private void hookPluginsToGameStart(){
+		DomainEvents.getInstance().registerListener(GameStartedEvent.class,(event)->{
+			var result = this.callGameStartHooks(event.getGame());
+			if(result.isFailure()) {
+				throw (RuntimeException)result.getCause();
+			}
+
+			return null;
+		});
+	}
+
+	/**
+	 * <p>From the list of loaded plugins into the game, call their game start hooks with an initialized game
+	 * and loaded configuration.</p>
+	 *
 	 * @param game
 	 * @return
 	 */
-	public Try<Void> callGameStartHooks(Game game){
+	private Try<Void> callGameStartHooks(Game game){
 		return Try.of(()->{
+			// Get the list of loaded plugins
+			var plugins = game.getConfiguration().getConfiguration(CoreConfigKeyEnum.LOADED_PLUGINS,Set.class)
+			  .getOrElseThrow(t->t)
+			  .map((l)->(Set<Plugin>)l)
+			  .getOrElseThrow(()->new IllegalStateException("The plugins have not been loaded yet in the game"));
+
 			// Build the dependency tree
-			var pluginsTree = RootlessTree.fromItemSet(plugins.values().toSet(),
+			var pluginsTree = RootlessTree.fromItemSet(plugins.toSet(),
 			  (plugin,potentialParent)->plugin.getSpecification().getParentPlugin().get().equals(potentialParent.getSpecification().getPluginName()),
 			  (plugin)->plugin.getSpecification().isBasePlugin())
 			  .getOrElseThrow((e)->e);
 
+			// Load each plugin in parallel where possible (each plugin branch can be loaded independently)
 			ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 			pluginsTree.getTopologicallyOrderedBranches().forEach((pluginsBranch)->{
 				threadExecutor.execute(()->pluginsBranch.forEach((plugin)->plugin.callGameStartHook(game)));
 			});
 			threadExecutor.shutdown();
-			var timedOut = !threadExecutor.awaitTermination(3, TimeUnit.MINUTES);
+			var timedOut = !threadExecutor.awaitTermination(PLUGIN_LOADING_TIMEOUT, TimeUnit.MINUTES);
 			if(timedOut) {
 				throw new GameHooksExecutionTimedoutException();
 			}
@@ -193,15 +209,19 @@ public class PluginManager {
 	 */
 	private Try<Set<PluginSpec>> completeNeededPlugins(Set<String> requestedPluginsNames) {
 		return Try.of(()->{
-			var missingPlugins = requestedPluginsNames.filter((plugin)->availablePlugins.get(plugin).isEmpty());
+			var availablePlugins = this.getAvailablePlugins(DEFAULT_PLUGINS_FOLDER)
+			  .getOrElseThrow(t->t);
+
+			var missingPlugins = requestedPluginsNames.filter((pluginName)->
+			  availablePlugins.find(plugin->plugin.getPluginName().equals(pluginName)).isEmpty());
 			if(missingPlugins.length() > 0) {
 				throw new PluginsNotFoundException(missingPlugins);
 			}
 
-			var requestedPlugins = requestedPluginsNames.flatMap(availablePlugins::get);
+			var requestedPlugins = requestedPluginsNames.flatMap((name)->availablePlugins.find(plugin->plugin.getPluginName().equals(name)));
 			var neededDependencies = requestedPlugins
 			  .filter(not(PluginSpec::isBasePlugin))
-			  .map((pluginSpec -> Tuple.of(pluginSpec,availablePlugins.get(pluginSpec.getParentPlugin().get()))));
+			  .map((pluginSpec -> Tuple.of(pluginSpec,availablePlugins.find(potentialParent -> pluginSpec.getParentPlugin().get().equals(potentialParent.getPluginName())))));
 
 			var missingDependencies = neededDependencies
 			  .filter((pluginDependencyTuple)-> pluginDependencyTuple._2.isEmpty());

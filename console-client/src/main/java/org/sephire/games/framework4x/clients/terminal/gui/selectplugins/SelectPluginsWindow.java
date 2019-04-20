@@ -45,6 +45,7 @@ import static org.sephire.games.framework4x.clients.terminal.gui.components.Mess
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.INFO;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.sizeWithWidthToPercent;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Plugins.DEFAULT_PATH;
+import static org.sephire.games.framework4x.core.plugins.PluginManager.DEFAULT_PLUGINS_FOLDER;
 
 /**
  * This window is shown when starting a game, to select which plugins will be active for
@@ -138,7 +139,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 			pluginsListLabel.setLayoutData(LinearLayout.createLayoutData(Fill));
 			pluginListPanel.addComponent(pluginsListLabel);
 
-			availablePlugins = pluginManager.getAvailablePlugins(DEFAULT_PATH).getOrElseThrow(t -> t).toSortedSet();
+			availablePlugins = pluginManager.getAvailablePlugins(DEFAULT_PLUGINS_FOLDER).getOrElseThrow(t -> t).toSortedSet();
 			var pluginCheckBoxList = new PluginsCheckboxList(availablePlugins);
 			pluginCheckBoxList.setLayoutData(LinearLayout.createLayoutData(Fill));
 			pluginListPanel.addComponent(pluginCheckBoxList);
@@ -159,15 +160,15 @@ public class SelectPluginsWindow extends Basic4XWindow {
 				}
 
 				var startGameWindowBuild = startGameWindow.get().build(configuration);
-				if (startGameWindow.isFailure()) {
+				if (startGameWindowBuild.isFailure()) {
 					var errorMessage = getTranslationFor("selectPluginWindow.errors.startWindowFail");
 
 					MessageDialog.showMessageDialog(getOverridenTextGui(), "Error", errorMessage, MessageDialogButton.OK);
-					log.error(format("The start game window could not be created: %s", startGameWindow.getCause().getMessage()));
+					log.error(format("The start game window could not be created: %s", startGameWindowBuild.getCause().getMessage()));
 					return;
 				}
-				this.getTextGUI().addWindow(startGameWindow.get());
-				this.getTextGUI().setActiveWindow(startGameWindow.get());
+				this.getTextGUI().addWindow(startGameWindowBuild.get());
+				this.getTextGUI().setActiveWindow(startGameWindowBuild.get());
 			});
 			pluginListPanel.addComponent(selectButton);
 			registerEventListener(SelectedPluginsListUpdatedEvent.class, (event) -> {
