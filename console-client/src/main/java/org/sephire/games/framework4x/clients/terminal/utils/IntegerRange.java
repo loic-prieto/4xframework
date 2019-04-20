@@ -7,7 +7,7 @@ import lombok.Value;
 import java.util.Comparator;
 
 /**
- * A simple semi open range of integers, from start to end,
+ * A simple semi open range of integers, from initialize to end,
  */
 @Value
 public class IntegerRange {

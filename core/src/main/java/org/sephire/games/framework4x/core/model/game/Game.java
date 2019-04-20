@@ -73,10 +73,10 @@ public class Game {
 
 	/**
 	 * Initialize a starting game state. This method must be invoked before the game
-	 * can start so that all required systems of the framework have been notified.
+	 * can initialize so that all required systems of the framework have been notified.
 	 * @return
 	 */
-	public Try<Void> start() {
+	public Try<Void> initialize() {
 		return initializeCoreState()
 		  .andThenTry(()->{
 			  DomainEvents.getInstance().fireEvent(new GameStartedEvent(this));

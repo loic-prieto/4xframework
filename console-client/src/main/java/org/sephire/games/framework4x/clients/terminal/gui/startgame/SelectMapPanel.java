@@ -16,7 +16,7 @@ import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Tran
 import static org.sephire.games.framework4x.core.utils.Validations.areArgumentsNotNull;
 
 /**
- * This panel holds the selection of a map in the start game screen.
+ * This panel holds the selection of a map in the initialize game screen.
  */
 public class SelectMapPanel extends Panel {
 

@@ -40,7 +40,7 @@ import static com.googlecode.lanterna.gui2.LinearLayout.Alignment.End;
 import static java.lang.String.format;
 
 /**
- * <p>In the start game window,the player selects the options of a game, including the map and the civilization</p>
+ * <p>In the initialize game window,the player selects the options of a game, including the map and the civilization</p>
  */
 @Slf4j
 public class StartGameWindow extends Basic4XWindow {

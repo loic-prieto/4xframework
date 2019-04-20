@@ -109,7 +109,7 @@ public class Plugin {
 	}
 
 	/**
-	 * <p>Call the game start hook of the plugin if it exists</p>
+	 * <p>Call the game initialize hook of the plugin if it exists</p>
 	 * @param game
 	 * @return
 	 */

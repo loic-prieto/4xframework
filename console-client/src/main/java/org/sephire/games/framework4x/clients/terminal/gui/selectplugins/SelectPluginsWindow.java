@@ -164,7 +164,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 					var errorMessage = getTranslationFor("selectPluginWindow.errors.startWindowFail");
 
 					MessageDialog.showMessageDialog(getOverridenTextGui(), "Error", errorMessage, MessageDialogButton.OK);
-					log.error(format("The start game window could not be created: %s", startGameWindowBuild.getCause().getMessage()));
+					log.error(format("The initialize game window could not be created: %s", startGameWindowBuild.getCause().getMessage()));
 					return;
 				}
 				this.getTextGUI().addWindow(startGameWindowBuild.get());

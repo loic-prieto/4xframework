@@ -27,7 +27,6 @@ import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapComp
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapScrollEvent;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.topmenu.TopMenuComponent;
 import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
-import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.game.Game;
 
 import java.util.List;
@@ -69,7 +68,7 @@ public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 			setComponent(backgroundPanel);
 
 			// Signal the game has started
-			game.start();
+			game.initialize();
 
 			return this;
 		});

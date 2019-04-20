@@ -130,7 +130,7 @@ public class PluginManager {
 	}
 
 	/**
-	 * <p>From the list of loaded plugins into the game, call their game start hooks with an initialized game
+	 * <p>From the list of loaded plugins into the game, call their game initialize hooks with an initialized game
 	 * and loaded configuration.</p>
 	 *
 	 * @param game

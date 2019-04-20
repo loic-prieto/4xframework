@@ -62,8 +62,8 @@ public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	 */
 	LOADED_PLUGINS,
 	/**
-	 * Key under which to store all game start hook observers to be called when the game is starting.
-	 * Plugins define game start hook observers.
+	 * Key under which to store all game initialize hook observers to be called when the game is starting.
+	 * Plugins define game initialize hook observers.
 	 */
 	GAME_START_HOOKS;
 }
