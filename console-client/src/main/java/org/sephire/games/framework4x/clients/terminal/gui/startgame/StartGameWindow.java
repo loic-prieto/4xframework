@@ -53,9 +53,8 @@ public class StartGameWindow extends Basic4XWindow {
 	private Provider<GameWindow> gameWindowProvider;
 
 	public StartGameWindow(UITranslationService i18n,
-						   WindowBasedTextGUI textGUI,
 						   Provider<GameWindow> gameWindowProvider) {
-		super(textGUI);
+		super();
 		this.i18n = i18n;
 		this.selectedCivilization = Option.none();
 		this.selectedMapGenerator = Option.none();
@@ -118,7 +117,7 @@ public class StartGameWindow extends Basic4XWindow {
 					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateGame")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateGame"));
 					MessageDialog.showMessageDialog(
-					  getOverridenTextGui(),
+					  getTextGUI(),
 					  "Error",
 					  errorMessage,
 					  MessageDialogButton.OK);
@@ -127,12 +126,15 @@ public class StartGameWindow extends Basic4XWindow {
 					return;
 				}
 
-				var gameWindowTry = gameWindowProvider.get().build(gameTry.get());
+				var game = gameTry.get();
+				game.initialize();
+
+				var gameWindowTry = gameWindowProvider.get().build(game);
 				if (gameWindowTry.isFailure()) {
 					var errorMessage = i18n.getTranslationFor(Locale.ENGLISH, "gameWindow.couldNotCreateWindow")
 					  .getOrElseThrow(() -> new TranslationNotFoundException("gameWindow.couldNotCreateWindow"));
 					MessageDialog.showMessageDialog(
-					  getOverridenTextGui(),
+					  getTextGUI(),
 					  "Error",
 					  errorMessage,
 					  MessageDialogButton.OK);
@@ -142,8 +144,8 @@ public class StartGameWindow extends Basic4XWindow {
 				}
 
 				var gameWindow = gameWindowTry.get();
-				getOverridenTextGui().addWindow(gameWindow);
-				getOverridenTextGui().setActiveWindow(gameWindow);
+				getTextGUI().addWindow(gameWindow);
+				getTextGUI().setActiveWindow(gameWindow);
 				close();
 			});
 			startButton.setEnabled(false);

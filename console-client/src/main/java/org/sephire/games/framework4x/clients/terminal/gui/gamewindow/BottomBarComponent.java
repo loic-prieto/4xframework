@@ -50,7 +50,7 @@ public class BottomBarComponent extends Panel {
 	private Basic4XWindow parentContainer;
 	private Panel centerPanel;
 
-	public BottomBarComponent(Game game, Basic4XWindow parentContainer) {
+	public BottomBarComponent(Game game, GameWindow parentContainer) {
 		super();
 		this.parentContainer = parentContainer;
 		this.game = game;
@@ -61,7 +61,7 @@ public class BottomBarComponent extends Panel {
 		var buildTry = buildElements();
 		if(buildTry.isFailure()){
 			var errorMessage = format("Could not load elements in bottom bar component: %s",buildTry.getCause().getMessage());
-			MessageDialog.showMessageDialog(parentContainer.getOverridenTextGui(),"Error",errorMessage, MessageDialogButton.OK);
+			MessageDialog.showMessageDialog(parentContainer.getOriginalTextGUI(),"Error",errorMessage, MessageDialogButton.OK);
 			log.error(errorMessage);
 		}
 	}

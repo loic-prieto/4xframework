@@ -20,6 +20,7 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.control.Try;
+import lombok.Getter;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowAPI;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowUtils;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
@@ -41,13 +42,14 @@ public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 
 	private Game game;
 	private UITranslationService i18n;
+	@Getter
+	private WindowBasedTextGUI originalTextGUI;
 
 	public GameWindow(WindowBasedTextGUI textGUI,
 					  UITranslationService i18n) {
-		super(textGUI);
+		super();
 		this.i18n = i18n;
-
-		GameWindowUtils.setCurrentGameWindow(this);
+		this.originalTextGUI = textGUI;
 	}
 
 	public Try<GameWindow> build(Game game) {
@@ -67,8 +69,7 @@ public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 
 			setComponent(backgroundPanel);
 
-			// Signal the game has started
-			game.initialize();
+			GameWindowUtils.setCurrentGameWindow(this);
 
 			return this;
 		});
