@@ -25,9 +25,7 @@ public class CreateCivilizationWindow extends Basic4XWindow {
 	private CivilizationForm civilizationForm;
 	private WindowEventBus parentEventBus;
 
-	private CreateCivilizationWindow(WindowBasedTextGUI textGUI,WindowEventBus parentEventBus) throws Throwable {
-		super(textGUI);
-
+	private CreateCivilizationWindow(WindowEventBus parentEventBus) throws Throwable {
 		this.civilizationForm = new CivilizationForm();
 		this.parentEventBus = parentEventBus;
 
@@ -115,7 +113,7 @@ public class CreateCivilizationWindow extends Basic4XWindow {
 		});
 	}
 
-	public static BuilderGUI builder() {
+	public static BuilderEventBus builder() {
 		return new Builder();
 	}
 
@@ -134,23 +132,12 @@ public class CreateCivilizationWindow extends Basic4XWindow {
 		Try<CreateCivilizationWindow> build();
 	}
 
-	public interface BuilderGUI {
-		BuilderEventBus withTextGUI(WindowBasedTextGUI textGUI);
-	}
-
 	public interface BuilderEventBus {
 		BuilderBuilder withEventBus(WindowEventBus parentEventBus);
 	}
 
-	public static class Builder implements BuilderBuilder, BuilderGUI,BuilderEventBus {
-		private WindowBasedTextGUI textGUI;
+	public static class Builder implements BuilderBuilder, BuilderEventBus {
 		private WindowEventBus parentBus;
-
-		@Override
-		public BuilderEventBus withTextGUI(WindowBasedTextGUI textGUI) {
-			this.textGUI = textGUI;
-			return this;
-		}
 
 		@Override
 		public BuilderBuilder withEventBus(WindowEventBus parentEventBus) {
@@ -161,8 +148,8 @@ public class CreateCivilizationWindow extends Basic4XWindow {
 		@Override
 		public Try<CreateCivilizationWindow> build() {
 			return Try.of(() -> {
-				areArgumentsNotNull(textGUI,parentBus).getOrElseThrow(t -> t);
-				return new CreateCivilizationWindow(textGUI,parentBus);
+				areArgumentsNotNull(parentBus).getOrElseThrow(t -> t);
+				return new CreateCivilizationWindow(parentBus);
 			});
 		}
 	}

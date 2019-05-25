@@ -17,7 +17,6 @@ import org.sephire.games.framework4x.core.model.civilization.Civilization;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.ConfigurationKeyNotFound;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
-import org.sephire.games.framework4x.core.model.config.userpreferences.UserPreferences;
 import org.sephire.games.framework4x.core.plugins.configuration.resources.civilizations.CivilizationsSerializer;
 
 import java.nio.file.Path;
@@ -126,7 +125,6 @@ public class SelectCivilizationPanel extends Panel {
 
 			createButton.addListener((event) -> {
 				var createCivilizationWindow = CreateCivilizationWindow.builder()
-				  .withTextGUI(parent.getOverridenTextGui())
 				  .withEventBus(parent.getEventBus())
 				  .build();
 
@@ -138,8 +136,8 @@ public class SelectCivilizationPanel extends Panel {
 					return;
 				}
 
-				parent.getOverridenTextGui().addWindow(createCivilizationWindow.get());
-				parent.getOverridenTextGui().setActiveWindow(createCivilizationWindow.get());
+				parent.getTextGUI().addWindow(createCivilizationWindow.get());
+				parent.getTextGUI().setActiveWindow(createCivilizationWindow.get());
 			});
 
 			return createButton;

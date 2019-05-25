@@ -30,10 +30,9 @@ public class GuiModule {
 	}
 
 	@Provides
-	public StartGameWindow provideStartGameWindow(MultiWindowTextGUI textGUI,
-												  UITranslationService i18n,
+	public StartGameWindow provideStartGameWindow(UITranslationService i18n,
 												  Provider<GameWindow> gameWindowProvider) {
-		return new StartGameWindow(i18n,textGUI,gameWindowProvider);
+		return new StartGameWindow(i18n, gameWindowProvider);
 	}
 
 	@Provides

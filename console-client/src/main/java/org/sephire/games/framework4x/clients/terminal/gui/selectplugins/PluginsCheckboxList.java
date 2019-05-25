@@ -67,7 +67,7 @@ public class PluginsCheckboxList extends CheckBoxList<ToStringDecorator<PluginSp
 				if (parentPluginSearch.isDefined()) {
 					this.setChecked(parentPluginSearch.get(),true);
 				} else {
-					var textGUI = ((Basic4XWindow)getBasePane()).getOverridenTextGui();
+					var textGUI = ((Basic4XWindow) getBasePane()).getTextGUI();
 					var errorMessage = "The parent of this plugin could not be found, make sure it is present in the plugins folder";
 					MessageDialog.showMessageDialog(textGUI,"Error",errorMessage, MessageDialogButton.OK);
 					log.error("A child plugin was selected but it's parent is not in the list of available plugins");

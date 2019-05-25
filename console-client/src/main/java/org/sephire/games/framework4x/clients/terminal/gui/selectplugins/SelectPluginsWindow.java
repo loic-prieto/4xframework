@@ -44,7 +44,6 @@ import static java.lang.String.format;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.ERROR;
 import static org.sephire.games.framework4x.clients.terminal.gui.components.MessagePanel.MessageType.INFO;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.sizeWithWidthToPercent;
-import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Plugins.DEFAULT_PATH;
 import static org.sephire.games.framework4x.core.plugins.PluginManager.DEFAULT_PLUGINS_FOLDER;
 
 /**
@@ -60,6 +59,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	private PluginManager pluginManager;
 	private UITranslationService i18n;
 	private Provider<StartGameWindow> startGameWindow;
+	private WindowBasedTextGUI textGUI;
 
 	/**
 	 * The set of selected plugins by the user inside the plugins checkbox list.
@@ -73,11 +73,10 @@ public class SelectPluginsWindow extends Basic4XWindow {
 							   WindowBasedTextGUI textGUI,
 							   UITranslationService i18n,
 							   Provider<StartGameWindow> startGameWindow) {
-		super(textGUI);
-
 		this.pluginManager = pluginManager;
 		this.selectedPlugins = HashSet.empty();
 		this.i18n = i18n;
+		this.textGUI = textGUI;
 		this.startGameWindow = startGameWindow;
 	}
 
@@ -154,7 +153,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 				if (loadingTry.isFailure()) {
 					var errorMessage = getTranslationFor("selectPluginWindow.errors.gameFail");
 
-					MessageDialog.showMessageDialog(getOverridenTextGui(), "Error", errorMessage, MessageDialogButton.OK);
+					MessageDialog.showMessageDialog(textGUI, "Error", errorMessage, MessageDialogButton.OK);
 					log.error(format("The plugin manager could not load plugins: %s ", loadingTry.getCause().getMessage()));
 					return;
 				}
@@ -163,7 +162,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 				if (startGameWindowBuild.isFailure()) {
 					var errorMessage = getTranslationFor("selectPluginWindow.errors.startWindowFail");
 
-					MessageDialog.showMessageDialog(getOverridenTextGui(), "Error", errorMessage, MessageDialogButton.OK);
+					MessageDialog.showMessageDialog(textGUI, "Error", errorMessage, MessageDialogButton.OK);
 					log.error(format("The initialize game window could not be created: %s", startGameWindowBuild.getCause().getMessage()));
 					return;
 				}
@@ -188,7 +187,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	private Try<Void> buildPluginInfoPanel(Panel backgroundPanel) {
 		return Try.of(() -> {
 			Panel pluginInfoPanel = new Panel();
-			pluginInfoPanel.setPreferredSize(sizeWithWidthToPercent(getOverridenTextGui().getScreen().getTerminalSize(), 0.4f));
+			pluginInfoPanel.setPreferredSize(sizeWithWidthToPercent(textGUI.getScreen().getTerminalSize(), 0.4f));
 			pluginInfoPanel.setLayoutData(BorderLayout.Location.RIGHT);
 			pluginInfoPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
@@ -219,7 +218,7 @@ public class SelectPluginsWindow extends Basic4XWindow {
 	private Try<Void> buildInfoPanel(Panel backgroundPanel) {
 		return Try.of(() -> {
 			Panel infoPanel = new Panel();
-			infoPanel.setPreferredSize(getOverridenTextGui().getScreen().getTerminalSize().withRows(4));
+			infoPanel.setPreferredSize(textGUI.getScreen().getTerminalSize().withRows(4));
 			infoPanel.setLayoutData(BorderLayout.Location.BOTTOM);
 			infoPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 

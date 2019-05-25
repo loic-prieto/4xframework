@@ -53,7 +53,7 @@ public class TopMenuComponent extends Panel {
 		parent.registerEventListener(MenuActivationRequestedEvent.class, (event) -> {
 			menus.getTopCategories()
 			  .find(c -> c.getShortcutKey().equals("" + event.getCharacter()))
-			  .peek(c -> MenuDialog.show(c, parent.getOverridenTextGui()));
+			  .peek(c -> MenuDialog.show(c, parent.getTextGUI()));
 		});
 	}
 
