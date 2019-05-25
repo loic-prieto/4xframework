@@ -5,7 +5,7 @@ import io.vavr.control.Try;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.model.civilization.Civilization;
-import org.sephire.games.framework4x.core.plugins.configuration.resources.xml.Civilizations;
+import org.sephire.games.framework4x.core.plugins.configuration.resources.xml.civilizations.Civilizations;
 import org.sephire.games.framework4x.core.utils.I18NString;
 
 import java.util.Locale;

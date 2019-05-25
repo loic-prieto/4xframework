@@ -6,7 +6,7 @@ import org.sephire.games.framework4x.core.model.civilization.Civilization;
 
 /**
  * This event is fired when a civilization is selected from the dropdown menu in the
- * start game screen.
+ * initialize game screen.
  */
 @Getter
 @AllArgsConstructor

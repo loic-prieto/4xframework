@@ -35,7 +35,7 @@ public class BottomBar {
 	 * <p>Adds an UI element to the bottom bar, in one of the available slots.</p>
 	 * <p>The element and position is stored in the configuration object and will be handled
 	 * by the BottomBar element in the GameWindow as it initializes</p>
-	 * <p>The plugins may use this function while they initialize, in the plugin start hook which is when they
+	 * <p>The plugins may use this function while they initialize, in the plugin initialize hook which is when they
 	 * have access to the Configuration.Builder object</p>
 	 * <p>Calling this function outside of the plugin loading hook will have no effect, since the configuration
 	 * will have been built and it is immutable</p>

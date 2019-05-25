@@ -20,16 +20,18 @@ package org.sephire.games.framework4x.clients.terminal.gui.gamewindow;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.input.KeyStroke;
 import io.vavr.control.Try;
+import lombok.Getter;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowAPI;
 import org.sephire.games.framework4x.clients.terminal.api.ui.gamewindow.GameWindowUtils;
 import org.sephire.games.framework4x.clients.terminal.gui.Basic4XWindow;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapComponent;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.MapScrollEvent;
 import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.topmenu.TopMenuComponent;
-import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.clients.terminal.utils.UITranslationService;
 import org.sephire.games.framework4x.core.model.game.Game;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -39,29 +41,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 
 	private Game game;
-	private Configuration configuration;
+	private UITranslationService i18n;
+	@Getter
+	private WindowBasedTextGUI originalTextGUI;
 
-	private GameWindow(Game game, WindowBasedTextGUI textGUI) throws Throwable {
-		super("Game Window", textGUI);
-		setHints(List.of(Window.Hint.FULL_SCREEN));
+	public GameWindow(WindowBasedTextGUI textGUI,
+					  UITranslationService i18n) {
+		super();
+		this.i18n = i18n;
+		this.originalTextGUI = textGUI;
+	}
 
-		this.game = game;
-		this.configuration = game.getConfiguration();
+	public Try<GameWindow> build(Game game) {
+		return Try.of(()->{
+			this.game = game;
 
-		setupFrame();
+			setupFrame().getOrElseThrow(t->t);
 
-		var backgroundPanel = new Panel();
-		backgroundPanel.setLayoutManager(new BorderLayout());
+			var backgroundPanel = new Panel();
+			backgroundPanel.setLayoutManager(new BorderLayout());
 
-		var mapComponent = MapComponent.of(game, this).getOrElseThrow(t->t);
-		backgroundPanel.addComponent(mapComponent, BorderLayout.Location.CENTER);
+			var mapComponent = MapComponent.of(game, this).getOrElseThrow(t->t);
+			backgroundPanel.addComponent(mapComponent, BorderLayout.Location.CENTER);
 
-		setupBottomBar(backgroundPanel);
-		setupTopBar(backgroundPanel).getOrElseThrow(t->t);
+			setupBottomBar(backgroundPanel);
+			setupTopBar(backgroundPanel).getOrElseThrow(t->t);
 
-		setComponent(backgroundPanel);
+			setComponent(backgroundPanel);
 
-		GameWindowUtils.setCurrentGameWindow(this);
+			GameWindowUtils.setCurrentGameWindow(this);
+
+			return this;
+		});
 	}
 
 	private void setupBottomBar(Panel container) {
@@ -84,41 +95,42 @@ public class GameWindow extends Basic4XWindow implements GameWindowAPI {
 		});
 	}
 
-	private void setupFrame() {
+	private Try<GameWindow> setupFrame() {
 
-		addWindowListener(new WindowListenerAdapter() {
-			@Override
-			public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+		return Try.of(()->{
+			setHints(List.of(Window.Hint.FULL_SCREEN));
+			setTitle(i18n.getTranslationFor(Locale.ENGLISH,"gamewindow.title")
+			  .getOrElseThrow(()->new TranslationNotFoundException("gamewindow.title")));
 
-				// React to top menu activations
-				var potentialMenuActivationEvent = MenuActivationRequestedEvent.from(keyStroke);
-				if (potentialMenuActivationEvent.isDefined()) {
-					fireEvent(potentialMenuActivationEvent.get());
-					return;
+			addWindowListener(new WindowListenerAdapter() {
+				@Override
+				public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+
+					// React to top menu activations
+					var potentialMenuActivationEvent = MenuActivationRequestedEvent.from(keyStroke);
+					if (potentialMenuActivationEvent.isDefined()) {
+						fireEvent(potentialMenuActivationEvent.get());
+						return;
+					}
+
+					// React to map scroll events
+					var potentialMapScrollEvent = MapScrollEvent.fromKeyStroke(keyStroke);
+					if (potentialMapScrollEvent.isDefined()) {
+						fireEvent(potentialMapScrollEvent.get());
+						return;
+					}
+
+					// React to cursor movement
+					var potentialCursorMovement = CursorMoveEvent.fromKeyStroke(keyStroke);
+					if (potentialCursorMovement.isDefined()) {
+						fireEvent(potentialCursorMovement.get());
+						return;
+					}
 				}
+			});
 
-				// React to map scroll events
-				var potentialMapScrollEvent = MapScrollEvent.fromKeyStroke(keyStroke);
-				if (potentialMapScrollEvent.isDefined()) {
-					fireEvent(potentialMapScrollEvent.get());
-					return;
-				}
-
-				// React to cursor movement
-				var potentialCursorMovement = CursorMoveEvent.fromKeyStroke(keyStroke);
-				if (potentialCursorMovement.isDefined()) {
-					fireEvent(potentialCursorMovement.get());
-					return;
-				}
-			}
+			return this;
 		});
-	}
-
-
-	public static Try<GameWindow> of(Game game, WindowBasedTextGUI textGUI) {
-		return Try.of(() ->
-		  new GameWindow(game, textGUI)
-		);
 	}
 
 	@Override

@@ -30,17 +30,14 @@ import java.util.function.Consumer;
 public abstract class Basic4XWindow extends BasicWindow {
 	@Getter
 	private WindowEventBus eventBus;
-	private WindowBasedTextGUI textGUI;
 
-	public Basic4XWindow(WindowBasedTextGUI textGUI) {
-		this.textGUI = textGUI;
+	public Basic4XWindow() {
 		this.eventBus = new WindowEventBus();
 	}
 
-	public Basic4XWindow(String title,WindowBasedTextGUI textGUI) {
+	public Basic4XWindow(String title) {
 		super(title);
 		this.eventBus = new WindowEventBus();
-		this.textGUI = textGUI;
 	}
 
 	/**
@@ -60,18 +57,6 @@ public abstract class Basic4XWindow extends BasicWindow {
 	 */
 	public <T> void fireEvent(T event) {
 		eventBus.fireEvent(event);
-	}
-
-	/**
-	 * I haven't been able to discover yet why the original WindowBasedTextGUI is always null,
-	 * so I'm passing it to each window constructor from the original textGui that created the screen.
-	 * This is an ugly solution.
-	 *
-	 * Return the text gui of this window.
-	 * @return
-	 */
-	public WindowBasedTextGUI getOverridenTextGui() {
-		return this.textGUI;
 	}
 
 }

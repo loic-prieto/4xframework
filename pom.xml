@@ -63,6 +63,7 @@
         <mockito.version>2.25.1</mockito.version>
         <jaxb.version>2.3.1</jaxb.version>
         <jaxb-moxy.version>2.7.4</jaxb-moxy.version>
+        <dagger.version>2.22.1</dagger.version>
     </properties>
 
     <repositories>
@@ -85,11 +86,21 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.0.0-M1</version>
+                    <configuration>
+                        <argLine>
+                            --illegal-access=permit
+                        </argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>3.0.0-M1</version>
+                    <configuration>
+                        <argLine>
+                            --illegal-access=permit
+                        </argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -104,6 +115,7 @@
                         <release>${java.version}</release>
                         <encoding>UTF-8</encoding>
                     </configuration>
+
                 </plugin>
 
                 <!-- License plugin configuration for all modules under the GPL3-only -->
@@ -242,6 +254,13 @@
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflections.version}</version>
+            </dependency>
+
+            <!-- DI with Dagger 2 -->
+            <dependency>
+                <groupId>com.google.dagger</groupId>
+                <artifactId>dagger</artifactId>
+                <version>${dagger.version}</version>
             </dependency>
 
         </dependencies>

@@ -97,11 +97,11 @@ public class MapZone {
 		public MapZoneBuilderBuild withDefaultCells(Size size, TerrainTypeEnum defaultTerrainType) {
 			java.util.Map<Location,MapCell> mutableMap = new java.util.HashMap<>();
 
-			range(0,size.getHeight()).forEach((y)->{
-				range(0,size.getWidth()).forEach((x)->{
+			for(int y=0;y<size.getHeight();y++) {
+				for(int x=0;x<size.getWidth();x++) {
 					mutableMap.put(Location.of(x,y),new MapCell(Location.of(x,y),defaultTerrainType));
-				});
-			});
+				}
+			}
 
 			this.cells = HashMap.ofAll(mutableMap);
 

@@ -22,6 +22,8 @@ import io.vavr.control.Try;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.events.DomainEvent;
+import org.sephire.games.framework4x.core.model.events.DomainEvents;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
@@ -41,12 +43,10 @@ public class Game {
 	private GameMap map;
 	@Getter
 	private Configuration configuration;
-	private PluginManager pluginManager;
 	private GameState gameState;
 
-	private Game(GameMap map, PluginManager pluginManager, Configuration configuration) {
+	private Game(GameMap map, Configuration configuration) {
 		this.configuration = configuration;
-		this.pluginManager = pluginManager;
 		this.map = map;
 		this.gameState = new GameState();
 	}
@@ -67,44 +67,37 @@ public class Game {
 		return gameState.get(key,valueType);
 	}
 
-	/**
-	 * Execute the plugins code related to the game start hook.
-	 * @return
-	 */
-	private Try<Void> executeGameStartHooks() {
-		return pluginManager.callGameStartHooks(this);
-	}
-
 	public static BuilderMapGenerator builder() {
 		return new Builder();
 	}
 
-	public interface BuilderPluginManager {
-		BuilderConfiguration withPluginManager(PluginManager pluginManager);
+	/**
+	 * Initialize a starting game state. This method must be invoked before the game
+	 * can initialize so that all required systems of the framework have been notified.
+	 * @return
+	 */
+	public Try<Void> initialize() {
+		return initializeCoreState()
+		  .andThenTry(()->{
+			  DomainEvents.getInstance().fireEvent(new GameStartedEvent(this));
+		  });
 	}
 
 	public interface BuilderMapGenerator {
-		BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator);
+		BuilderConfiguration withMapGenerator(MapGeneratorWrapper mapGenerator);
 	}
 
 	public interface BuilderConfiguration {
 		BuilderBuilder withConfiguration(Configuration configuration);
 	}
 
-	public static class Builder implements BuilderBuilder, BuilderMapGenerator, BuilderPluginManager, BuilderConfiguration {
+	public static class Builder implements BuilderBuilder, BuilderMapGenerator,  BuilderConfiguration {
 		private MapGeneratorWrapper mapGenerator;
-		private PluginManager pluginManager;
 		private Configuration configuration;
 
 		@Override
-		public BuilderPluginManager withMapGenerator(MapGeneratorWrapper mapGenerator) {
+		public BuilderConfiguration withMapGenerator(MapGeneratorWrapper mapGenerator) {
 			this.mapGenerator = mapGenerator;
-			return this;
-		}
-
-		@Override
-		public BuilderConfiguration withPluginManager(PluginManager pluginManager) {
-			this.pluginManager = pluginManager;
 			return this;
 		}
 
@@ -117,7 +110,7 @@ public class Game {
 		@Override
 		public Try<Game> build() {
 			return Try.of(()->{
-				areArgumentsNotNull(mapGenerator, pluginManager, configuration).getOrElseThrow(t -> t);
+				areArgumentsNotNull(mapGenerator, configuration).getOrElseThrow(t -> t);
 
 				Try<GameMap> mapTry = mapGenerator.buildMap(configuration);
 				if(mapTry.isFailure()) {
@@ -125,13 +118,8 @@ public class Game {
 					throw mapTry.getCause();
 				}
 
-				var game = new Game(mapTry.get(), pluginManager, configuration);
-				game.executeGameStartHooks()
-				  .onFailure((e)->log.error(format("Error while calling game start hooks: %s",e.getMessage())))
-				  .getOrElseThrow(e->e);
-				game.initializeCoreState()
-				  .onFailure((e)->log.error(format("Error while loading initial game state: %s",e.getMessage())))
-				  .getOrElseThrow(e->e);
+				var game = new Game(mapTry.get(), configuration);
+
 
 				return game;
 			});

@@ -233,7 +233,7 @@ public class PluginManagerTest {
 	}
 
 	@Test
-	@DisplayName("When a plugin in the plugin folder is invalid because of i18n, the plugin manager should refuse to start")
+	@DisplayName("When a plugin in the plugin folder is invalid because of i18n, the plugin manager should refuse to initialize")
 	public void should_complain_if_a_plugin_is_invalid() {
 		var pluginManagerTry = PluginManager.fromFolder(invalidPluginFolder2);
 		assertTrue(pluginManagerTry.isFailure());
