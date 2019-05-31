@@ -1,7 +1,14 @@
 (Sorry for the spanish, i put this document here to have it somewhere)
-Artículo fuente
-https://en.wikipedia.org/wiki/Life_expectancy#Human_patterns
 
+# Sources for demographic evolution
+https://en.wikipedia.org/wiki/Demographic_transition
+https://en.wikipedia.org/wiki/Life_expectancy#Human_patterns
+https://www.amazon.es/Concise-History-World-Population-6th
+https://www.amazon.es/Population-Development-Demographic-Tim-Dyson
+
+
+
+# Notes (in spanish)
 Rango de vida maximo: 0 - 110
 Esperanza de vida actual: 87 en japón
 Esta es la esperanza de vida de una persona con niveles de medicina actuales con una salud perfecta y acceso completo a cuidados hospitalarios
