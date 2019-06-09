@@ -20,3 +20,8 @@ General rules of resource storage and transportation are kept from the standard 
 To extract a resource from the map, a city has to build specific public works. For example: a mine, a farm, an oil rig.
 
 These public works may be built both on cities and colonies.
+
+The extractive/transformative buildings will produce a fixed amount of resource that can be increased by other buildings,
+better tech, more manpower.
+
+## 

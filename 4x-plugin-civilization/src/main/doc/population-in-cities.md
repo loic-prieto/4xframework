@@ -36,3 +36,14 @@ talking about forced labor. Population can be divided on blue collar - white col
 This should be very carefully though out, because it may become unfun to the gameplay.
 
 This is left for other plugins, since going all Victoria-pop-management on this plugin may be too much when starting out.
+
+## Usage of manpower in the cities
+
+Manpower is used for several purposes:
+- To build...buildings
+- To extract resources
+- To work in buildings
+- to build units
+- to work in buildings in far away colonies 
+
+The manpower need varies from building to building.

@@ -55,4 +55,5 @@ you may set the active age from 14 to 60. That, depending on the health conditio
 the population.
 Education affects the lower bar of the active population. The more there is education investment, the higher the age at
 which the active population is drawn from.
-Health conditions affect the upper bar of the active population. Starting from age 60, people have to be supported. 
+Health conditions affect the upper bar of the active population. Starting from age 60, people have to be supported if not
+in the active labor market.
