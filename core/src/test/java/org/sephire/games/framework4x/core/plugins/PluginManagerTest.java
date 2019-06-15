@@ -19,19 +19,20 @@ package org.sephire.games.framework4x.core.plugins;
 
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
+import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.model.config.Configuration;
+import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1ConfigKeys;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.sephire.games.framework4x.core.plugins.PluginCreationUtils.buildNonPluginJar;
 import static org.sephire.games.framework4x.core.plugins.PluginCreationUtils.buildPluginJar;
 
@@ -72,22 +73,49 @@ public class PluginManagerTest {
 	}
 
 	@Test
-	@DisplayName("Should create PluginManager from a valid plugin folder")
-	public void plugin_manager_should_be_created_with_valid_folder(){
-		var pluginManager = PluginManager.fromFolder(validPluginsFolder);
+	@DisplayName("Should validate successfully a valid plugin folder")
+	public void plugin_manager_should_validate_valid_plugin_folder(){
+		var pluginManager = new PluginManager();
 
-		assertTrue(pluginManager.isSuccess());
+		assertTrue(pluginManager.isPluginFolderValid(validPluginsFolder));
+	}
+
+	@Test
+	@DisplayName("The Plugin Manager should declare as invalid a folder where not all jars are plugins")
+	public void plugin_manager_should_fail_when_folder_does_not_contain_all_plugins(){
+		var pluginManager = new PluginManager();
+
+
+		assertFalse(pluginManager.isPluginFolderValid(mixedPluginsFolder));
+	}
+
+	@Test
+	@DisplayName("Given a plugin jar file, if the parent is defined with the same name as the plugin, it should complain")
+	public void should_complain_if_plugin_defines_parent_as_itself() {
+		var pluginManager = new PluginManager();
+
+		var isPluginFolder1Valid = pluginManager.isPluginFolderValid(invalidPluginFolder1);
+
+		assertFalse(isPluginFolder1Valid);
+	}
+
+	@Test
+	@DisplayName("When a plugin in the plugin folder is invalid because of i18n, the plugin manager should refuse to initialize")
+	public void should_complain_if_a_plugin_is_invalid() {
+		var pluginManager = new PluginManager();
+
+		var isPluginFolder1Valid = pluginManager.isPluginFolderValid(invalidPluginFolder2);
+
+		assertFalse(isPluginFolder1Valid);
 	}
 
 	@Test
 	@DisplayName("Plugin Manager should list successfully plugins from a valid plugin folder")
 	public void plugin_manager_should_list_valid_plugins() {
-		var pluginManager = PluginManager.fromFolder(validPluginsFolder);
+		var pluginManager = new PluginManager();
 
-		assertTrue(pluginManager.isSuccess());
-
-		var pluginList = pluginManager.get()
-		  .getAvailablePlugins();
+		var pluginList = pluginManager.getAvailablePlugins(validPluginsFolder);
+		assertTrue(pluginList.isSuccess());
 
 		var expectedList = List.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
@@ -103,54 +131,68 @@ public class PluginManagerTest {
 	@Test
 	@DisplayName("The plugin manager should load plugins successfully")
 	public void should_load_plugins_successfully() {
-		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
-		assertTrue(pluginManagerTry.isSuccess());
+		var pluginManager = new PluginManager();
 
 		var configuration = Configuration.builder();
 
-		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2"), configuration);
-
 		assertTrue(loadedPluginsTry.isSuccess());
+
+		var expectedLoadedPlugins = HashSet.of(
+		  "org.sephire.games.framework4x.testing.testPlugin1",
+		  "org.sephire.games.framework4x.testing.testPlugin2");
+		var loadedPluginsNames = configuration.getConfig(CoreConfigKeyEnum.LOADED_PLUGINS, Set.class)
+		  .map((optionalSet)-> optionalSet
+			.map(pluginSet->((Set<Plugin>)pluginSet)
+			  .map(plugin->plugin.getSpecification().getPluginName())));
+
+		assertEquals(expectedLoadedPlugins,loadedPluginsNames.get().get());
 	}
 
 	@Test
 	@DisplayName("Given a list of plugins, if a plugin dependency is not included in the list, the plugin manager should add it")
 	public void should_complete_list_of_needed_plugins() {
-		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
-		assertTrue(pluginManagerTry.isSuccess());
+		var pluginManager = new PluginManager();
 
 		var configuration = Configuration.builder();
 
-		var pluginManager = pluginManagerTry.get();
-		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
+		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin2",
 		  "org.sephire.games.framework4x.testing.testPlugin11"), configuration);
 
-		assertTrue(loadedPluginsTry.isSuccess());
+		assertTrue(pluginLoadingTry.isSuccess());
+
 		var expectedLoadedPlugins = HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2",
 		  "org.sephire.games.framework4x.testing.testPlugin11");
-		assertEquals(expectedLoadedPlugins,pluginManager.getLoadedPlugins());
+		var loadedPluginsNames = configuration.getConfig(CoreConfigKeyEnum.LOADED_PLUGINS, Set.class)
+		  .map((optionalSet)-> optionalSet
+			.map(pluginSet->((Set<Plugin>)pluginSet)
+			  .map(plugin->plugin.getSpecification().getPluginName())));
+
+		assertTrue(loadedPluginsNames.isSuccess());
+		assertTrue(loadedPluginsNames.get().isDefined());
+		var names = loadedPluginsNames.get().get();
+
+		assertEquals(expectedLoadedPlugins,names);
 	}
 
 	@Test
 	@DisplayName("Given a set of plugins to load, if one of the plugin dependencies is not found, it should raise an error")
 	public void should_complain_if_needed_plugin_is_not_found() {
-		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
-		assertTrue(pluginManagerTry.isSuccess());
+		var pluginManager = new PluginManager();
 
 		var configuration = Configuration.builder();
 
-		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin4"), configuration);
 
 		assertTrue(loadedPluginsTry.isFailure());
+
 		assertEquals(ParentPluginsNotFoundException.class,loadedPluginsTry.getCause().getClass());
 
 		var expectedMissingDependency = "nonExistentParent";
@@ -168,12 +210,11 @@ public class PluginManagerTest {
 	@Test
 	@DisplayName("Given a set of plugins to load, the plugin manager should complain if one of them cannot be found in plugin folder")
 	public void should_complain_if_loaded_plugin_does_not_exist() {
-		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
-		assertTrue(pluginManagerTry.isSuccess());
+		var pluginManager = new PluginManager();
 
 		var configuration = Configuration.builder();
 
-		var pluginLoadingTry = pluginManagerTry.get().loadPlugins(
+		var pluginLoadingTry = pluginManager.loadPlugins(
 		  HashSet.of(
 		    "org.sephire.games.framework4x.testing.testPlugin1"
 			, "nonExistentPlugin"), configuration);
@@ -182,25 +223,15 @@ public class PluginManagerTest {
 		assertEquals(PluginsNotFoundException.class,pluginLoadingTry.getCause().getClass());
 	}
 
-	@Test
-	@DisplayName("The Plugin Manager should refuse to handle a folder where not all jars are plugins")
-	public void plugin_manager_should_fail_when_folder_does_not_contain_all_plugins(){
-		var pluginManager = PluginManager.fromFolder(mixedPluginsFolder);
-
-		assertTrue(pluginManager.isFailure());
-		assertEquals(PluginLoadingException.class,pluginManager.getCause().getClass());
-	}
 
 	@Test
 	@DisplayName("Given a set of plugins to load, "+
 	  "when one of those plugins is a child of another, the child should override configuration from the parent")
 	public void configuration_should_be_overriden_by_child_plugins() {
-		var pluginManagerTry = PluginManager.fromFolder(validPluginsFolder);
-		assertTrue(pluginManagerTry.isSuccess());
+		var pluginManager = new PluginManager();
 
 		var configuration = Configuration.builder();
 
-		var pluginManager = pluginManagerTry.get();
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2",
@@ -217,35 +248,7 @@ public class PluginManagerTest {
 		assertEquals(expectedConfigValue,actualConfigValueOperation.get().get());
 	}
 
-	@Test
-	@DisplayName("Given a plugin jar file, if the parent is defined with the same name as the plugin, it should complain")
-	public void should_complain_if_plugin_defines_parent_as_itself() {
-		var pluginManagerTry = PluginManager.fromFolder(invalidPluginFolder1);
-		assertTrue(pluginManagerTry.isFailure());
-		assertEquals(PluginLoadingException.class,pluginManagerTry.getCause().getClass());
 
-		var exceptions = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions();
-		var isExpectedException = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions()
-		  .exists((t)->InvalidPluginJarException.class.isAssignableFrom(t.getClass()));
-
-		assertTrue(isExpectedException);
-		assertEquals(1,exceptions.length());
-	}
-
-	@Test
-	@DisplayName("When a plugin in the plugin folder is invalid because of i18n, the plugin manager should refuse to initialize")
-	public void should_complain_if_a_plugin_is_invalid() {
-		var pluginManagerTry = PluginManager.fromFolder(invalidPluginFolder2);
-		assertTrue(pluginManagerTry.isFailure());
-		assertEquals(PluginLoadingException.class,pluginManagerTry.getCause().getClass());
-
-		var exceptions = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions();
-		var isExpectedException = ((PluginLoadingException)pluginManagerTry.getCause()).getExceptions()
-		  .exists((t)->InvalidPluginException.class.isAssignableFrom(t.getClass()));
-
-		assertTrue(isExpectedException);
-		assertEquals(1,exceptions.length());
-	}
 
 
 }

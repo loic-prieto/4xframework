@@ -46,9 +46,8 @@ public class GameTest {
 
 		var configuration = Configuration.builder();
 
-		var pluginManagerTry = PluginManager.fromFolder(pluginTempFolder);
-		assertTrue(pluginManagerTry.isSuccess());
-		var pluginManager = pluginManagerTry.get();
+		var pluginManager = new PluginManager();
+
 		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(PLUGIN1_NAME), configuration);
 		assertTrue(pluginLoadingTry.isSuccess());
 
@@ -57,7 +56,6 @@ public class GameTest {
 			"testMapGenerator",
 			"testMapGenerator",
 			(config) -> Try.success(null)))
-		  .withPluginManager(pluginManager)
 		  .withConfiguration(configuration.build())
 		  .build();
 

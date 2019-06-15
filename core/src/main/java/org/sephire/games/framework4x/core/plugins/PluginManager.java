@@ -21,10 +21,10 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashSet;
 import io.vavr.collection.List;
-import io.vavr.collection.Map;
 import io.vavr.collection.Set;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import lombok.NoArgsConstructor;
 import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum;
 import org.sephire.games.framework4x.core.model.events.DomainEvents;
@@ -53,6 +53,7 @@ import static org.sephire.games.framework4x.core.utils.FunctionalUtils.Collector
  * This class provides for utility functions that can be used by clients to inspect what plugins are available,
  * and load them.
  */
+@NoArgsConstructor
 public class PluginManager {
 
 	public static final String PLUGIN_NAME_MANIFEST_ENTRY_LABEL = "X-4XPlugin-Name";
@@ -236,7 +237,8 @@ public class PluginManager {
 	}
 
 	/**
-	 * Checks whether a folder is a valid 4x plugin folder.
+	 * <p>Checks whether a folder is a valid 4x plugin folder.</p>
+	 * <p>A folder is a valid plugin folder if there are only plugin jars and those plugins are valid</p>
 	 *
 	 * @param folderPath
 	 * @return
@@ -247,7 +249,7 @@ public class PluginManager {
 				throw new IllegalArgumentException(format("The path %s is not a valid folder",folderPath));
 			}
 
-			var folderHasOnlyPlugins = checkFolderHasOnlyPlugins(folderPath.toFile());
+			var folderHasOnlyPlugins = checkFolderHasOnlyValidPlugins(folderPath.toFile());
 			if(folderHasOnlyPlugins.isFailure()){
 				throw folderHasOnlyPlugins.getCause();
 			}
@@ -291,7 +293,7 @@ public class PluginManager {
 	 *
 	 * @return
 	 */
-	private static Try<Boolean> checkFolderHasOnlyPlugins(File folder){
+	private static Try<Boolean> checkFolderHasOnlyValidPlugins(File folder){
 		return Try.of(()->{
 			var jarFiles = List.of(folder.list((dir,name)-> name.endsWith("jar")))
 			  .map((jarFileName)->new File(folder.getAbsolutePath().concat(File.separator).concat(jarFileName)))
@@ -306,10 +308,10 @@ public class PluginManager {
 				throw new PluginLoadingException(format("Jar files in folder %s could not be loaded: %s",folder,cause));
 			}
 
-			var someJarIsNotPlugin = jarFiles.map(Try::get)
-			  .exists((jarFile -> !PluginManager.has4XPluginInformation(jarFile)));
+			var someJarIsNotValidPlugin = jarFiles.map(Try::get)
+			  .exists((jarFile -> buildPluginSpecFrom(jarFile).isFailure()));
 
-			return !someJarIsNotPlugin;
+			return !someJarIsNotValidPlugin;
 		});
 	}
 
@@ -323,25 +325,6 @@ public class PluginManager {
 		  .mapFailure(
 		  	Case($(instanceOf(IOException.class)),t -> new PluginJarFileCouldNotBeReadException(t.getMessage()))
 		  );
-	}
-
-	/**
-	 * Checks whether a jar file is a 4X plugin.
-	 *
-	 * @param jarFile
-	 * @return
-	 */
-	private static boolean has4XPluginInformation(JarFile jarFile) {
-		boolean is4XPlugin = false;
-
-		try {
-			var manifest = jarFile.getManifest();
-			if(manifest != null) {
-				is4XPlugin = manifest.getMainAttributes().getValue(PLUGIN_NAME_MANIFEST_ENTRY_LABEL) != null;
-			}
-		}catch(IOException ioe) {}
-
-		return is4XPlugin;
 	}
 
 	/**
