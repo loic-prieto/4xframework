@@ -78,11 +78,34 @@
                     <archive>
                         <manifestEntries>
                             <X-4XPlugin-Name>org.sephire.games.framework4x.plugins.standard</X-4XPlugin-Name>
-                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard</X-4XPlugin-RootPackage>
+                            <X-4XPlugin-RootPackage>org.sephire.games.framework4x.plugins.standard
+                            </X-4XPlugin-RootPackage>
                         </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
+
+            <!-- Generate xml deserialized classes for config models (Civilizations, techs, etc) -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb23-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>cities-config</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/resources/resources/config-schemas</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

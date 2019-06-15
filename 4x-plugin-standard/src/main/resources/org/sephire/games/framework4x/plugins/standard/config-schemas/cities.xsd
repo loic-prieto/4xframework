@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           targetNamespace="cities.config.standard.plugins.4xframework"
+           xmlns="cities.config.standard.plugins.4xframework"
+           jxb:version="1.0"
+           elementFormDefault="qualified">
+
+    <!-- The root element of the document -->
+    <xs:element name="cities">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="configuration" type="general-configuration"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="general-configuration">
+        <xs:sequence>
+            <xs:element name="growthModel" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Serialization / Deserialization config -->
+    <xs:annotation>
+        <xs:appinfo>
+            <jxb:schemaBindings>
+                <jxb:package name="org.sephire.games.framework4x.plugins.standard.configuration.cities">
+                    <jxb:javadoc>
+                        <![CDATA[<body>Types related to cities objects</body>]]>
+                    </jxb:javadoc>
+                </jxb:package>
+            </jxb:schemaBindings>
+        </xs:appinfo>
+    </xs:annotation>
+</xs:schema>

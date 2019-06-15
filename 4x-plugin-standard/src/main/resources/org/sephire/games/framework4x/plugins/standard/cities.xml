@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cities xmlns="cities.config.standard.plugins.4xframework">
+    <configuration>
+        <growthModel>org.sephire.games.framework4x.plugins.standard.model.DemographicTransitionGrowthModel</growthModel>
+    </configuration>
+</cities>
