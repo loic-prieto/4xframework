@@ -97,10 +97,23 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <episode>true</episode>
+                            <useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
                             <schemaDirectory>src/main/resources/org/sephire/games/framework4x/plugins/standard/config-schemas</schemaDirectory>
                             <schemaIncludes>
                                 <include>*.xsd</include>
                             </schemaIncludes>
+                            <catalogs>
+                                <!-- Core catalog for common types and civilizations -->
+                                <catalog>
+                                    <dependencyResource>
+                                        <groupId>org.sephire.games.strategy-framework</groupId>
+                                        <artifactId>core</artifactId>
+                                        <version>0.1.0</version>
+                                        <resource>configuration/catalogs/core-catalog.xml</resource>
+                                    </dependencyResource>
+                                </catalog>
+                            </catalogs>
                         </configuration>
                     </execution>
                 </executions>

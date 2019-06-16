@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="civilizations.config.4xframework"
-           xmlns="civilizations.config.4xframework"
-           xmlns:ct="common-types.config.4xframework"
+           targetNamespace="civilizations.config.core.4xframework"
+           xmlns="civilizations.config.core.4xframework"
+           xmlns:ct="common-types.config.core.4xframework"
            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
            jxb:version="1.0"
            elementFormDefault="qualified">
 
-    <xs:import namespace="common-types.config.4xframework" schemaLocation="common-types.xsd" />
+    <xs:import namespace="common-types.config.core.4xframework" />
 
     <!-- The root element of the document -->
     <xs:element name="civilizations">

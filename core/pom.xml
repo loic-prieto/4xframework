@@ -104,10 +104,12 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <schemaDirectory>src/main/resources/resources/schemas</schemaDirectory>
+                            <episode>true</episode>
+                            <schemaDirectory>src/main/resources/configuration/schemas</schemaDirectory>
                             <schemaIncludes>
                                 <include>*.xsd</include>
                             </schemaIncludes>
+                            <catalog>src/main/resources/configuration/catalogs/core.xml</catalog>
                         </configuration>
                     </execution>
                 </executions>
