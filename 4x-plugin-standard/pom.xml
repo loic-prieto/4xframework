@@ -97,7 +97,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <schemaDirectory>src/main/resources/resources/config-schemas</schemaDirectory>
+                            <schemaDirectory>src/main/resources/org/sephire/games/framework4x/plugins/standard/config-schemas</schemaDirectory>
                             <schemaIncludes>
                                 <include>*.xsd</include>
                             </schemaIncludes>
