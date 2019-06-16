@@ -46,7 +46,7 @@ class GameCommandsTopMenuTest {
 		var gameCommandsTopMenus = gameCommandsTopMenusTry.get();
 		assertEquals(2,gameCommandsTopMenus.getTopCategories().size());
 
-		var gameMenuItem = gameCommandsTopMenus.getTopCategories().find(c->c.getLabel().equals("game"));
+		var gameMenuItem = gameCommandsTopMenus.getTopCategories().find(c->c.getLabel().equals("Game"));
 		assertTrue(gameMenuItem.isDefined());
 		assertEquals("g",gameMenuItem.get().getShortcutKey());
 		assertTrue(gameMenuItem.get().isSubmenu());
@@ -69,7 +69,7 @@ class GameCommandsTopMenuTest {
 		var gameCommandsTopMenus = gameCommandsTopMenusTry.get();
 
 
-		var gameMenuItemTry = gameCommandsTopMenus.getTopCategories().find(c->c.getLabel().equals("game"));
+		var gameMenuItemTry = gameCommandsTopMenus.getTopCategories().find(c->c.getLabel().equals("Game"));
 		assertTrue(gameMenuItemTry.isDefined());
 		var gameMenuItem = gameMenuItemTry.get();
 		assertTrue(gameMenuItem.getCommands().isDefined());
