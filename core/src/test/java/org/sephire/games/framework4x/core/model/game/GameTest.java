@@ -20,6 +20,7 @@ package org.sephire.games.framework4x.core.model.game;
 import io.vavr.collection.HashSet;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sephire.games.framework4x.core.model.config.Configuration;
@@ -29,6 +30,7 @@ import org.sephire.games.framework4x.testing.testPlugin1.TestPlugin1GameStateKey
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,18 +39,24 @@ import static org.sephire.games.framework4x.core.plugins.PluginCreationUtils.bui
 public class GameTest {
 
 	private static final String PLUGIN1_NAME = "org.sephire.games.framework4x.testing.testPlugin1";
+	private static Path pluginsFolder;
+
+	@BeforeAll
+	public static void setupPluginsJars() throws IOException {
+		// Build valid plugins directory
+		pluginsFolder = Files.createTempDirectory("GameTest-");
+		buildPluginJar(pluginsFolder,PLUGIN1_NAME,Option.none());
+	}
 
 	@Test
 	@DisplayName("When a game has been started, plugins can write state into the game")
-	public void should_load_game_state_when_starting_game() throws IOException {
-		var pluginTempFolder = Files.createTempDirectory("PluginManagerTest-");
-		buildPluginJar(pluginTempFolder,PLUGIN1_NAME, Option.none());
+	public void should_load_game_state_when_starting_game() {
 
 		var configuration = Configuration.builder();
 
 		var pluginManager = new PluginManager();
 
-		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(PLUGIN1_NAME), configuration);
+		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(PLUGIN1_NAME), pluginsFolder, configuration);
 		assertTrue(pluginLoadingTry.isSuccess());
 
 		var gameTry = Game.builder()
@@ -61,6 +69,7 @@ public class GameTest {
 
 		assertTrue(gameTry.isSuccess());
 		var game = gameTry.get();
+		game.initialize();
 
 		var testPlugin1StateTry = game.getState(TestPlugin1GameStateKeys.KEY1,String.class);
 		assertTrue(testPlugin1StateTry.isSuccess());
