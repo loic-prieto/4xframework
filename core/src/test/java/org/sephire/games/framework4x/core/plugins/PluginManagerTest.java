@@ -125,7 +125,7 @@ public class PluginManagerTest {
 		  "org.sephire.games.framework4x.testing.testPlugin11")
 		  .sorted().toSet().map((name)->new PluginSpec(name,name,Option.none()));
 
-		assertEquals(expectedList,pluginList);
+		assertEquals(expectedList,pluginList.get());
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class PluginManagerTest {
 
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
-		  "org.sephire.games.framework4x.testing.testPlugin2"), configuration);
+		  "org.sephire.games.framework4x.testing.testPlugin2"), validPluginsFolder,configuration);
 		assertTrue(loadedPluginsTry.isSuccess());
 
 		var expectedLoadedPlugins = HashSet.of(
@@ -160,7 +160,7 @@ public class PluginManagerTest {
 
 		var pluginLoadingTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin2",
-		  "org.sephire.games.framework4x.testing.testPlugin11"), configuration);
+		  "org.sephire.games.framework4x.testing.testPlugin11"), validPluginsFolder,configuration);
 
 		assertTrue(pluginLoadingTry.isSuccess());
 
@@ -189,7 +189,7 @@ public class PluginManagerTest {
 
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
-		  "org.sephire.games.framework4x.testing.testPlugin4"), configuration);
+		  "org.sephire.games.framework4x.testing.testPlugin4"), validPluginsFolder,configuration);
 
 		assertTrue(loadedPluginsTry.isFailure());
 
@@ -217,7 +217,7 @@ public class PluginManagerTest {
 		var pluginLoadingTry = pluginManager.loadPlugins(
 		  HashSet.of(
 		    "org.sephire.games.framework4x.testing.testPlugin1"
-			, "nonExistentPlugin"), configuration);
+			, "nonExistentPlugin"), validPluginsFolder,configuration);
 
 		assertTrue(pluginLoadingTry.isFailure());
 		assertEquals(PluginsNotFoundException.class,pluginLoadingTry.getCause().getClass());
@@ -235,7 +235,7 @@ public class PluginManagerTest {
 		var loadedPluginsTry = pluginManager.loadPlugins(HashSet.of(
 		  "org.sephire.games.framework4x.testing.testPlugin1",
 		  "org.sephire.games.framework4x.testing.testPlugin2",
-		  "org.sephire.games.framework4x.testing.testPlugin11"), configuration);
+		  "org.sephire.games.framework4x.testing.testPlugin11"), validPluginsFolder,configuration);
 
 		assertTrue(loadedPluginsTry.isSuccess());
 

@@ -72,11 +72,25 @@ public class PluginManager {
 	 * game creation into the given configuration builder.</p>
 	 * <p>Will also load all user-stored configuration afterwards, to overwrite the configuration loaded by the
 	 * plugins with what the user has stored in it's home folder</p>
+	 * <p>The plugins will be searched in the default plugin folder PluginManager.DEFAULT_PLUGINS_FOLDER</p>
 	 * @param plugins
 	 * @return
 	 */
 	public Try<Void> loadPlugins(Set<String> plugins, Configuration.Builder configuration) {
-		return invokeLoadingOperation(plugins, configuration)
+		return loadPlugins(plugins,DEFAULT_PLUGINS_FOLDER,configuration);
+	}
+
+	/**
+	 * <p>Executes the loading method for each plugin, loading every configuration and resource to prepare for a
+	 * game creation into the given configuration builder.</p>
+	 * <p>Will also load all user-stored configuration afterwards, to overwrite the configuration loaded by the
+	 * plugins with what the user has stored in it's home folder</p>
+	 * <p>The plugins will be searched in the given plugins folder</p>
+	 * @param plugins
+	 * @return
+	 */
+	public Try<Void> loadPlugins(Set<String> plugins,Path pluginsFolder,Configuration.Builder configuration) {
+		return invokeLoadingOperation(plugins,pluginsFolder, configuration)
 		  .andThen(() -> loadUserStoredConfiguration(configuration))
 		  .andThen(this::hookPluginsToGameStart);
 	}
@@ -87,10 +101,10 @@ public class PluginManager {
 	 * @param plugins
 	 * @return
 	 */
-	private Try<Void> invokeLoadingOperation(Set<String> plugins, Configuration.Builder configuration) {
+	private Try<Void> invokeLoadingOperation(Set<String> plugins,Path pluginsPath, Configuration.Builder configuration) {
 		return Try.of(()->{
 			// First build the dependency list and load each plugin
-			var sortedPluginsOperation = buildPluginToLoadList(plugins);
+			var sortedPluginsOperation = buildPluginToLoadList(plugins,pluginsPath);
 			if(sortedPluginsOperation.isFailure()) {
 				throw sortedPluginsOperation.getCause();
 			}
@@ -178,11 +192,11 @@ public class PluginManager {
 	 *
 	 * @return
 	 */
-	private Try<List<PluginSpec>> buildPluginToLoadList(Set<String> pluginsToLoad){
+	private Try<List<PluginSpec>> buildPluginToLoadList(Set<String> pluginsToLoad,Path pluginsPath){
 		return Try.of(()->{
 
 			// Check we have all needed dependencies
-			var completePluginList = completeNeededPlugins(pluginsToLoad)
+			var completePluginList = completeNeededPlugins(pluginsToLoad,pluginsPath)
 			  .getOrElseThrow(e->e);
 
 			// We use a tree to order plugins by dependency parentage
@@ -208,9 +222,9 @@ public class PluginManager {
 	 * @param requestedPluginsNames
 	 * @return
 	 */
-	private Try<Set<PluginSpec>> completeNeededPlugins(Set<String> requestedPluginsNames) {
+	private Try<Set<PluginSpec>> completeNeededPlugins(Set<String> requestedPluginsNames,Path pluginsPath) {
 		return Try.of(()->{
-			var availablePlugins = this.getAvailablePlugins(DEFAULT_PLUGINS_FOLDER)
+			var availablePlugins = this.getAvailablePlugins(pluginsPath)
 			  .getOrElseThrow(t->t);
 
 			var missingPlugins = requestedPluginsNames.filter((pluginName)->
