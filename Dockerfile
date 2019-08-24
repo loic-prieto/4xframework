@@ -27,7 +27,7 @@ ADD . /tmp/project
 RUN cd /tmp/project && \
     mvn clean package -Dmaven.test.skip=true
 
-FROM openjdk:11-slim
+FROM openjdk:12
 RUN mkdir -p /tmp/project/classpath
 WORKDIR /tmp/project
 
