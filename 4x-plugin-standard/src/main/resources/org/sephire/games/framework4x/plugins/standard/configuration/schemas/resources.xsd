@@ -4,26 +4,43 @@
            targetNamespace="resources.config.standard.plugins.4xframework"
            xmlns="resources.config.standard.plugins.4xframework"
            xmlns:ct="common-types.config.4xframework"
-           jxb:version="1.0"
+           jxb:version="2.0"
            elementFormDefault="qualified">
 
     <xs:import namespace="common-types.config.4xframework" />
 
     <!-- The root element of the document -->
     <xs:element name="resources">
+        <xs:annotation>
+            <xs:documentation>
+                A list of available resources provided by the plugin. This is the root of the document.
+            </xs:documentation>
+        </xs:annotation>
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="resource" minOccurs="0" maxOccurs="unbounded" type="resource"/>
+                <xs:element name="resource" maxOccurs="unbounded" type="resource"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <xs:complexType name="resource">
+        <xs:annotation>
+            <xs:documentation>
+                A resource is some item that can be used by a civilization for producing something. Wheat, Iron, etc.
+            </xs:documentation>
+        </xs:annotation>
         <xs:sequence>
-            <xs:element name="identifier" type="xs:string"/>
+            <xs:element name="identifier" type="ct:identifier"/>
             <xs:element name="label" type="ct:i18nString"/>
             <xs:element name="description" type="ct:i18nString" />
-            <xs:element name="storable" type="xs:boolean" />
+            <xs:element name="storable" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        Whether the object can be stored in the civilization/city warehouses. For example iron is, but
+                        manpower isn't.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
