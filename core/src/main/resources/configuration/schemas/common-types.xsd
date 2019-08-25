@@ -3,16 +3,30 @@
            targetNamespace="common-types.config.4xframework"
            xmlns="common-types.config.4xframework"
            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
-           jxb:version="1.0"
+           jxb:version="2.0"
            elementFormDefault="qualified">
 
     <xs:complexType name="i18nString">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                When using a string that is to be displayed to the user, we need for that string to have
+                translations. The I18NString is a type that allows to specify different translations for
+                a given word. It is composed of at least one locale-entry element which maps a language
+                to a translation for that given element.
+            </xs:documentation>
+        </xs:annotation>
         <xs:sequence>
             <xs:element name="i18n-string" maxOccurs="unbounded" type="locale-entry"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="locale-entry">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                A locale-entry element maps a language to a translation for a given i18nString.
+                The possible values for the language attributes are those that the java class java.util.Locale uses.
+            </xs:documentation>
+        </xs:annotation>
         <xs:simpleContent>
             <xs:extension base="xs:string">
                 <xs:attribute name="language" type="xs:string"/>
@@ -20,9 +34,25 @@
         </xs:simpleContent>
     </xs:complexType>
 
-    <!-- Serialization / Deserialization config -->
+    <xs:simpleType name="identifier">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                This type can be used to provide identifier for resources for the game framework.
+                Identifiers can only be lowercased letters.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-z]+" />
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:annotation>
         <xs:appinfo>
+            <xs:documentation xml:lang="en">
+                Common types to reuse between different schemas
+            </xs:documentation>
+
+            <!-- Serialization / Deserialization config -->
             <jxb:schemaBindings>
                 <jxb:package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.common">
                     <jxb:javadoc>

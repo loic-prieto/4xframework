@@ -2,8 +2,5 @@
         PUBLIC "-//OASIS//DTD Entity Resolution XML Catalog V1.0//EN" "http://www.oasis-open.org/committees/entity/release/1.0/catalog.dtd">
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog"
          prefer="public">
-    <rewriteSystem systemIdStartString="common-types.config.core.4xframework"
-                   rewritePrefix="maven:org.sephire.games.strategy-framework:core:jar::!/configuration/schemas/common-types.xsd"/>
-    <rewriteSystem systemIdStartString="civilizations.config.core.4xframework"
-                   rewritePrefix="maven:org.sephire.games.strategy-framework:core:jar::!/configuration/schemas/civilizations.xsd"/>
+    <public publicId="common-types.config.core.4xframework" uri="./common-types.xsd" />
 </catalog>

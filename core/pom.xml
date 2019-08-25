@@ -110,6 +110,7 @@
                                 <include>*.xsd</include>
                             </schemaIncludes>
                             <catalog>src/main/resources/configuration/catalogs/core.xml</catalog>
+                            <strict>false</strict>
                         </configuration>
                     </execution>
                 </executions>
