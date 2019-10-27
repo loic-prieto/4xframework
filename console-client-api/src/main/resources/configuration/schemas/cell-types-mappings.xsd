@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="cell-types-mappings.config.console-client.4xframework"
+           xmlns="cell-types-mappings.config.console-client.4xframework"
+           xmlns:ct="common-types.config.4xframework"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+           jxb:version="2.0"
+           elementFormDefault="qualified">
+
+    <xs:import namespace="common-types.config.4xframework" />
+
+    <xs:element name="cell-types-mappings">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">
+                This is a list of cell types mappings that may be defined by the plugins. This element must be
+                the root element of the document.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="cell-type-mapping" maxOccurs="unbounded" type="cell-type-mapping"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="cell-type-mapping">
+        <xs:annotation>
+            <xs:documentation>
+                A cell type mapping defines what character and colour to assign to a cell type in the
+                console client
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="cell-type" type="ct:identifier" />
+            <xs:element name="character" type="xs:string"/>
+            <xs:element name="colour" type="rgb-colour" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="rgb-colour">
+        <xs:annotation>
+            <xs:documentation>
+                A cell type mapping has a colour, defined as a triplet of RGB indexes, from 1 to 255.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="red" type="byte-integer" />
+            <xs:element name="green" type="byte-integer" />
+            <xs:element name="blue" type="byte-integer" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="byte-integer" xml:base="xs:integer">
+        <xs:restriction>
+            <xs:maxInclusive value="255" />
+            <xs:minInclusive value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:annotation>
+        <!-- Serialization / Deserialization config -->
+        <xs:appinfo>
+            <jxb:schemaBindings>
+                <jxb:package name="org.sephire.games.framework4x.clients.terminal.api.configuration.resources.xml.cellTypesMappings">
+                    <jxb:javadoc>
+                        <![CDATA[<body>Types related to cell types mappings</body>]]>
+                    </jxb:javadoc>
+                </jxb:package>
+            </jxb:schemaBindings>
+        </xs:appinfo>
+    </xs:annotation>
+</xs:schema>
