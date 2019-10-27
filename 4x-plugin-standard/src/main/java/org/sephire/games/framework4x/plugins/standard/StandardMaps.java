@@ -34,10 +34,10 @@ public class StandardMaps {
 		return Try.of(()->{
 			var cells = range(0,300)
 			  .flatMap((x)->range(0,300).map((y)-> Tuple.of(x,y)))
-			  .map((xyTuple)-> new MapCell(Location.of(xyTuple._1,xyTuple._2),getRandomTerrainType()));
+			  .map((xyTuple)-> new TerrainCell(Location.of(xyTuple._1,xyTuple._2),getRandomTerrainType()));
 
 			return GameMap.builder()
-			  .addZone(MapZone.builder()
+			  .addZone(Zone.builder()
 				.withName("level0")
 				.withCells(cells)
 				.build()
@@ -57,7 +57,7 @@ public class StandardMaps {
 	public Try<GameMap> sameTileMapGenerator(Configuration configuration){
 		return Try.of(()->{
 			return GameMap.builder()
-			  .addZone(MapZone.builder()
+			  .addZone(Zone.builder()
 				.withName("level0")
 				.withDefaultCells(new Size(300,300), StandardTerrainTypes.HILL)
 				.build()

@@ -21,10 +21,10 @@ import org.sephire.games.framework4x.core.model.config.userpreferences.UserPrefe
 
 public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	/**
-	 * This key holds the value for the configuration of terrain types.
+	 * This key holds the value for the configuration of cell types.
 	 * This are to be defined by at least base plugins.
 	 */
-	TERRAIN_TYPES,
+	CELL_TYPES,
 	/**
 	 * Under this key exists a list of game map generators that are available to choose when creating a game.
 	 * Map generators may be dynamic, or fixed (as in programmatic or resource-based).

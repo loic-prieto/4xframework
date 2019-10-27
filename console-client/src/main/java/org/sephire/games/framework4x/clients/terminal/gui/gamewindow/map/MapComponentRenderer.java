@@ -24,7 +24,7 @@ import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainMappingColor;
 import org.sephire.games.framework4x.core.model.map.Location;
-import org.sephire.games.framework4x.core.model.map.MapCell;
+import org.sephire.games.framework4x.core.model.map.TerrainCell;
 
 import static io.vavr.collection.List.range;
 import static org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.FakeTerrainType.FAKE;
@@ -55,16 +55,21 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 		}
 
 		var viewport = component.getViewport();
-		var map = component.getMap();
 		var mappings = component.getMappings();
+		var currentZone = component.getCurrentZone();
 
 		// Draw cells
 		range(0,viewportSize.getColumns()).forEach((x)->{
 			range(0,viewportSize.getRows()).forEach((y)->{
 				var cellLocation = Location.of(x,y).add(viewport.getCameraOffset());
-				var mapCell = map.getCurrentZone().getCells().get(cellLocation);
+
+				// Fetch the highest precedence cell at this viewport location
+				var cell = currentZone.getCellAt(cellLocation);
+
+				// Draw terrain
+				var mapCell = map.getCurrentZone().getTerrainCells().get(cellLocation);
 				var terrainType =  mapCell
-				  .getOrElse(new MapCell(Location.of(x,y), FAKE))
+				  .getOrElse(new TerrainCell(Location.of(x,y,currentLevel), FAKE))
 				  .getTerrainType()
 				  .toString().toLowerCase();
 

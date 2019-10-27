@@ -55,7 +55,7 @@ import static io.vavr.API.*;
 import static io.vavr.Predicates.instanceOf;
 import static java.lang.String.format;
 import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.I18N;
-import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.TERRAIN_TYPES;
+import static org.sephire.games.framework4x.core.model.config.CoreConfigKeyEnum.CELL_TYPES;
 import static org.sephire.games.framework4x.core.utils.FunctionalUtils.Collectors.toTry;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.normalizePackageNameForReflection;
 import static org.sephire.games.framework4x.core.utils.ResourceLoading.packageToFolderPath;
@@ -247,25 +247,25 @@ public class Plugin {
 	}
 
 	/**
-	 * Loads the terrain resources defined in this plugin, found in the CoreResourcesTypes.TERRAIN_TYPES.getFileName() file
+	 * Loads the cell types defined in this plugin, found in the CoreResourcesTypes.CELL_TYPES.getFileName() file
 	 * in the class folder of the plugin, into the configuration under the CoreConfigKeyEnum.TERRAIN_TYPES key.
 	 *
 	 * @param configuration
 	 * @return
 	 */
 	private Try<Void> loadTerrainResources(Configuration.Builder configuration) {
-		var terrainTypesFilename = toClasspathFile(CoreResourcesTypes.TERRAIN_TYPES.getFileName());
+		var terrainTypesFilename = toClasspathFile(CoreResourcesTypes.CELL_TYPES.getFileName());
 		return ConfigLoader.getConfigFor(terrainTypesFilename, TerrainsTypesMapping.class)
 		  .map((mapping) -> mapping.getTypes().toArray(new String[]{}))
 		  .map(API::Set)
 		  // Merge with previous terrain config
 		  .peek((terrainSet) -> {
 			  var newTerrainSet = terrainSet;
-			  var existentTerrainConfig = configuration.getConfig(TERRAIN_TYPES);
+			  var existentTerrainConfig = configuration.getConfig(CELL_TYPES);
 			  if (existentTerrainConfig.isDefined()) {
 				  newTerrainSet = newTerrainSet.union((Set<String>) existentTerrainConfig.get());
 			  }
-			  configuration.putConfig(TERRAIN_TYPES, newTerrainSet);
+			  configuration.putConfig(CELL_TYPES, newTerrainSet);
 		  })
 		  .map(Functions::toVoid)
 		  // The terrain file is not mandatory for a plugin

@@ -25,7 +25,7 @@ import lombok.Getter;
  **/
 public enum CoreResourcesTypes {
 
-	TERRAIN_TYPES("terrains-types.yaml"),
+	CELL_TYPES("cell-types.xml"),
 	CIVILIZATIONS("civilizations.xml");
 
 	@Getter

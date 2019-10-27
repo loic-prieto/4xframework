@@ -29,20 +29,10 @@ import static java.lang.String.format;
  */
 @Getter
 public class GameMap {
-	private Map<String, MapZone> zones;
-	private MapZone currentZone;
+	private Map<String, Zone> zones;
 
-	private GameMap(Map<String, MapZone> zones, MapZone currentZone) {
+	private GameMap(Map<String, Zone> zones) {
 		this.zones = zones;
-		this.currentZone = currentZone;
-	}
-
-	public Try<Void> setCurrentZone(String zoneName) {
-		return Try.of(() -> {
-			this.currentZone = zones.get(zoneName)
-			  .getOrElseThrow(() -> new ZoneNotFoundException(zoneName));
-			return null;
-		});
 	}
 
 	public static GameMapBuilderZoneField builder() {
@@ -50,36 +40,29 @@ public class GameMap {
 	}
 
 	private static class Builder implements GameMapBuilderZoneField, GameMapBuilderBuild {
-		private Map<String,MapZone> zones = HashMap.empty();
-		private String defaultZone;
+		private Map<String, Zone> zones = HashMap.empty();
 
 		@Override
-		public GameMapBuilderZoneField addZone(MapZone zone) {
+		public GameMapBuilderZoneField addZone(Zone zone) {
 			this.zones = zones.put(zone.getName(),zone);
 			return this;
 		}
 
-		@Override
-		public GameMapBuilderBuild withDefaultZone(String zoneName) {
-			this.defaultZone = zoneName;
-			return this;
-		}
 
 		@Override
 		public Try<GameMap> build() {
 			return Try.of(()->{
-				if(!zones.containsKey(defaultZone)) {
-					throw new IllegalArgumentException(format("The zone %s does not exist",defaultZone));
+				if(zones.isEmpty()) {
+					throw new IllegalArgumentException("There must be at least one zone");
 				}
 
-				return new GameMap(zones,zones.get(defaultZone).get());
+				return new GameMap(zones);
 			});
 		}
 	}
 
 	public interface GameMapBuilderZoneField {
-		GameMapBuilderZoneField addZone(MapZone zone);
-		GameMapBuilderBuild withDefaultZone(String zoneName);
+		GameMapBuilderZoneField addZone(Zone zone);
 	}
 
 	public interface GameMapBuilderBuild {

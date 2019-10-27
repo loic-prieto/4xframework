@@ -52,7 +52,6 @@ public class CursorMoveEvent {
 	}
 
 	private static Option<MapDirection> getDirectionFromKey(KeyStroke keyStroke) {
-		var keyType = keyStroke.getKeyType();
-		return !keyStroke.isAltDown()? MapDirection.fromKeyType(keyType) : Option.none();
+		return !keyStroke.isAltDown()? MapDirection.fromKeyStroke(keyStroke) : Option.none();
 	}
 }

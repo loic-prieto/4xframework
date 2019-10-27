@@ -1,5 +1,6 @@
 package org.sephire.games.framework4x.plugins.standard.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -7,6 +8,12 @@ import lombok.Getter;
  * by both the standard plugin and dependent plugins.
  */
 @Getter
+@AllArgsConstructor
 public class CityPopulation {
 	private long count;
+
+	public CityPopulation withPopulationDelta(long populationDelta){
+		CityPopulation newCityPopulation = new CityPopulation(count-populationDelta);
+		return newCityPopulation;
+	}
 }

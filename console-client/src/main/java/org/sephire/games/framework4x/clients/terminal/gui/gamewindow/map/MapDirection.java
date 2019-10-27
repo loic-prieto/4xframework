@@ -17,32 +17,46 @@
  */
 package org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map;
 
+import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import io.vavr.control.Option;
 
 import static io.vavr.API.*;
 
 public enum MapDirection {
+	NORTH,
+	SOUTH,
+	WEST,
+	EAST,
 	UP,
-	DOWN,
-	LEFT,
-	RIGHT;
+	DOWN;
 
 	/**
 	 * Given a keytype from lanterna, returns a Map Direction.
 	 * This assumes keys are not re-mappable.
-	 * @param keyType
+	 * @param keyStroke
 	 * @return
 	 */
-	public static Option<MapDirection> fromKeyType(KeyType keyType) {
-		return Option.of(
-		  Match(keyType).of(
-			Case($(KeyType.ArrowUp),()->MapDirection.UP),
-			Case($(KeyType.ArrowDown),()->MapDirection.DOWN),
-			Case($(KeyType.ArrowLeft),()->MapDirection.LEFT),
-			Case($(KeyType.ArrowRight),()->MapDirection.RIGHT),
-			Case($(),()->null)
-		  )
-		);
+	public static Option<MapDirection> fromKeyStroke(KeyStroke keyStroke) {
+		if(keyStroke.getKeyType().equals(KeyType.Character)) {
+		 	return Option.of(
+			  Match(keyStroke.getCharacter()).of(
+				Case($('<'),()->MapDirection.UP),
+				Case($('>'),()->MapDirection.DOWN),
+				Case($(),()->null)
+			  )
+			);
+		} else {
+			return Option.of(
+			  Match(keyStroke.getKeyType()).of(
+				Case($(KeyType.ArrowUp),()->MapDirection.NORTH),
+				Case($(KeyType.ArrowDown),()->MapDirection.SOUTH),
+				Case($(KeyType.ArrowLeft),()->MapDirection.WEST),
+				Case($(KeyType.ArrowRight),()->MapDirection.EAST),
+				Case($(),()->null)
+			  )
+			);
+		}
+
 	}
 }

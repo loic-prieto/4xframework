@@ -87,10 +87,12 @@ public class Terminal {
 		public static Location applyDirection(Location location, MapDirection direction,int distance) {
 
 			return Match(direction).of(
-			  Case($(MapDirection.UP),()->location.substract(0,distance)),
-			  Case($(MapDirection.DOWN),()->location.add(0,distance)),
-			  Case($(MapDirection.LEFT),()->location.substract(distance,0)),
-			  Case($(MapDirection.RIGHT),()->location.add(distance,0))
+			  Case($(MapDirection.NORTH),()->location.substract(0,distance,0)),
+			  Case($(MapDirection.SOUTH),()->location.add(0,distance,0)),
+			  Case($(MapDirection.WEST),()->location.substract(distance,0,0)),
+			  Case($(MapDirection.EAST),()->location.add(distance,0,0)),
+			  Case($(MapDirection.UP),()->location.add(0,0,distance)),
+			  Case($(MapDirection.DOWN),()->location.substract(0,0,distance))
 			);
 		}
 

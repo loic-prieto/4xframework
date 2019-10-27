@@ -30,6 +30,7 @@ import org.sephire.games.framework4x.clients.terminal.gui.gamewindow.CursorMoveE
 import org.sephire.games.framework4x.core.model.game.Game;
 import org.sephire.games.framework4x.core.model.map.GameMap;
 import org.sephire.games.framework4x.core.model.map.Location;
+import org.sephire.games.framework4x.core.model.map.Zone;
 
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Dimensions.fromTerminalSize;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.applyDirection;
@@ -48,11 +49,14 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 	private TerrainsMapping mappings;
 	@Getter
 	private Location cursorPosition;
+	@Getter
+	private Zone currentZone;
 	private Basic4XWindow parentContainer;
 
 	private MapComponent(GameMap map,TerrainsMapping mappings,Basic4XWindow parentContainer) {
 		this.viewport = new MapViewport();
 		this.map = map;
+		this.currentZone = map.getZones().get()._2();
 		this.mappings = mappings;
 		this.cursorPosition = Location.of(0,0);
 		this.parentContainer = parentContainer;
@@ -96,11 +100,11 @@ public class MapComponent extends AbstractComponent<MapComponent> {
 		Option<MapScrollEvent> result = Option.none();
 
 		if(x != 0) {
-			var mapDirection = x > 0 ? MapDirection.RIGHT : MapDirection.LEFT;
+			var mapDirection = x > 0 ? MapDirection.EAST : MapDirection.WEST;
 			var distance = Math.abs(x);
 			result = Option.of(new MapScrollEvent(mapDirection,distance));
 		} else if(y != 0) {
-			var mapDirection = y > 0 ? MapDirection.DOWN : MapDirection.UP;
+			var mapDirection = y > 0 ? MapDirection.SOUTH : MapDirection.NORTH;
 			var distance = Math.abs(y);
 			result = Option.of(new MapScrollEvent(mapDirection,distance));
 		}

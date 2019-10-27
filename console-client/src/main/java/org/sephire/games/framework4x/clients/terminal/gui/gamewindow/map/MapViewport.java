@@ -38,7 +38,7 @@ public class MapViewport {
 	private Size size;
 
 	public MapViewport() {
-		this.cameraOffset = Location.of(0,0);
+		this.cameraOffset = Location.of(0,0,0);
 		this.size = new Size(0,0);
 	}
 

@@ -8,7 +8,7 @@ package org.sephire.games.framework4x.plugins.standard.model;
 public class DemographicTransitionGrowthModel implements PopulationGrowthModel {
 
 	@Override
-	public long calculatePopulationCount(CityPopulation cityPopulation, int timeDelta) {
-		return 1000 * timeDelta;
+	public CityPopulation calculatePopulationCount(CityPopulation cityPopulation, int timeDelta) {
+		return cityPopulation.withPopulationDelta(1000 * timeDelta);
 	}
 }

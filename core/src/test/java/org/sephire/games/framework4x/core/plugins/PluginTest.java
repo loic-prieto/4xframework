@@ -82,7 +82,7 @@ public class PluginTest {
 		var pluginLoadTry = Plugin.from(pluginSpec.get(), configuration);
 
 		assertTrue(pluginLoadTry.isSuccess());
-		assertTrue(configuration.getConfig(CoreConfigKeyEnum.TERRAIN_TYPES).isDefined());
+		assertTrue(configuration.getConfig(CoreConfigKeyEnum.CELL_TYPES).isDefined());
 	}
 
 	@Test

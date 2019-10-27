@@ -15,5 +15,5 @@ public interface PopulationGrowthModel {
 	 * @param timeDelta The time unit depends on the population growth model used.
 	 * @return
 	 */
-	long calculatePopulationCount(CityPopulation cityPopulation, int timeDelta);
+	CityPopulation calculatePopulationCount(CityPopulation cityPopulation, int timeDelta);
 }
