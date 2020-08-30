@@ -63,10 +63,6 @@
 
         <!-- Config parsing -->
         <dependency>
-            <groupId>com.github.fabriziocucci</groupId>
-            <artifactId>yacl4j-core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>

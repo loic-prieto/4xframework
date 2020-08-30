@@ -20,7 +20,7 @@
 # stored into the image maven repository, so that recompilation of the project with
 # the console client dockerfile doesn't take an eternity.
 # This image is to be rebuilt only when dependencies change across the projects.
-FROM maven:3.6.0-jdk-11-slim
+FROM maven:3.6.3-openjdk-14-slim
 
 ADD . /tmp/project
 
