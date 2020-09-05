@@ -17,6 +17,7 @@
  */
 package org.sephire.games.framework4x.core.plugins;
 
+import io.vavr.API;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.collection.HashSet;
@@ -200,15 +201,25 @@ public class PluginManager {
 			  .getOrElseThrow(e->e);
 
 			// We use a tree to order plugins by dependency parentage
-			var pluginsTree = RootlessTree.fromItemSet(completePluginList,
-			  (PluginSpec item,PluginSpec potentialParentItem)-> {
-				return potentialParentItem.getPluginName().equals(item.getParentPlugin().get());
-			  },
-			  PluginSpec::isBasePlugin)
+			var pluginsTree = buildPluginTree(completePluginList)
 			  .getOrElseThrow(e->e);
 
 			return pluginsTree.getItemsOrderedTopologically();
 		});
+	}
+
+	/**
+	 * From a set of pluginspecs, builds a pluginspec tree, for easier manipulation based on
+	 * parent-children relationships.
+	 * @param plugins
+	 * @return
+	 */
+	private Try<RootlessTree<PluginSpec>> buildPluginTree(Set<PluginSpec> plugins) {
+		return RootlessTree.fromItemSet(plugins,
+				(PluginSpec item,PluginSpec potentialParentItem)-> {
+					return potentialParentItem.getPluginName().equals(item.getParentPlugin().get());
+				},
+				PluginSpec::isBasePlugin);
 	}
 
 	/**
@@ -252,8 +263,6 @@ public class PluginManager {
 
 	/**
 	 * <p>Checks whether a folder is a valid 4x plugin folder.</p>
-	 * <p>A folder is a valid plugin folder if there are only plugin jars and those plugins are valid</p>
-	 *
 	 * @param folderPath
 	 * @return
 	 */
@@ -278,6 +287,31 @@ public class PluginManager {
 		return checks.isSuccess();
 	}
 
+
+	/**
+	 * <p>Returns a list of plugin specs that are children of the specified</p>
+     * <p>May return errors:
+	 * 	 <ul>
+	 * 	     <li>{@link PluginsNotFoundException} if the parent does not exist in the specified path plugin</li>
+	 * 	 </ul>
+	 * </p>
+	 * @param parentPluginIdentifier
+	 * @param pluginFolder
+	 * @return
+	 */
+	public Try<Set<PluginSpec>> getChildrenPlugins(String parentPluginIdentifier,Path pluginFolder) {
+		return Try.of(()-> {
+			var pluginTree = getAvailablePlugins(pluginFolder)
+				.flatMap(pluginSpecs->buildPluginTree(pluginSpecs))
+				.getOrElseThrow(t->t);
+
+			var parentPluginTreeBranch = pluginTree
+					.findFirstItem(pluginSpec->pluginSpec.getPluginName().equals(parentPluginIdentifier))
+					.getOrElseThrow(()->new PluginsNotFoundException(API.Set(parentPluginIdentifier)));
+
+			return parentPluginTreeBranch.toOrderedListByBreadthFirstTraversal(true).toSet();
+		});
+	}
 
 
 	/**
