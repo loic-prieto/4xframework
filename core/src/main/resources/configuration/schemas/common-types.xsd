@@ -29,7 +29,7 @@
         </xs:annotation>
         <xs:simpleContent>
             <xs:extension base="xs:string">
-                <xs:attribute name="language" type="xs:string"/>
+                <xs:attribute name="language" type="xs:string" use="required" default="en"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>

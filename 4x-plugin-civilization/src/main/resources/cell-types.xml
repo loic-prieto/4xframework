@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cell-types xmlns="cell-types.config.core.4xframework"
+            xmlns:ct="common-types.config.4xframework">
+    <!-- Terrain cells -->
+    <cell-type>
+        <identifier>mountain</identifier>
+        <parent-type>terrain</parent-type>
+        <name>
+            <ct:i18n-string language="en">Mountain</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A terrain that is composed mostly of mountains, generally impassable or very
+            difficult to traverse and attack.</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>hill</identifier>
+        <parent-type>terrain</parent-type>
+        <name>
+            <ct:i18n-string language="en">Hill</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A hilly terrain, usually contains minerals that help production and provide
+            a minor boost to defense</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>forest</identifier>
+        <parent-type>terrain</parent-type>
+        <name>
+            <ct:i18n-string language="en">Forest</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A terrain mainly dominated by forests</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>coast</identifier>
+        <name>
+            <ct:i18n-string language="en">Coast</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="">Shallow waters near the coast where an abundance of fauna can be found</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>ocean</identifier>
+        <name>
+            <ct:i18n-string language="en">Ocean</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">Deep ocean water cells</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>plain</identifier>
+        <parent-type>terrain</parent-type>
+        <name>
+            <ct:i18n-string language="">Plain</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="">A flat terrain, apt for many uses</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>desert</identifier>
+        <parent-type>terrain</parent-type>
+        <name>
+            <ct:i18n-string language="">Desert</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="">An arid and sterile terrain where life is rare</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>tundra</identifier>
+        <name>
+            <ct:i18n-string language="">Tundra</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="">A cold desert</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>artic</identifier>
+        <name>
+            <ct:i18n-string language="">Artic desert</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="">Ice and snow covers the whole terrain</ct:i18n-string>
+        </description>
+    </cell-type>
+</cell-types>

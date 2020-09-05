@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cell-types xmlns="cell-types.config.core.4xframework"
+            xmlns:ct="common-types.config.4xframework">
+    <cell-type>
+        <identifier>terrain</identifier>
+        <name>
+            <ct:i18n-string language="en">Terrain</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A terrain cell type is the base cell, where all other cells
+            for the same location rest upon. Terrain types themselves are to be defined by plugins making
+            use of this one as a base</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>city</identifier>
+        <name>
+            <ct:i18n-string language="en">City</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="es">A city is the center of production and where the people live. Without
+            cities there is no civilization.</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>resource</identifier>
+        <name>
+            <ct:i18n-string language="en">Resource</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A resource, when talking about cell types, is a natural resource appearing
+            in the terrain that can be exploited either to maintain something or create an item/object/event</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>transportation</identifier>
+        <name>
+            <ct:i18n-string language="en">Transportation</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">roads, tracks, maglevs, etc. A terrain feature that accelerates or even enables
+            movement for units traversing terrain</ct:i18n-string>
+        </description>
+    </cell-type>
+    <cell-type>
+        <identifier>building</identifier>
+        <name>
+            <ct:i18n-string language="en">Building</ct:i18n-string>
+        </name>
+        <description>
+            <ct:i18n-string language="en">A building appearing in the map that has effects on the terrain or
+                produces items</ct:i18n-string>
+        </description>
+    </cell-type>
+</cell-types>

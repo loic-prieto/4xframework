@@ -31,6 +31,15 @@
         </xs:annotation>
         <xs:sequence>
             <xs:element name="identifier" type="ct:identifier" />
+            <xs:element name="parent-type" type="ct:identifier" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>
+                        A cell type may be a subtype of another cell type. So, for example a mountain may be a subtype
+                        of terrain, or a mine a subtype of building, a road a subtype of transportation.
+                        The subtypes are a way for derived plugins to refine the type of cells that can appear in a map.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
             <xs:element name="name" type="ct:i18nString"/>
             <xs:element name="description" type="ct:i18nString" />
         </xs:sequence>
