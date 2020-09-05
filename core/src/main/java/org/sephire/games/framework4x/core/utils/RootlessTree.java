@@ -21,12 +21,13 @@ import io.vavr.Function1;
 import io.vavr.Function2;
 import io.vavr.collection.List;
 import io.vavr.collection.Set;
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 
 /**
  * <p>Represents a tree whose root is a container for the main branches, which means that the value of the root node
  * itself has no meaning.</p>
- * <p>Once built, the tree is immutable</p>
+ * <p>Once the tree has been built, it is immutable</p>
  * <p>The nodes of the tree may either be base nodes or non base nodes:<ul>
  *     <li>Base nodes are nodes that have no parent. These will be the main branches of the tree</li>
  *     <li>non base nodes are nodes that have a parent. They may act as parents to other nodes</li>
@@ -36,7 +37,7 @@ import io.vavr.control.Try;
  *     <li>A predicate to check whether a node is a base node</li>
  *     <li>A predicate to check whether a node is a parent of another node</li>
  * </ul>
- * Thus a rootless generic tree needs to be built: a set of items, and two predicates to stablish the relationship
+ * Thus a rootless generic tree needs to be built: a set of items, and two predicates to establish the relationship
  * between nodes.
  * </p>
  *
@@ -48,18 +49,18 @@ public class RootlessTree<T> {
 	private TreeNode<T> rootNode;
 
 	/**
-	 *
+	 * This is only to be used by static constructors
 	 * @param isParentPredicate (item,potentialParentItem) -> Boolean
 	 * @param isBaseItemPredicate (item) -> Boolean
 	 */
-	public RootlessTree(Function2<T, T, Boolean> isParentPredicate, Function1<T, Boolean> isBaseItemPredicate) {
+	private RootlessTree(Function2<T, T, Boolean> isParentPredicate, Function1<T, Boolean> isBaseItemPredicate) {
 		this.isParentPredicate = isParentPredicate;
 		this.isBaseItemPredicate = isBaseItemPredicate;
 		this.rootNode = new TreeNode<>(null);
 	}
 
 	/**
-	 * <p>Get a list of independent branche of items, ordered by topological relations between
+	 * <p>Get a list of independent branches of items, ordered by topological relations between
 	 * the items.</p>
 	 * <p>Each list is independent from the other, which means that parallel operations can
 	 * be applied to them</p>
@@ -71,6 +72,19 @@ public class RootlessTree<T> {
 		return basePlugins
 		  .map(TreeNode::toOrderedListByBreadthFirstTraversal)
 		  .collect(List.collector());
+	}
+
+	/**
+	 * <p>Finds the first node of the tree that matches the predicate.</p>
+	 * <p>
+	 *     TODO: this returns the underlying data structure of the tree, which is mutable, this should be refactored.
+	 * </p>
+	 *
+	 * @param itemFinderPredicate
+	 * @return
+	 */
+	public Option<TreeNode<T>> findFirstItem(Function1<T,Boolean> itemFinderPredicate) {
+		return rootNode.findFirstNode(itemFinderPredicate,true);
 	}
 
 	/**
@@ -93,7 +107,7 @@ public class RootlessTree<T> {
 	 * @param item
 	 * @return
 	 */
-	public Try<Void> addItem(T item) {
+	private Try<Void> addItem(T item) {
 		return Try.of(()->{
 			if(rootNode.findFirstNode(i->i.equals(item),true).isDefined()) {
 				return null;
@@ -113,7 +127,7 @@ public class RootlessTree<T> {
 	}
 
 	/**
-	 * <p>From a set of itemw, build a rootless tree, honouring the parent-child relationship between
+	 * <p>From a set of items, build a rootless tree, honouring the parent-child relationship between
 	 * items.</p>
 	 * <p>The set must include all items needed to resolve the relationship between them</p>
 	 * <p>May return the following errors:
@@ -146,7 +160,11 @@ public class RootlessTree<T> {
 										 Function1<T,Boolean> isBaseItemPredicate,
 										 Function2<T,T,Boolean> isParentPredicate) {
 		return Try.of(()->{
+			// If the item is not a base item, then this will ensure that the parent of this
+			// Item has been inserted.
 			if(!isBaseItemPredicate.apply(item)){
+				// Since this item is not a base item, it will try first to find the
+				// From the full set of items, tries to find the parent of the item to insert
 				var parentItem = items.find((i)->isParentPredicate.apply(item,i))
 				  .getOrElseThrow(()->new IllegalArgumentException("Tried to add an item whose parent has not been added yet to the tree"));
 				// If the parent has already been inserted, it doesn't get added twice
@@ -156,6 +174,7 @@ public class RootlessTree<T> {
 				}
 			}
 
+			// Once the parent item is ensured to be inserted, we insert this one
 			var itemAddTry = tree.addItem(item);
 			if(itemAddTry.isFailure()) {
 				throw itemAddTry.getCause();
