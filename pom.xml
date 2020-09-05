@@ -46,6 +46,7 @@
         <module>4x-plugin-standard-terminal-client</module>
         <module>4x-plugin-civilization</module>
         <module>console-client-api</module>
+        <module>4x-plugin-civilization-terminal-client</module>
     </modules>
 
     <properties>

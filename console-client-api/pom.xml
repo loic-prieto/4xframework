@@ -64,4 +64,32 @@
             <artifactId>apiguardian-api</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Generate xml deserialized classes for config models (Civilizations, techs, etc) -->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb23-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>console-client-api</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <episode>true</episode>
+                            <schemaDirectory>src/main/resources/configuration/schemas</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                            <catalog>src/main/resources/configuration/catalogs/console-client-api.xml</catalog>
+                            <strict>false</strict>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

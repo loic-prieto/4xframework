@@ -29,6 +29,7 @@ import org.sephire.games.framework4x.core.model.config.Configuration;
 import org.sephire.games.framework4x.core.model.config.I18NKeyNotFoundException;
 import org.sephire.games.framework4x.core.model.game.GameStateEnumKey;
 import org.sephire.games.framework4x.core.model.game.GameStateNotFoundException;
+import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.configuration.ConfigLoader;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLifecycleHandler;
 import org.sephire.games.framework4x.core.plugins.configuration.PluginLoadingHook;
@@ -44,14 +45,24 @@ import static org.sephire.games.framework4x.plugins.standard.StandardStateKey.*;
 @PluginLifecycleHandler
 public class Main {
 
+	private static final String CELL_MAPPING_FILE_NAME = "cell-types-mappings.xml";
+	private static final String PLUGIN_NAME = Main.getPackageName();
+
 	private static String getPackageName() {
 		return Main.class.getPackageName();
 	}
 
+	/**
+	 * When the terminal client - standard plugin adapter loads, it know how to auto load
+	 * all terrain type mappings, which allows derived plugins to define terrain mappings without having
+	 * to care on how to load them.
+	 * @param configuration
+	 * @return
+	 */
 	@PluginLoadingHook
 	public Try<Void> pluginLoad(Configuration.Builder configuration) {
 
-		return loadTerrainMappings(configuration)
+		return loadCellTypeMappings(configuration)
 		  .andThen(()->loadBottomBarElements(configuration))
 		  .onFailure((error) -> log.error(String.format("Could not load successfully the plugin %s : %s", getPackageName(), error)))
 		  .onSuccess((result) -> log.info(String.format("Plugin %s loaded successfully", getPackageName())))
@@ -59,14 +70,24 @@ public class Main {
 	}
 
 	/**
-	 * <p>Load the terrain mappings for the console client from the standard plugin terrain types.</p>
+	 * <p>Load the cell type mappings for the console client from all children plugins that have a cell type
+	 * mapping file defined</p>
+	 * <p>TODO: To be completed</p>
 	 * @param configuration
 	 * @return
 	 */
-	private Try<TerrainsMapping> loadTerrainMappings(Configuration.Builder configuration) {
-		var terrainsTypesMappingsFilename = packageToFolderPath(getPackageName()).concat("/terrains-types-mappings.yaml");
-		return ConfigLoader.getConfigFor(terrainsTypesMappingsFilename, TerrainsMapping.class)
-		  .peek((terrainsMappings) -> configuration.putConfig(ConsoleClientConfigKeyEnum.TERRAIN_CHARACTER_MAPPING, terrainsMappings));
+	private Try<Void> loadCellTypeMappings(Configuration.Builder configuration) {
+
+		return Try.of(()->{
+			var childrenPlugin = new PluginManager()
+					.getChildrenPlugins(PLUGIN_NAME,PluginManager.DEFAULT_PLUGINS_FOLDER)
+					.getOrElseThrow(t->t)
+					.map(pluginSpec->packageToFolderPath(pluginSpec.getRootPackage())
+							.concat("/").concat(CELL_MAPPING_FILE_NAME))
+					.filter(cellTypeMappingFile->false);
+
+			return null;
+		});
 	}
 
 	/**

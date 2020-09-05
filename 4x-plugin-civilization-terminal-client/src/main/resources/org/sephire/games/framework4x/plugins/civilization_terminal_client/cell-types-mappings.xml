@@ -37,6 +37,15 @@
         </colour>
     </cell-type-mapping>
     <cell-type-mapping>
+        <cell-type>coast</cell-type>
+        <character>\u02F7</character>
+        <colour>
+            <red>120</red>
+            <green>180</green>
+            <blue>230</blue>
+        </colour>
+    </cell-type-mapping>
+    <cell-type-mapping>
         <cell-type>ocean</cell-type>
         <character>\u02F7</character>
         <colour>
@@ -55,12 +64,21 @@
         </colour>
     </cell-type-mapping>
     <cell-type-mapping>
-        <cell-type>glacier</cell-type>
+        <cell-type>artic</cell-type>
         <character>\u02F7</character>
         <colour>
             <red>240</red>
             <green>248</green>
             <blue>255</blue>
+        </colour>
+    </cell-type-mapping>
+    <cell-type-mapping>
+        <cell-type>tundra</cell-type>
+        <character>\u02F7</character>
+        <colour>
+            <red>240</red>
+            <green>255</green>
+            <blue>240</blue>
         </colour>
     </cell-type-mapping>
 </cell-types-mappings>
