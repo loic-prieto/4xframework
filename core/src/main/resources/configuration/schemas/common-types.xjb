@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb"
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          schemaLocation="./common-types.xsd"
+          node="/xs:schema"
+          version="1.0">
+    <schemaBindings>
+        <package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.common">
+            <javadoc>
+                <![CDATA[<body>Common types to reuse between different schemas</body>]]>
+            </javadoc>
+        </package>
+    </schemaBindings>
+</bindings>

@@ -166,8 +166,7 @@ public class Plugin {
 	 */
 	private Try<Void> load(Configuration.Builder configuration) {
 
-		return loadTerrainResources(configuration)
-		  .andThen(() -> loadMapGenerators(configuration))
+		return loadMapGenerators(configuration)
 		  .andThen(() -> loadI18NResources(configuration))
 		  .andThen(() -> loadGameCommands(configuration))
 		  .andThen(() -> loadCivilizations(configuration))
@@ -244,34 +243,6 @@ public class Plugin {
 			civLoader.load(configuration).getOrElseThrow(t -> t);
 			return null;
 		});
-	}
-
-	/**
-	 * Loads the cell types defined in this plugin, found in the CoreResourcesTypes.CELL_TYPES.getFileName() file
-	 * in the class folder of the plugin, into the configuration under the CoreConfigKeyEnum.TERRAIN_TYPES key.
-	 *
-	 * @param configuration
-	 * @return
-	 */
-	private Try<Void> loadTerrainResources(Configuration.Builder configuration) {
-		var terrainTypesFilename = toClasspathFile(CoreResourcesTypes.CELL_TYPES.getFileName());
-		return ConfigLoader.getConfigFor(terrainTypesFilename, TerrainsTypesMapping.class)
-		  .map((mapping) -> mapping.getTypes().toArray(new String[]{}))
-		  .map(API::Set)
-		  // Merge with previous terrain config
-		  .peek((terrainSet) -> {
-			  var newTerrainSet = terrainSet;
-			  var existentTerrainConfig = configuration.getConfig(CELL_TYPES);
-			  if (existentTerrainConfig.isDefined()) {
-				  newTerrainSet = newTerrainSet.union((Set<String>) existentTerrainConfig.get());
-			  }
-			  configuration.putConfig(CELL_TYPES, newTerrainSet);
-		  })
-		  .map(Functions::toVoid)
-		  // The terrain file is not mandatory for a plugin
-		  .recover((e) -> Match(e).of(
-			Case($(instanceOf(ConfigFileNotFoundException.class)), (Void) null)
-		  ));
 	}
 
 	/**

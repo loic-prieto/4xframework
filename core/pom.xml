@@ -66,10 +66,6 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.moxy</artifactId>
-        </dependency>
 
         <!-- Logging -->
         <dependency>
@@ -94,7 +90,7 @@
                 <artifactId>maven-jaxb23-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>civilizations</id>
+                        <id>generate-xml-classes</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
@@ -105,8 +101,13 @@
                             <schemaIncludes>
                                 <include>*.xsd</include>
                             </schemaIncludes>
-                            <catalog>src/main/resources/configuration/catalogs/core.xml</catalog>
+                            <bindingDirectory>src/main/resources/configuration/schemas</bindingDirectory>
+                            <bindingIncludes>
+                                <include>*.xjb</include>
+                            </bindingIncludes>
+                            <catalog>src/main/resources/configuration/catalogs/core-internal.xml</catalog>
                             <strict>false</strict>
+                            <useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,54 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
            targetNamespace="civilizations.config.core.4xframework"
-           xmlns="civilizations.config.core.4xframework"
+           xmlns:civ="civilizations.config.core.4xframework"
            xmlns:ct="common-types.config.4xframework"
            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
            jxb:version="2.0"
            elementFormDefault="qualified">
 
-    <xs:import namespace="common-types.config.4xframework" />
+    <import namespace="common-types.config.4xframework" />
 
-    <xs:element name="civilizations">
-        <xs:annotation>
-            <xs:documentation xml:lang="en">
+    <element name="civilizations">
+        <annotation>
+            <documentation xml:lang="en">
                 This is a list of civilizations that may be defined by the plugins. This element must be
                 the root element of the document.
-            </xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element name="civilization" maxOccurs="unbounded" type="civilization"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+            </documentation>
+        </annotation>
+        <complexType>
+            <sequence>
+                <element name="civilization" maxOccurs="unbounded" type="civ:civilization"/>
+            </sequence>
+        </complexType>
+    </element>
 
-    <xs:complexType name="civilization">
-        <xs:annotation>
-            <xs:documentation>
+    <complexType name="civilization">
+        <annotation>
+            <documentation>
                 A civilization has a unique identifier that is used by the framework. It must be
                 globally unique between all plugins.
-            </xs:documentation>
-        </xs:annotation>
-        <xs:sequence>
-            <xs:element name="identifier" type="ct:identifier" />
-            <xs:element name="name" type="ct:i18nString"/>
-            <xs:element name="description" type="ct:i18nString" />
-            <xs:element name="demonymSingular" type="ct:i18nString" />
-            <xs:element name="demonymPlural" type="ct:i18nString" />
-        </xs:sequence>
-    </xs:complexType>
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="identifier" type="ct:identifier" />
+            <element name="name" type="ct:i18nString"/>
+            <element name="description" type="ct:i18nString" />
+            <element name="demonymSingular" type="ct:i18nString" />
+            <element name="demonymPlural" type="ct:i18nString" />
+        </sequence>
+    </complexType>
 
-    <xs:annotation>
-        <!-- Serialization / Deserialization config -->
-        <xs:appinfo>
-            <jxb:schemaBindings>
-                <jxb:package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.civilizations">
-                    <jxb:javadoc>
-                        <![CDATA[<body>Types related to civilization objects</body>]]>
-                    </jxb:javadoc>
-                </jxb:package>
-            </jxb:schemaBindings>
-        </xs:appinfo>
-    </xs:annotation>
-</xs:schema>
+</schema>

@@ -25,5 +25,5 @@ FROM maven:3.6.3-openjdk-14-slim
 ADD . /tmp/project
 
 RUN cd /tmp/project && \
-    mvn clean package -Dmaven.test.skip=true && \
+    mvn clean compile -pl core -Dmaven.test.skip=true && \
     cd .. && rm -rf project

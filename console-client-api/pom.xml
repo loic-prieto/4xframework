@@ -86,6 +86,7 @@
                             </schemaIncludes>
                             <catalog>src/main/resources/configuration/catalogs/console-client-api.xml</catalog>
                             <strict>false</strict>
+                            <useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
                         </configuration>
                     </execution>
                 </executions>

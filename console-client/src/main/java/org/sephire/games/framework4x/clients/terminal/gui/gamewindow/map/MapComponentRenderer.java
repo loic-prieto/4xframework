@@ -24,10 +24,8 @@ import com.googlecode.lanterna.gui2.ComponentRenderer;
 import com.googlecode.lanterna.gui2.TextGUIGraphics;
 import org.sephire.games.framework4x.clients.terminal.api.config.TerrainMappingColor;
 import org.sephire.games.framework4x.core.model.map.Location;
-import org.sephire.games.framework4x.core.model.map.TerrainCell;
 
 import static io.vavr.collection.List.range;
-import static org.sephire.games.framework4x.clients.terminal.gui.gamewindow.map.FakeTerrainType.FAKE;
 import static org.sephire.games.framework4x.clients.terminal.utils.Terminal.Position.terminalPositionFrom;
 
 /**
@@ -67,11 +65,8 @@ public class MapComponentRenderer implements ComponentRenderer<MapComponent> {
 				var cell = currentZone.getCellAt(cellLocation);
 
 				// Draw terrain
-				var mapCell = map.getCurrentZone().getTerrainCells().get(cellLocation);
-				var terrainType =  mapCell
-				  .getOrElse(new TerrainCell(Location.of(x,y,currentLevel), FAKE))
-				  .getTerrainType()
-				  .toString().toLowerCase();
+				//Code here to get the terrain type of the current cell
+				var terrainType = (Void)null; // fake code
 
 				var cellMapping = mappings.getMappings().get(terrainType);
 				String cellChar = cellMapping != null ? cellMapping.getCharacter() : " ";

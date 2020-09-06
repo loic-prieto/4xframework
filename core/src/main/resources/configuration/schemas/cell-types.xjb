@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb"
+          schemaLocation="./cell-types.xsd"
+          version="2.0">
+    <bindings multiple="true" node="//*[@name='cell-types' or @name='cell-type']" version="2.0">
+        <schemaBindings>
+            <package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.cellTypes">
+                <javadoc>
+                    <![CDATA[<body>Types map cell types</body>]]>
+                </javadoc>
+            </package>
+        </schemaBindings>
+    </bindings>
+</bindings>

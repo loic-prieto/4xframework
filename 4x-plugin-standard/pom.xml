@@ -104,6 +104,8 @@
                                 <include>*.xsd</include>
                             </schemaIncludes>
                             <catalog>src/main/resources/org/sephire/games/framework4x/plugins/standard/configuration/catalogs/standard-plugin.xml</catalog>
+                            <strict>false</strict>
+                            <useDependenciesAsEpisodes>true</useDependenciesAsEpisodes>
                         </configuration>
                     </execution>
                 </executions>

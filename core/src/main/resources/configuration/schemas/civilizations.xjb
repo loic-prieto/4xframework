@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<bindings xmlns="http://java.sun.com/xml/ns/jaxb"
+          schemaLocation="./common-types.xsd"
+          version="2.0">
+    <bindings multiple="true" node="//*[@name='civilizations' or @name='civilization']" version="2.0">
+        <schemaBindings>
+            <package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.civilizations">
+                <javadoc>
+                    <![CDATA[<body>Types related to civilization objects</body>]]>
+                </javadoc>
+            </package>
+        </schemaBindings>
+    </bindings>
+</bindings>

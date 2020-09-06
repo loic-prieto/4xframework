@@ -1,67 +1,49 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
            targetNamespace="common-types.config.4xframework"
-           xmlns="common-types.config.4xframework"
+           xmlns:ct="common-types.config.4xframework"
            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
            jxb:version="2.0"
            elementFormDefault="qualified">
 
-    <xs:complexType name="i18nString">
-        <xs:annotation>
-            <xs:documentation xml:lang="en">
+    <complexType name="i18nString">
+        <annotation>
+            <documentation xml:lang="en">
                 When using a string that is to be displayed to the user, we need for that string to have
                 translations. The I18NString is a type that allows to specify different translations for
                 a given word. It is composed of at least one locale-entry element which maps a language
                 to a translation for that given element.
-            </xs:documentation>
-        </xs:annotation>
-        <xs:sequence>
-            <xs:element name="i18n-string" maxOccurs="unbounded" type="locale-entry"/>
-        </xs:sequence>
-    </xs:complexType>
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="i18n-string" maxOccurs="unbounded" type="ct:locale-entry"/>
+        </sequence>
+    </complexType>
 
-    <xs:complexType name="locale-entry">
-        <xs:annotation>
-            <xs:documentation xml:lang="en">
+    <complexType name="locale-entry">
+        <annotation>
+            <documentation xml:lang="en">
                 A locale-entry element maps a language to a translation for a given i18nString.
                 The possible values for the language attributes are those that the java class java.util.Locale uses.
-            </xs:documentation>
-        </xs:annotation>
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
-                <xs:attribute name="language" type="xs:string" use="required" default="en"/>
-            </xs:extension>
-        </xs:simpleContent>
-    </xs:complexType>
+            </documentation>
+        </annotation>
+        <simpleContent>
+            <extension base="string">
+                <attribute name="language" type="string" use="required" />
+            </extension>
+        </simpleContent>
+    </complexType>
 
-    <xs:simpleType name="identifier">
-        <xs:annotation>
-            <xs:documentation xml:lang="en">
+    <simpleType name="identifier">
+        <annotation>
+            <documentation xml:lang="en">
                 This type can be used to provide identifier for resources for the game framework.
                 Identifiers can only be lowercased letters.
-            </xs:documentation>
-        </xs:annotation>
-        <xs:restriction base="xs:string">
-            <xs:pattern value="[a-z]+" />
-        </xs:restriction>
-    </xs:simpleType>
+            </documentation>
+        </annotation>
+        <restriction base="string">
+            <pattern value="[a-z]+" />
+        </restriction>
+    </simpleType>
 
-    <xs:annotation>
-        <xs:appinfo>
-            <xs:documentation xml:lang="en">
-                Common types to reuse between different schemas
-            </xs:documentation>
-
-            <!-- Serialization / Deserialization config -->
-            <jxb:schemaBindings>
-                <jxb:package name="org.sephire.games.framework4x.core.plugins.configuration.resources.xml.common">
-                    <jxb:javadoc>
-                        <![CDATA[<body>Common types to reuse between different schemas</body>]]>
-                    </jxb:javadoc>
-                </jxb:package>
-            </jxb:schemaBindings>
-        </xs:appinfo>
-    </xs:annotation>
-
-
-</xs:schema>
+</schema>

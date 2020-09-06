@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
            xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
            targetNamespace="cities.config.standard.plugins.4xframework"
-           xmlns="cities.config.standard.plugins.4xframework"
+           xmlns:cities="cities.config.standard.plugins.4xframework"
            jxb:version="1.0"
            elementFormDefault="qualified">
 
     <!-- The root element of the document -->
-    <xs:element name="cities">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element name="configuration" type="general-configuration"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+    <element name="cities">
+        <complexType>
+            <sequence>
+                <element name="configuration" type="cities:general-configuration"/>
+            </sequence>
+        </complexType>
+    </element>
 
-    <xs:complexType name="general-configuration">
-        <xs:sequence>
-            <xs:element name="growthModel" type="xs:string"/>
-        </xs:sequence>
-    </xs:complexType>
+    <complexType name="general-configuration">
+        <sequence>
+            <element name="growthModel" type="string"/>
+        </sequence>
+    </complexType>
 
     <!-- Serialization / Deserialization config -->
-    <xs:annotation>
-        <xs:appinfo>
+    <annotation>
+        <appinfo>
             <jxb:schemaBindings>
                 <jxb:package name="org.sephire.games.framework4x.plugins.standard.configuration.cities">
                     <jxb:javadoc>
@@ -31,6 +31,6 @@
                     </jxb:javadoc>
                 </jxb:package>
             </jxb:schemaBindings>
-        </xs:appinfo>
-    </xs:annotation>
-</xs:schema>
+        </appinfo>
+    </annotation>
+</schema>
