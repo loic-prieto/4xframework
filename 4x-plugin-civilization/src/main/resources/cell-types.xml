@@ -36,6 +36,7 @@
     </cell-type>
     <cell-type>
         <identifier>coast</identifier>
+        <parent-type>terrain</parent-type>
         <name>
             <ct:i18n-string language="en">Coast</ct:i18n-string>
         </name>
@@ -45,6 +46,7 @@
     </cell-type>
     <cell-type>
         <identifier>ocean</identifier>
+        <parent-type>terrain</parent-type>
         <name>
             <ct:i18n-string language="en">Ocean</ct:i18n-string>
         </name>
@@ -74,6 +76,7 @@
     </cell-type>
     <cell-type>
         <identifier>tundra</identifier>
+        <parent-type>terrain</parent-type>
         <name>
             <ct:i18n-string language="">Tundra</ct:i18n-string>
         </name>
@@ -83,6 +86,7 @@
     </cell-type>
     <cell-type>
         <identifier>artic</identifier>
+        <parent-type>terrain</parent-type>
         <name>
             <ct:i18n-string language="">Artic desert</ct:i18n-string>
         </name>

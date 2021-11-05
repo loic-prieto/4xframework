@@ -22,7 +22,7 @@ import org.sephire.games.framework4x.core.model.config.userpreferences.UserPrefe
 public enum CoreConfigKeyEnum implements ConfigKeyEnum {
 	/**
 	 * This key holds the value for the configuration of cell types.
-	 * This are to be defined by at least base plugins.
+	 * These are to be defined by at least base plugins.
 	 */
 	CELL_TYPES,
 	/**

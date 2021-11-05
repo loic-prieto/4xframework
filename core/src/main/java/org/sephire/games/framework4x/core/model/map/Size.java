@@ -24,6 +24,6 @@ import lombok.Value;
  */
 @Value
 public class Size {
-	private int width;
-	private int height;
+	int width;
+	int height;
 }

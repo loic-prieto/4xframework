@@ -22,10 +22,8 @@ import io.vavr.control.Try;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.sephire.games.framework4x.core.model.config.Configuration;
-import org.sephire.games.framework4x.core.model.events.DomainEvent;
 import org.sephire.games.framework4x.core.model.events.DomainEvents;
 import org.sephire.games.framework4x.core.model.map.GameMap;
-import org.sephire.games.framework4x.core.plugins.PluginManager;
 import org.sephire.games.framework4x.core.plugins.map.MapGeneratorWrapper;
 
 import static java.lang.String.format;
@@ -33,7 +31,7 @@ import static org.sephire.games.framework4x.core.model.game.CoreGameStateKeys.CU
 import static org.sephire.games.framework4x.core.utils.Validations.areArgumentsNotNull;
 
 /**
- * This is the main framework 4x component, it hold the data needed to run a game. Mainly the loaded configuration
+ * This is the main framework 4x component, it holds the data needed to run a game. Mainly the loaded configuration
  * and the game map as of now.
  */
 @Slf4j
